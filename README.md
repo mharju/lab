@@ -1,10 +1,8 @@
-# console
+# Console
 
-FIXME: Write a one-line description of your library/project.
-
-## Overview
-
-FIXME: Write a paragraph about the library/project and highlight its goals.
+Starting point for a CLJS based "printf on steroids" supporting displaying data in a map or a C3 graph (line, bar
+chart). The idea is that you listen for events to the websocket channel and update the view accordingly. The data
+can be submitted for example via TCP with a simple script using `websocketd` and `nc`. The format for the websocket data is `{"id": <some-id-that-is-listened, "data": <arbitrary-data>}`
 
 ## Setup
 
@@ -30,10 +28,10 @@ To create a production build run:
     lein do clean, cljsbuild once min
 
 And open your browser in `resources/public/index.html`. You will not
-get live reloading, nor a REPL. 
+get live reloading, nor a REPL.
 
 ## License
 
-Copyright © 2014 FIXME
+Copyright © 2017 Taiste
 
 Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.

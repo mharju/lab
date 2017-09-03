@@ -16,9 +16,24 @@ body {
     width: 100%;
 }
 
-.graph, .map, .vis {
+.graph, .map, .vis, .console {
     flex: 1;
     align-self: stretch;
+}
+
+.console {
+    overflow: auto;
+}
+.console span.row {
+    display: block;
+    font-family: "Menlo";
+    font-size: 12pt;
+}
+.console span.date {
+    font-weight: bold;
+}
+.console span.date:after {
+    content: " - ";
 }
 
 .graph {

@@ -25,7 +25,7 @@
 (defn add-view!
   ([id] (add-view! (js/document.querySelector "body") id))
   ([parent id]
-    (let [template (str "<div class=\"view\" id=\"" (name id) "\"><div class=\"map\"></div><div class=\"graph\"></div><div class=\"vis\"></div></div>")]
+    (let [template (str "<div class=\"view\" id=\"" (name id) "\"><div class=\"map\"></div><div class=\"graph\"></div><div class=\"vis\"></div><div class=\"console\"></div>")]
       (.append (js/$ parent) template)
       (swap! views assoc id (js/document.getElementById (name id)))
       (swap! components assoc id {:map (make-map-for id)}))))
@@ -144,6 +144,22 @@
         (js-obj "nodes" (data-set nodes) "edges" (data-set edges))
         (js-obj))))
 
+
+;; console functions
+(defn console! [view]
+  (set-mode view :console)
+  (let [element (.find (js/$ (get-in @views [view])) ".console")]
+    (.css element #js {:height js/window.innerHeight})))
+
+(defn append-to-console! [view text]
+  (let [element (.find (js/$ (get-in @views [view])) ".console")]
+    (.append element (str "<span class=\"row\"><span class=\"date\">" (.replace (.slice (.toISOString (js/Date.)) 0 -1) "T" " ") "</span> " text "</span>"))))
+
+(defn clear-console! [view]
+  (let [element (.find (js/$ (get-in @views [view])) ".console")]
+    (.html element "")))
+
+
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
@@ -154,7 +170,7 @@
   (add-view! :view)
   (add-view! :view-2)
 
-  (vis! :view-2 [{:id 1 :label "WESSA"} {:id 2 :label "KEPPO"} {:id 3 :label "SALAATTI"}]
+  (vis! :view-2 [{:id 1 :label "First"} {:id 2 :label "Second"} {:id 3 :label "Third"}]
                [{:from 1 :to 2} {:from 1 :to 3} {:from 2 :to 3}])
   (map-center :view [60.4486401 22.2673988])
   (marker :view-2 [60.4486401 22.2673988])
@@ -164,11 +180,16 @@
   (clear-markers! :view)
   (set-mode :view :graph)
   (scatter-plot! :view-2 [["data_x" 10 20 30 40] ["data" 11 12 13 14]])
-  (line-graph! :view-3 [1 2 3 4 3 2 1 2 3 4 2] :title "foobar")
+  (line-graph! :view-2 [1 2 3 4 3 2 1 2 3 4 2] :title "foobar")
   (line-graph! :view [["foobar" 1 2 3 4 4 3 2 1]
                ["bazbaz" 1 2 3 2 2 1 2 3]])
 
   (bar-graph! :view [1 2 2 3 2 2] :title "baba")
+
+  (console! :view)
+  (dotimes [n 100]
+    (append-to-console! :view "Hello world"))
+  (clear-console! :view)
 
   (do
     (connect!)

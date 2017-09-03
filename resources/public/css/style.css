@@ -27,7 +27,8 @@ body {
 .console span.row {
     display: block;
     font-family: "Menlo";
-    font-size: 12pt;
+    font-size: 10pt;
+    margin-bottom: 0.25em;
 }
 .console span.date {
     font-weight: bold;

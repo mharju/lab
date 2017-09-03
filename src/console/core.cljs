@@ -3,6 +3,7 @@
   (:require [cljsjs.leaflet]
             [cljsjs.c3]
             [cljsjs.jquery]
+            [cljsjs.vis]
             [clojure.core.async :refer [>! <! chan]]))
 
 (enable-console-print!)
@@ -84,6 +85,18 @@
                          values
                          [(into [title] values)])}})))
 
+(defn scatter-plot [values & {:keys [title] :or {title "data"}}]
+  (set-mode :graph)
+  (.generate js/c3
+    (clj->js {
+             :bindto "#graph"
+             :data {
+                :type "scatter"
+                :xs {
+                    title (str title "_x")
+                }
+                :columns values}})))
+
 (defn flow [graph values]
   (.flow graph (clj->js
                  {:columns
@@ -93,13 +106,25 @@
                   :duration 500
                   :length 0})))
 
+;; vis functions
+(defn data-set [data] (js/vis.DataSet. (clj->js data)))
+(defn vis [nodes edges]
+  (set-mode :vis)
+  (js/vis.Network.
+    (.getElementById js/document "vis")
+    (js-obj "nodes" (data-set nodes) "edges" (data-set edges))
+    (js-obj)))
+
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
 )
 
+
 (comment
+  (vis [{:id 1 :label "WESSA"} {:id 2 :label "KEPPO"} {:id 3 :label "SALAATTI"}]
+       [{:from 1 :to 2} {:from 1 :to 3} {:from 2 :to 3}])
   (map-center [60.4486401 22.2673988])
   (marker [60.4486401 22.2673988])
   (marker [60.4436501 22.2673988])
@@ -114,18 +139,38 @@
           (flow graph ["data" data])))))
 
   (do
+    (connect!)
+    (let [graph (bar-graph [] :title "data")]
+      (listen!
+        "test"
+        (fn [data]
+          (flow graph ["data" data])))))
+
+  (do
     (clear-markers!)
     (connect!)
     (let [m (polyline [])]
       (listen!
         "test"
         (fn [data]
-          (println "got" data)
           (.setLatLngs m (clj->js data))))))
 
+  (do
+    (let [graph (scatter-plot [] :title "data")]
+      (connect!)
+      (listen!
+        "points"
+        (fn [data]
+          (println data)
+          (.flow graph (clj->js {:columns data
+                                 :duration 500
+                                 :length 0})))))))
+
+(comment
   (clear-markers!)
 
   (set-mode :graph)
+  (scatter-plot [["data_x" 10 20 30 40] ["data" 11 12 13 14]])
   (line-graph [1 2 3 4 3 2 1 2 3 4 2] :title "foobar")
   (line-graph [["foobar" 1 2 3 4 4 3 2 1]
                ["bazbaz" 1 2 3 2 2 1 2 3]])

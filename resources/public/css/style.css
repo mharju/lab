@@ -11,7 +11,7 @@ body {
     display: flex;
 }
 
-#graph, #map {
+#graph, #map, #vis {
     flex: 1;
     align-self: stretch;
 }
@@ -21,4 +21,6 @@ body {
     align-self: center;
     max-width: 95%;
 }
-
+#vis {
+    display: none;
+}

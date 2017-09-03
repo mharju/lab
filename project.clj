@@ -12,7 +12,8 @@
                   :exclusions [org.clojure/tools.reader]]
                  [cljsjs/jquery "3.2.1-0"]
                  [cljsjs/leaflet "1.0.3-1"]
-                 [cljsjs/c3 "0.4.14-0"]]
+                 [cljsjs/c3 "0.4.14-0"]
+                 [cljsjs/vis "4.20.1-0"]]
 
   :plugins [[lein-figwheel "0.5.10"]
             [lein-cljsbuild "1.1.5" :exclusions [[org.clojure/clojure]]]]

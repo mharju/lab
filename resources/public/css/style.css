@@ -10,17 +10,22 @@ body {
     max-width: 100%;
     display: flex;
 }
+.view {
+    display: flex;
+    align-self: stretch;
+    width: 100%;
+}
 
-#graph, #map, #vis {
+.graph, .map, .vis {
     flex: 1;
     align-self: stretch;
 }
 
-#graph {
+.graph {
     display: none;
     align-self: center;
     max-width: 95%;
 }
-#vis {
+.vis {
     display: none;
 }

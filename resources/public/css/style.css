@@ -42,6 +42,6 @@ body {
     align-self: center;
     max-width: 95%;
 }
-.vis {
+.vis, .console {
     display: none;
 }

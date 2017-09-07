@@ -1,10 +1,13 @@
 # Console
 
-Starting point for a CLJS based "printf on steroids" supporting displaying data in a map or a C3 graph (line, bar
-chart). The idea is that you listen for events to the websocket channel and update the view accordingly. The data
-can be submitted for example via TCP with a simple script using `websocketd` and `nc`. The format for the websocket data is `{"id": <some-id-that-is-listened, "data": <arbitrary-data>}`
+Starting point for a CLJS based "printf on steroids" supporting displaying data in a map, a C3 graph (line, bar
+chart), ja vis.js network or plain text based console output.
 
-## Setup
+The idea is that you listen for events to the websocket channel and update the view accordingly. The data can be
+submitted for example via TCP with a simple script using `websocketd` and `nc`. The format for the websocket data is
+`{"id": <some-id-that-is-listened>, "data": <arbitrary-data>}`
+
+## Development setup
 
 To get an interactive development environment run:
 

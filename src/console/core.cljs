@@ -177,27 +177,32 @@
   (marker :view [60.4436501 22.2673988])
   (marker :view [60.4456601 22.2673988])
 
-  (clear-markers! :view)
+  (clear-markers! :view-2)
   (set-mode :view :graph)
   (scatter-plot! :view-2 [["data_x" 10 20 30 40] ["data" 11 12 13 14]])
-  (line-graph! :view-2 [1 2 3 4 3 2 1 2 3 4 2] :title "foobar")
+  (line-graph! :view-2 [] :title "foobar")
   (line-graph! :view [["foobar" 1 2 3 4 4 3 2 1]
                ["bazbaz" 1 2 3 2 2 1 2 3]])
 
   (bar-graph! :view [1 2 2 3 2 2] :title "baba")
 
-  (console! :view)
   (dotimes [n 100]
     (append-to-console! :view "Hello world"))
   (clear-console! :view)
 
   (do
+    (console! :view)
+    (clear-console! :view)
     (connect!)
-    (let [graph (line-graph [] :title "data")]
-      (listen!
-        "test"
-        (fn [data]
-          (flow graph (into ["data"] data))))))
+    (listen! "test"
+     (fn [data] (append-to-console! :view data))))
+
+  (do
+    (connect!)
+    (listen!
+      "random"
+      (fn [data]
+        (flow :view-2 (into ["data"] data)))))
 
   (do
     (connect!)

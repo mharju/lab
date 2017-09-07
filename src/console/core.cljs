@@ -69,19 +69,22 @@
   (set-mode view :map)
   (let [l (get-in @components [view :map])
         m (.marker js/L (clj->js center))]
-    (.addTo m l)))
+    (.addTo m l)
+    m))
 
 (defn geojson [view data]
   (set-mode view :map)
   (let [l (get-in @components [view :map])
         m (.geoJSON js/L (clj->js data))]
-    (.addTo m l)))
+    (.addTo m l)
+    m))
 
 (defn polyline [view points]
   (set-mode view :map)
   (let [l (get-in @components [view :map])
         m (.polyline js/L points)]
-    (.addTo m l)))
+    (.addTo m l)
+    m))
 
 
 ;; graph functions
@@ -191,18 +194,31 @@
   (clear-console! :view)
 
   (do
-    (console! :view)
-    (clear-console! :view)
+    (console! :view-2)
+    (clear-console! :view-2)
     (connect!)
-    (listen! "test"
-     (fn [data] (append-to-console! :view data))))
+    (listen! "console"
+     (fn [data] (append-to-console! :view-2 data))))
 
   (do
     (connect!)
+    (line-graph! :view-2 [] :title "foobar")
     (listen!
-      "random"
+      "delay"
       (fn [data]
         (flow :view-2 (into ["data"] data)))))
+
+  (let [markers (atom {})]
+    (set-mode :view :map)
+    (clear-markers! :view)
+    (connect!)
+    (listen!
+      "vehicles"
+      (fn [{:strs [vehicle lat lon]}]
+        (if-let [marker (get @markers vehicle)]
+          (.setLatLng marker (js/L.LatLng. lat lon))
+          (swap! markers assoc
+                 vehicle (marker :view [lat lon]))))))
 
   (do
     (connect!)
@@ -232,4 +248,3 @@
           (.flow graph (clj->js {:columns data
                                  :duration 500
                                  :length 0})))))))
-

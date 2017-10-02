@@ -3,6 +3,7 @@
 html {
     height: 100%;
     width: 100%;
+    font-family: 'Roboto',sans-serif;
 }
 body {
     margin: 0; padding: 0;
@@ -44,4 +45,21 @@ body {
 }
 .vis, .console {
     display: none;
+}
+
+.c3-axis {
+    fill: #aaa;
+}
+.c3-axis path.domain, .c3-axis .tick line {
+    stroke: #aaa;
+}
+.c3-line {
+    stroke-width: 2;
+}
+.c3-circles {
+    visibility: hidden;
+}
+text {
+    font-family: 'Roboto';
+    font-size: 10pt;
 }

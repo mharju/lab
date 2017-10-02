@@ -99,16 +99,19 @@
                            values
                            [(into [title] values)])}}))))
 
-(defn bar-graph! [view values & {:keys [title] :or {title "data"}}]
+(defn bar-graph! [view values & {:keys [title type categories] :or {title "data" type :indexed categories nil}}]
   (set-mode view :graph)
-  (swap! components assoc-in [view :graph]
-    (.generate js/c3
-      (clj->js {:bindto (str "#" (name view) " .graph")
-                :data {
-                :type "bar"
-                :columns (if (vector? (first values))
-                           values
-                           [(into [title] values)])}}))))
+  (let [x-axis (into {:type type} (when (= type :category) {:categories categories}))]
+    (swap! components assoc-in [view :graph]
+      (.generate js/c3
+        (clj->js {:bindto (str "#" (name view) " .graph")
+                  :axis {
+                    :x x-axis}
+                  :data {
+                    :type "bar"
+                    :columns (if (vector? (first values))
+                               values
+                               [(into [title] values)])}})))))
 
 (defn scatter-plot! [view values & {:keys [title] :or {title "data"}}]
   (set-mode view :graph)
@@ -187,7 +190,7 @@
   (line-graph! :view [["foobar" 1 2 3 4 4 3 2 1]
                ["bazbaz" 1 2 3 2 2 1 2 3]])
 
-  (bar-graph! :view [1 2 2 3 2 2] :title "baba")
+  (bar-graph! :view [1 5 2 3] :title "Number of Stuffs" :type :category :categories ["seppo" "teppo" "lappo" "nappo"])
 
   (dotimes [n 100]
     (append-to-console! :view "Hello world"))

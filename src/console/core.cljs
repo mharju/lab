@@ -8,6 +8,8 @@
 
 (enable-console-print!)
 
+(def color-pattern {:pattern ["#0cc2aa" "#fcc100" "#a88add"]})
+
 (defonce views (atom {}))
 (defonce components (atom {}))
 
@@ -94,6 +96,7 @@
   (swap! components assoc-in [view :graph]
     (.generate js/c3
       (clj->js {:bindto (str "#" (name view) " .graph")
+                :color color-pattern
                 :data {
                 :columns (if (vector? (first values))
                            values
@@ -107,6 +110,7 @@
         (clj->js {:bindto (str "#" (name view) " .graph")
                   :axis {
                     :x x-axis}
+                  :color color-pattern
                   :data {
                     :type "bar"
                     :columns (if (vector? (first values))
@@ -119,6 +123,7 @@
     (.generate js/c3
       (clj->js {
                :bindto (str "#" (name view) " .graph")
+               :color color-pattern
                :data {
                   :type "scatter"
                   :xs {
@@ -133,6 +138,7 @@
                      (if (vector? (first values))
                        values
                        [values])
+                    :color color-pattern
                     :duration 500
                     :length 0}))))
 

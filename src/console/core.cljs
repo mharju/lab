@@ -1,10 +1,15 @@
 (ns console.core
   (:require-macros  [cljs.core.async.macros :refer  [go go-loop]])
-  (:require [cljsjs.leaflet]
+  (:require [clojure.core.async :refer [>! <! chan]]
+            [clojure.string :as string]
+            [cljsjs.leaflet]
             [cljsjs.c3]
             [cljsjs.jquery]
             [cljsjs.vis]
-            [clojure.core.async :refer [>! <! chan]]))
+            [cljsjs.codemirror]
+            [cljsjs.codemirror.mode.clojure]
+            [replumb.core :as rpl]
+            [console.io :as rpl-io]))
 
 (enable-console-print!)
 
@@ -31,6 +36,11 @@
       (.append (js/$ parent) template)
       (swap! views assoc id (js/document.getElementById (name id)))
       (swap! components assoc id {:map (make-map-for id)}))))
+
+(defn remove-view! [id]
+  (swap! views dissoc id)
+  (swap! components dissoc id)
+  (.remove (js/document.querySelector (str "#" (name id)))))
 
 (defonce data-connection (atom {:ws nil :listeners {}}))
 (defn listen! [id listener]
@@ -171,12 +181,46 @@
   (let [element (.find (js/$ (get-in @views [view])) ".console")]
     (.html element "")))
 
+;; editor functions
+(defn- try-eval [cm]
+  (let [repl-opts (merge (rpl/options :browser
+                           ["/js/compiled/out"]
+                           rpl-io/fetch-file!)
+                          {:warning-as-error false
+                           :preloads {:require '#{[console.core :as c]}}})
+        part (if-not (string/blank? (.getSelection cm)) (.getSelection cm) (.getValue cm))]
+    (rpl/read-eval-call repl-opts
+                        (fn [result]
+                          (.setValue cm (str (.getValue cm) "\r\n" ";; " (rpl/unwrap-result result))))
+                        part)))
+
+(defn- handle-key [e]
+  (when (.-metaKey e)
+    (case (.-keyCode e)
+      72 (do
+           (.toggle (js/$ "#editor"))
+           (.preventDefault e))
+      true)))
+
+(defonce init
+  (.ready (js/$ js/document)
+    (fn [e]
+      (.on (js/$ js/document) "keydown" handle-key)
+      (let [cm (js/CodeMirror. (js/document.querySelector "#repl")
+                     #js {:mode "clojure"
+                          :lineNumbers false
+                          :theme "solarized dark"
+                          :value ";; Welcome to Console REPL.\r\n;; Enter value and press cmd-e to evaluate.\r\n" })]
+        (.setOption cm "extraKeys"
+                    #js {"Cmd-E" (fn [cm] (try-eval cm))})
+        (.focus cm)
+        (.setCursor cm #js {:line 3 :ch 0})))))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
+  )
 
 (comment
   (add-view! :view)
@@ -189,11 +233,11 @@
   (marker :view [60.4436501 22.2673988])
   (marker :view [60.4456601 22.2673988])
 
-  (clear-markers! :view-2)
+  (clear-markers! :view)
   (set-mode :view :graph)
   (scatter-plot! :view-2 [["data_x" 10 20 30 40] ["data" 11 12 13 14]])
   (line-graph! :view-2 [] :title "foobar")
-  (line-graph! :view [["foobar" 1 2 3 4 4 3 2 1]
+  (line-graph! :view-2 [["foobar" 1 2 3 4 4 3 2 1]
                ["bazbaz" 1 2 3 2 2 1 2 3]])
 
   (bar-graph! :view [1 5 2 3] :title "Number of Stuffs" :type :category :categories ["seppo" "teppo" "lappo" "nappo"])
@@ -207,7 +251,7 @@
     (clear-console! :view-2)
     (connect!)
     (listen! "console"
-     (fn [data] (append-to-console! :view-2 data))))
+      (fn [data] (append-to-console! :view-2 data))))
 
   (do
     (connect!)

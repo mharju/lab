@@ -32,7 +32,7 @@
 (defn add-view!
   ([id] (add-view! (js/document.querySelector "body") id))
   ([parent id]
-    (let [template (str "<div class=\"view\" id=\"" (name id) "\"><div class=\"map\"></div><div class=\"graph\"></div><div class=\"vis\"></div><div class=\"console\"></div>")]
+    (let [template (str "<div class=\"view\" id=\"" (name id) "\"><div class=\"info\"><span class=\"id\">" id "</span></div><div class=\"map\"></div><div class=\"graph\"></div><div class=\"vis\"></div><div class=\"console\"></div>")]
       (.append (js/$ parent) template)
       (swap! views assoc id (js/document.getElementById (name id)))
       (swap! components assoc id {:map (make-map-for id)}))))
@@ -194,11 +194,14 @@
                           (.setValue cm (str (.getValue cm) "\r\n" ";; " (rpl/unwrap-result result))))
                         part)))
 
+(defonce cm-inst (atom nil))
 (defn- handle-key [e]
   (when (.-metaKey e)
     (case (.-keyCode e)
       72 (do
-           (.toggle (js/$ "#editor"))
+           (.toggle (js/$ "#repl"))
+           (when (.is (js/$ "#repl") ":visible")
+             (.focus @cm-inst))
            (.preventDefault e))
       true)))
 
@@ -211,15 +214,19 @@
                           :lineNumbers false
                           :theme "solarized dark"
                           :value ";; Welcome to Console REPL.\r\n;; Enter value and press cmd-e to evaluate.\r\n" })]
+        (reset! cm-inst cm)
         (.setOption cm "extraKeys"
                     #js {"Cmd-E" (fn [cm] (try-eval cm))})
         (.focus cm)
-        (.setCursor cm #js {:line 3 :ch 0})))))
+        (.setCursor cm #js {:line 3 :ch 0})
+        (add-view! :view)))))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
+  (.off (js/$ js/document) "keydown")
+  (.on (js/$ js/document) "keydown" handle-key)
   )
 
 (comment

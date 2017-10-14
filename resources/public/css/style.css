@@ -15,6 +15,19 @@ body {
     display: flex;
     align-self: stretch;
     width: 100%;
+    position: relative;
+}
+
+.view .info {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: rgba(0,0,0,0.4);
+  color: white;
+  font-family: Menlo;
+  z-index: 10000;
+  text-align: right;
+  padding: 5px 10px;
 }
 
 .graph, .map, .vis, .console {

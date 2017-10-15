@@ -7,6 +7,14 @@ The idea is that you listen for events to the websocket channel and update the v
 submitted for example via TCP with a simple script using `websocketd` and `nc`. The format for the websocket data is
 `{"id": <some-id-that-is-listened>, "data": <arbitrary-data>}`
 
+
+## Screenshot
+
+This is a demo of evaluating a listener in-line for the view. The data is then pushed to
+the websocket and the view is updated real time.
+
+![Screenshot](screenshot.png)
+
 ## Development setup
 
 To get an interactive development environment run:

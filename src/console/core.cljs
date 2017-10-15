@@ -32,7 +32,7 @@
 (defn add-view!
   ([id] (add-view! (js/document.querySelector "body") id))
   ([parent id]
-    (let [template (str "<div class=\"view\" id=\"" (name id) "\"><div class=\"info\"><span class=\"id\">" id "</span></div><div class=\"map\"></div><div class=\"graph\"></div><div class=\"vis\"></div><div class=\"console\"></div>")]
+    (let [template (str "<div class=\"view\" id=\"" (name id) "\"><div class=\"info\"><span class=\"id\">" id "</span><span class=\"connection-status\"></span></div><div class=\"map\"></div><div class=\"graph\"></div><div class=\"vis\"></div><div class=\"console\"></div>")]
       (.append (js/$ parent) template)
       (swap! views assoc id (js/document.getElementById (name id)))
       (swap! components assoc id {:map (make-map-for id)}))))
@@ -43,8 +43,10 @@
   (.remove (js/document.querySelector (str "#" (name id)))))
 
 (defonce data-connection (atom {:ws nil :listeners {}}))
-(defn listen! [id listener]
-  (swap! data-connection assoc-in [:listeners id] listener))
+(defn listen! [id target-view listener]
+  (let [selector (str "#" (name target-view) " .connection-status")]
+    (.addClass (js/$ selector) "connected")
+    (swap! data-connection assoc-in [:listeners id] listener)))
 (defn connect! []
   (when-let [{:keys [ws]} @data-connection]
     (if-not (nil? ws)
@@ -63,7 +65,7 @@
 (defn set-mode [view mode]
   (let [p (js/$ (get @views view))]
     (do  (.show (.find p (str "." (name mode))))
-         (.hide (.find p (str "> div:not(." (name mode) ")"))))))
+         (.hide (.find p (str "> div:not(." (name mode) ", .info)"))))))
 
 ;; map functions
 (defn map-center [view center & {:keys [zoom] :or {zoom 13}}]
@@ -254,11 +256,11 @@
   (clear-console! :view)
 
   (do
-    (console! :view-2)
-    (clear-console! :view-2)
+    (console! :view)
+    (clear-console! :view)
     (connect!)
-    (listen! "console"
-      (fn [data] (append-to-console! :view-2 data))))
+    (listen! "console" :view
+      (fn [data] (append-to-console! :view data))))
 
   (do
     (connect!)

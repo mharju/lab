@@ -193,7 +193,8 @@
         part (if-not (string/blank? (.getSelection cm)) (.getSelection cm) (.getValue cm))]
     (rpl/read-eval-call repl-opts
                         (fn [result]
-                          (.setValue cm (str (.getValue cm) "\r\n" ";; " (rpl/unwrap-result result))))
+                          (let [value (.getValue cm)]
+                              (.setValue cm (str value (if (> 80 (count value)) "\r\n" " ") ";; => " (rpl/unwrap-result result)))))
                         part)))
 
 (defonce cm-inst (atom nil))
@@ -249,10 +250,10 @@
   (line-graph! :view-2 [["foobar" 1 2 3 4 4 3 2 1]
                ["bazbaz" 1 2 3 2 2 1 2 3]])
 
-  (bar-graph! :view [1 5 2 3] :title "Number of Stuffs" :type :category :categories ["seppo" "teppo" "lappo" "nappo"])
+  (bar-graph! :view [1 5 2 3] :title "Number of Stuffs" :type :category :categories ["seppo" "teppo" "lappo" "pappo"])
 
   (dotimes [n 100]
-    (append-to-console! :view "Hello world"))
+    (append-to-console! :view-2 "Hello world"))
   (clear-console! :view)
 
   (do

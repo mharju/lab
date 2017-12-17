@@ -43,8 +43,7 @@ And wait for the data to start flowing in.
 
 ## Screenshot
 
-This is a demo of evaluating a listener in-line for the view. The data is then pushed to
-the websocket and the view is updated real time.
+This is a demo of evaluating some lat-long pairs and adding them to the view.
 
 ![Screenshot](screenshot.png)
 

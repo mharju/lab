@@ -34,6 +34,10 @@
     (.addTo m l)
     m))
 
+(defn add-markers! [view points]
+  (doseq [point points]
+    (apply add-marker! view point)))
+
 (defn add-geojson! [view data]
   (set-mode! view :map)
   (let [l (get-in @components [view :map])

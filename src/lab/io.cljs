@@ -1,4 +1,4 @@
-(ns console.io
+(ns lab.io
   (:import goog.net.XhrIo))
 
 (defn fetch-file!

@@ -1,4 +1,4 @@
-(defproject console "0.1.0-SNAPSHOT"
+(defproject lab "0.1.0-SNAPSHOT"
   :description "FIXME: write this!"
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -15,6 +15,8 @@
                  [cljsjs/c3 "0.4.14-0"]
                  [cljsjs/vis "4.20.1-0"]
                  [cljsjs/codemirror "5.24.0-1"]
+                 [hiccup "1.0.5"]
+                 [hiccups "0.3.0"]
                  [com.cognitect/transit-cljs "0.8.239"]
                  [replumb "0.2.4"]]
 
@@ -30,16 +32,16 @@
                 ;; the presence of a :figwheel configuration here
                 ;; will cause figwheel to inject the figwheel client
                 ;; into your build
-                :figwheel {:on-jsload "console.core/on-js-reload"
+                :figwheel {:on-jsload "lab.core/on-js-reload"
                            ;; :open-urls will pop open your application
                            ;; in the default browser once Figwheel has
                            ;; started and complied your application.
                            ;; Comment this out once it no longer serves you.
                            :open-urls ["http://localhost:3449/index.html"]}
 
-                :compiler {:main console.core
+                :compiler {:main lab.core
                            :asset-path "js/compiled/out"
-                           :output-to "resources/public/js/compiled/console.js"
+                           :output-to "resources/public/js/compiled/lab.js"
                            :output-dir "resources/public/js/compiled/out"
                            :source-map-timestamp true
                            ;; To console.log CLJS data-structures make sure you enable devtools in Chrome
@@ -50,9 +52,9 @@
                ;; lein cljsbuild once min
                {:id "min"
                 :source-paths ["src"]
-                :compiler {:output-to "resources/public/js/compiled/console.js"
-                           :main console.core
-                           :optimizations :advanced
+                :compiler {:output-to "resources/public/js/compiled/lab.js"
+                           :main lab.core
+                           :optimizations :simple
                            :pretty-print false}}]}
 
   :figwheel {;; :http-server-root "public" ;; default and assumes "resources"

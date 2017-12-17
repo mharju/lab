@@ -1,4 +1,4 @@
-# Console
+# Lab
 
 Starting point for a CLJS based "printf on steroids" supporting displaying data in a map, a C3 graph (line, bar
 chart), ja vis.js network or plain text based console output.
@@ -23,17 +23,20 @@ In logger-side, you declare a listener for id "vehicle"  as follows (you can eva
 via nREPL or the provided in-line console)
 
 ```clojure
-;; c is ns alias for console.core
+;; c ns built-in alias for lab.core
+;; m is built-in alias for lab.map
+;; v is build-in ns alias for lab.views
+;; Also: lab.graph = g, lab.console = console, lab.vis = vis
 (let [markers (atom {})]
   (c/connect!)                          ;; not necessary if already invoked in the session
-  (c/set-mode :view :map)               ;; this is also performed implicitly by the map operations
-  (c/clear-markers! :view)
+  (v/set-mode :view :map)               ;; this is also performed implicitly by the map operations
+  (m/clear-markers! :view)
   (c/listen! "locations" :view
      (fn [{:keys [vehicle lat lon]}]
        (if-let [marker (get @markers vehicle)]
           (.setLatLng marker (js/L.LatLng. lat lon))
           (swap! markers assoc
-                 vehicle (marker :view [lat lon]))))))
+                 vehicle (m/add-marker! :view lat lon))))))
 ```
 
 And wait for the data to start flowing in.

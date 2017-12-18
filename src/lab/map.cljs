@@ -32,6 +32,7 @@
   (let [l (get-in @components [view :map])
         m (.marker js/L (clj->js [lat lon]))]
     (.addTo m l)
+    (map-center! view [lat lon] #js {:padding 5})
     m))
 
 (defn add-markers! [view points]

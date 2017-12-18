@@ -25,5 +25,6 @@
                         (fn [result]
                           (js/console.error result repl-opts)
                           (let [value (.getValue cm)]
-                              (.setValue cm (str value (if (> 80 (count value)) "\r\n" " ") ";; => " (rpl/unwrap-result result)))))
+                            (.setValue cm (str (.replace value (js/RegExp "^([^;])" "gm") ";; $1") (if (> 80 (count value)) "\r\n" " ") "\n;; => " (rpl/unwrap-result result)))
+                            (.setCursor cm (inc (.lastLine cm)) 0)))
                         part)))

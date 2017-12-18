@@ -40,10 +40,11 @@
 (defn- handle-key [e]
   (when (.-metaKey e)
     (case (.-keyCode e)
-      72 (do
-           (.toggle (js/$ "#repl"))
-           (when (.is (js/$ "#repl") ":visible")
-             (.focus @cm-inst))
+      72 (let [$repl (js/$ "#repl")]
+           (if (.is $repl ":visible")
+             (do (.hide $repl)
+                 (.focus @cm-inst))
+             (.show $repl))
            (.preventDefault e))
       true)))
 

@@ -27,17 +27,18 @@
                     (when (>= (.indexOf (.-className (.getPane layer)) "marker") 0)
                       (.remove layer))))))
 
-(defn add-marker! [view lat lon]
+(defn add-marker! [view lat lon & {:keys [rev] :or {rev false}}]
   (set-mode! view :map)
   (let [l (get-in @components [view :map])
-        m (.marker js/L (clj->js [lat lon]))]
+        coords (if-not rev [lat lon] [lon lat])
+        m (.marker js/L (clj->js coords))]
     (.addTo m l)
-    (map-center! view [lat lon] #js {:padding 5})
+    (map-center! view coords #js {:padding 5})
     m))
 
-(defn add-markers! [view points]
+(defn add-markers! [view points & {:keys [rev] :or {rev false}}]
   (doseq [point points]
-    (apply add-marker! view point)))
+    (apply add-marker! view point rev)))
 
 (defn add-geojson! [view data]
   (set-mode! view :map)
@@ -46,10 +47,11 @@
     (.addTo m l)
     m))
 
-(defn add-polyline! [view points]
+(defn add-polyline! [view points & {:keys [rev as-list] :or {rev false as-list false}}]
   (set-mode! view :map)
-  (js/console.info view points)
   (let [l (get-in @components [view :map])
+        points (if-not as-list points (mapv vec (partition 2 points)))
+        points (if-not rev points (mapv (fn [[lat lng]] [lng lat]) points))
         m (.polyline js/L (clj->js points) #js {:color "#0cc2aa" })]
     (.addTo m l)
     m))

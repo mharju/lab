@@ -67,4 +67,3 @@
                ["bazbaz" 1 2 3 2 2 1 2 3]])
 
   (bar-graph! :view [1 5 2 3] :title "Number of Stuffs" :type :category :categories ["seppo" "teppo" "lappo" "pappo"]))
-

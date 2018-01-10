@@ -23,8 +23,10 @@
         part (if-not (string/blank? (.getSelection cm)) (.getSelection cm) (.getValue cm))]
     (rpl/read-eval-call repl-opts
                         (fn [result]
-                          (js/console.error result repl-opts)
-                          (let [value (.getValue cm)]
-                            (.setValue cm (str (.replace value (js/RegExp "^([^;])" "gm") ";; $1") (if (> 80 (count value)) "\r\n" " ") "\n;; => " (rpl/unwrap-result result) "\n"))
+                          (let [value (.getValue cm)
+                                success (rpl/success? result)
+                                result (rpl/unwrap-result result)
+                                new-value (if success (.replace value (js/RegExp "^([^;])" "gm") ";; $1") value)]
+                            (.setValue cm (str new-value (if (> 80 (count value)) "\r\n" " ") "\n;; => " result "\n"))
                             (.setCursor cm (inc (.lastLine cm)) 0)))
                         part)))

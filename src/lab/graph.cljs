@@ -30,7 +30,7 @@
                                values
                                [(into [title] values)])}})))))
 
-(defn scatter-plot! [view values & {:keys [title] :or {title "data"}}]
+(defn scatter-plot! [view values & {:keys [title xs] :or {title "data"}}]
   (set-mode! view :graph)
   (swap! components assoc-in [view :graph]
     (.generate js/c3
@@ -39,9 +39,9 @@
                :color color-pattern
                :data {
                   :type "scatter"
-                  :xs {
+                  :xs (or xs {
                       title (str title "_x")
-                  }
+                  })
                   :columns values}}))))
 
 (defn flow [view values]

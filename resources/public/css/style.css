@@ -118,9 +118,6 @@ html {
 .c3-line {
     stroke-width: 2;
 }
-.c3-circles {
-    visibility: hidden;
-}
 text {
     font-family: 'Roboto';
     font-size: 10pt;

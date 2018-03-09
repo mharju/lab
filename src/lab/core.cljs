@@ -50,6 +50,12 @@
 
 (defn toggle-help! []
   (.toggle (js/$ ".help")))
+(defonce comment-evaled
+  (let [stored (js/JSON.parse (.getItem js/localStorage "comment_evaled"))]
+    (atom (if-not (nil? stored) stored true))))
+(defn toggle-comment-evaled! []
+  (swap! comment-evaled not)
+  (.setItem js/localStorage "comment_evaled" @comment-evaled))
 
 (defonce init
   (.ready (js/$ js/document)
@@ -62,10 +68,11 @@
                      #js {:mode "clojure"
                           :lineNumbers false
                           :theme "solarized dark"
-                          :value ";; Welcome to Console REPL. Eval (c/toggle-help!) to get docs.\r\n;; Enter value and press cmd-e to evaluate the whole buffer or selection.\r\n" })]
+                          :value ";; Welcome to Console REPL. Eval (c/toggle-help!) to get docs or (c/toggle-comment-evaled!)\r\n;; to disable commenting evaled expressions. Enter value and press cmd-e to evaluate\r\n;; the whole buffer or selection.\r\n" })]
         (reset! cm-inst cm)
         (.setOption cm "extraKeys"
-                    #js {"Cmd-E" (fn [cm] (evl/try-eval! cm))})
+                    #js {"Cmd-E" (fn [cm]
+                                   (evl/try-eval! cm :comment-evaled @comment-evaled))})
         (.focus cm)
         (.setCursor cm #js {:line 3 :ch 0})
         (add-view! :view)

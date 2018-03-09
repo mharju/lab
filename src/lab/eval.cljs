@@ -8,7 +8,7 @@
             [lab.views :as v]
             [lab.vis :as vis]))
 
-(defn try-eval! [cm]
+(defn try-eval! [cm & {:keys [comment-evaled] :or {comment-evaled true}}]
   (let [repl-opts (merge (rpl/options :browser
                            ["/js/compiled/out"]
                            rpl-io/fetch-file!)
@@ -26,7 +26,7 @@
                           (let [value (.getValue cm)
                                 success (rpl/success? result)
                                 result (rpl/unwrap-result result)
-                                new-value (if success (.replace value (js/RegExp "^([^;])" "gm") ";; $1") value)]
+                                new-value (if (and success comment-evaled) (.replace value (js/RegExp "^([^;])" "gm") ";; $1") value)]
                             (.setValue cm (str new-value (if (> 80 (count value)) "\r\n" " ") "\n;; => " result "\n"))
                             (.setCursor cm (inc (.lastLine cm)) 0)))
                         part)))

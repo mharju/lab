@@ -1,6 +1,7 @@
 (ns lab.core
   (:require [hiccup.core :refer [html]]
-            [cljs.analyzer.api :refer [ns-publics]]))
+            [cljs.analyzer]
+            [cljs.analyzer.api :refer [ns-publics ns-resolve]]))
 
 (defmacro render-help []
   (let [ns-list '[lab.map lab.graph lab.console lab.vis lab.core]]
@@ -22,3 +23,8 @@
                                                          (first (or (get-in fn-info [:top-fn :arglists])
                                                                     (second (get fn-info :arglists)))))]))))]
                     [:tr part]))]]))])))
+
+(defmacro with-view [& body]
+  `(do
+     ~@(for [[f & params] body]
+         (cons f (cons :view params)))))

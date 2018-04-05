@@ -1,5 +1,5 @@
 (ns lab.core
-  (:require-macros  [lab.core :refer [render-help]])
+  (:require-macros  [lab.core :refer [render-help with-view]])
   (:require [clojure.string :as string]
             [cljsjs.jquery]
             [cljsjs.codemirror]
@@ -139,4 +139,9 @@
           (println data)
           (.flow graph (clj->js {:columns data
                                  :duration 500
-                                 :length 0})))))))
+                                 :length 0}))))))
+
+  (with-view
+    (map identity (range 10))
+    (println "Hello")))
+

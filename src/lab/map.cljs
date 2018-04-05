@@ -1,6 +1,7 @@
 (ns lab.map
   (:require [lab.views :refer [components views set-mode!]]
-            [cljsjs.leaflet]))
+            [cljsjs.leaflet])
+  (:require-macros [lab.core :refer [with-view]]))
 
 (defn- map-for [id]
   (let [view (get @views id)
@@ -64,7 +65,7 @@
          (add-polyline! view))))
 
 (comment
-  (map-center :view 60.4486401 22.2673988)
-  (add-marker! :view-2 60.4486401 22.2673988)
-  (add-marker! :view 60.4436501 22.2673988)
-  (add-marker! :view 60.4456601 22.2673988))
+  (with-view
+      (clear-markers!)
+      (add-marker! 60.4436501 22.2673988)
+      (add-marker! 60.4456601 22.2673988)))

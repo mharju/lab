@@ -50,23 +50,26 @@
   (let [graph (get-in @components [view :graph])]
     (.load graph (clj->js {:columns data :type "bar"}))))
 
+(defn time-series! [view]
+  (line-graph! view
+     {:columns [["t"] ["y"]] :x "t"}
+     {:x {:type "timeseries" :tick {:format "%H:%M:%S"}}}))
+
+(defn time-flow [view ts value & args]
+  (flow :view (merge {:columns [["t" ts] ["y" value]] :length 0} (or (first args) {}))))
+
 (comment
   (scatter-plot! :view
      {:columns [["x" 10 20 30 40] ["data" 11 12 13 14]] :x "x"})
 
-  (line-graph! :view
-     {:columns
-       [["x"]
-        ["latency"]]
-       :x "x"}
-     {:x {:type "timeseries" :tick {:format "%H:%M:%S"}}})
+  (with-connection
+    (time-series! :view)
+    (fn [data]
+      ()))
 
-  (js/setInterval
-    (fn []
-        (flow :view {:columns
-              [["x" (js/Date.)]
-               ["latency" (js/Math.random)]]}))
-    1000)
+  (time-series! :view)
+  (def iv (js/setInterval (fn [] (time-flow :view (js/Date.) (js/Math.random) {:length 1})) 1000))
+  (js/clearInterval iv)
 
   (flow :view {:columns [["x" 1522647282000] ["latency" 5] ["id" 7]] :length 1})
 

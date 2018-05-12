@@ -12,13 +12,15 @@
                   :exclusions [org.clojure/tools.reader]]
                  [cljsjs/jquery "3.2.1-0"]
                  [cljsjs/leaflet "1.2.0-0"]
+                 [cljsjs/leaflet-omnivore "0.3.1-0"]
                  [cljsjs/c3 "0.4.18-0"]
                  [cljsjs/vis "4.20.1-0"]
                  [cljsjs/codemirror "5.31.0-0"]
                  [hiccup "1.0.5"]
                  [hiccups "0.3.0"]
-                 [com.cognitect/transit-cljs "0.8.250"]
-                 [replumb "0.2.4"]]
+                 [com.cognitect/transit-cljs "0.8.256"]
+                 [replumb "0.2.4"]
+                 [cljsjs/parinfer-codemirror "1.4.1-2"]]
 
   :plugins [[lein-figwheel "0.5.15"]
             [lein-cljsbuild "1.1.5" :exclusions [[org.clojure/clojure]]]]
@@ -100,7 +102,7 @@
   ;; setting up nREPL for Figwheel and ClojureScript dev
   ;; Please see:
   ;; https://github.com/bhauman/lein-figwheel/wiki/Using-the-Figwheel-REPL-within-NRepl
-  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.9"]
+  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.10"]
                                   [figwheel-sidecar "0.5.15"]
                                   [com.cemerick/piggieback "0.2.2"]]
                    ;; need to add dev source path here to get user.clj loaded

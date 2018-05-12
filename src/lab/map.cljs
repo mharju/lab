@@ -1,7 +1,8 @@
 (ns lab.map
   (:require [lab.views :refer [components views set-mode!]]
-            [cljsjs.leaflet])
-  (:require-macros [lab.core :refer [with-view]]))
+            [cljsjs.leaflet]
+            [cljsjs.leaflet-omnivore])
+  (:require-macros [lab.macros :refer [with-view markers]]))
 
 (defn- map-for [id]
   (let [view (get @views id)
@@ -64,8 +65,16 @@
     	 (mapv #(mapv js/parseFloat %))
          (add-polyline! view))))
 
+(defn add-wkt! [view wkt-string]
+  (set-mode! view :map)
+  (let [m (get-in @components [view :map])
+        layer (js/omnivore.wkt.parse wkt-string)]
+    (.addTo layer m)
+    (.fitBounds m (.getBounds layer))))
+
 (comment
   (with-view
       (clear-markers!)
       (add-marker! 60.4436501 22.2673988)
-      (add-marker! 60.4456601 22.2673988)))
+      (add-marker! 60.4456601 22.2673988))
+  (markers :view 60.4504278,22.2738248,60.4485448,22.2538258))

@@ -13,12 +13,14 @@
                            ["/js/compiled/out"]
                            rpl-io/fetch-file!)
                           {:warning-as-error false
+                           :verbose true
                            :preloads {:require '#{[lab.map :as m]
                                                   [lab.core :as c]
                                                   [lab.graph :as g]
                                                   [lab.views :as v]
                                                   [lab.console :as console]
-                                                  [lab.vis :as vis]}}
+                                                  [lab.vis :as vis]}
+                                      :require-macros '[[lab.macros :refer [with-view markers]]]}
                            :callback #(js/console.info "Result" %)})
         part (if-not (string/blank? (.getSelection cm)) (.getSelection cm) (.getValue cm))]
     (rpl/read-eval-call repl-opts

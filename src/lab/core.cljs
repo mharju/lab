@@ -1,8 +1,10 @@
 (ns lab.core
-  (:require-macros  [lab.core :refer [render-help with-view]])
+  (:require-macros  [lab.core :refer [render-help]]
+                    [lab.macros :refer [with-view]])
   (:require [clojure.string :as string]
             [cljsjs.jquery]
             [cljsjs.codemirror]
+            [cljsjs.parinfer-codemirror]
             [cljsjs.codemirror.mode.clojure]
             [clojure.set]
             [lab.eval :as evl]
@@ -10,8 +12,6 @@
             [lab.map :refer [map!]]))
 
 (enable-console-print!)
-
-(render-help)
 
 (defonce data-connection (atom {:ws nil :listeners {}}))
 
@@ -70,6 +70,7 @@
                           :theme "solarized dark"
                           :value ";; Welcome to Console REPL. Eval (c/toggle-help!) to get docs or (c/toggle-comment-evaled!)\r\n;; to disable commenting evaled expressions. Enter value and press cmd-e to evaluate\r\n;; the whole buffer or selection.\r\n" })]
         (reset! cm-inst cm)
+        (js/parinferCodeMirror.init cm)
         (.setOption cm "extraKeys"
                     #js {"Cmd-E" (fn [cm]
                                    (evl/try-eval! cm :comment-evaled @comment-evaled))})
@@ -83,8 +84,7 @@
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
   (.off (js/$ js/document) "keydown")
-  (.on (js/$ js/document) "keydown" handle-key)
-  )
+  (.on (js/$ js/document) "keydown" handle-key))
 
 (comment
   (add-view! :view)
@@ -144,4 +144,3 @@
   (with-view
     (map identity (range 10))
     (println "Hello")))
-

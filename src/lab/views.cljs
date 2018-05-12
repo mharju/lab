@@ -1,13 +1,14 @@
 (ns lab.views
   (:require-macros [hiccups.core :as hiccups :refer [html]])
   (:require [hiccups.runtime]
-            [cljsjs.jquery]))
+            [cljsjs.jquery]
+            [clojure.set]))
 
 (defonce views (atom {}))
 (defonce components (atom {}))
 
 (defn add-view!
-  ([id] (add-view! (js/document.querySelector "body") id))
+  ([id] (add-view! (js/document.querySelector "#dashboard") id))
   ([parent id]
     (let [template (html [:div.view {:id (name id)}
                              [:div.info [:span.id id] [:span.connection-status]]

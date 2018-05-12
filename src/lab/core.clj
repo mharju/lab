@@ -15,16 +15,12 @@
               [:h3 current-namespace]
               [:table
                 (doall
-                  (for [part (partition 1
-                               (remove nil?
-                                 (for [[fn-name fn-info] fns]
+                  (for [part (->>
+                               (for [[fn-name fn-info] (sort-by first fns)]
                                    (when (get-in fn-info [:fn-var])
-                                     [:td fn-name " " #_(str
+                                   [:td fn-name " " #_(str
                                                          (first (or (get-in fn-info [:top-fn :arglists])
-                                                                    (second (get fn-info :arglists)))))]))))]
+                                                                    (second (get fn-info :arglists)))))]))
+                               (partition 1)
+                               (remove nil?))]
                     [:tr part]))]]))])))
-
-(defmacro with-view [& body]
-  `(do
-     ~@(for [[f & params] body]
-         (cons f (cons :view params)))))

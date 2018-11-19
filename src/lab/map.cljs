@@ -65,6 +65,12 @@
     	 (mapv #(mapv js/parseFloat %))
          (add-polyline! view))))
 
+(defn polyline-from-dbdump! [view dump]
+  (->> (re-seq #"\|\s*(\d+\.\d+,\d+\.\d+)\s*\|" dump)
+       (map #(clojure.string/split (second %) #","))
+       (mapv #(mapv js/parseFloat %))
+       (add-polyline! view)))
+
 (defn add-wkt! [view wkt-string]
   (set-mode! view :map)
   (let [m (get-in @components [view :map])

@@ -37,25 +37,34 @@
 ;; editor functions
 
 (defonce cm-inst (atom nil))
-(defn- handle-key [e]
-  (when (.-metaKey e)
-    (case (.-keyCode e)
-      72 (let [$repl (js/$ "#repl")]
-           (if (.is $repl ":visible")
-             (do (.hide $repl)
-                 (.focus @cm-inst))
-             (.show $repl))
-           (.preventDefault e))
-      true)))
 
 (defn toggle-help! []
   (.toggle (js/$ ".help")))
+
 (defonce comment-evaled
   (let [stored (js/JSON.parse (.getItem js/localStorage "comment_evaled"))]
     (atom (if-not (nil? stored) stored true))))
+
 (defn toggle-comment-evaled! []
   (swap! comment-evaled not)
   (.setItem js/localStorage "comment_evaled" @comment-evaled))
+
+(defn toggle-repl! []
+  (let [$repl (js/$ "#repl")]
+             (if (.is $repl ":visible")
+               (do (.hide $repl)
+                   (.focus @cm-inst))
+               (.show $repl))))
+
+(defn resize-repl! [new-height]
+  (set! (.. (js/document.getElementById "repl") -style -height) (str new-height "em"))
+  (set! (.. (js/document.querySelector ".CodeMirror") -style -height) (str new-height "em")))
+
+(defn- handle-key [e]
+  (when (.-metaKey e)
+    (case (.-keyCode e)
+      72 (do (toggle-repl!) (.preventDefault e))
+      true)))
 
 (defonce init
   (.ready (js/$ js/document)

@@ -51,7 +51,7 @@ This is a demo of evaluating some lat-long pairs and adding them to the view.
 
 To get an interactive development environment run:
 
-    lein figwheel
+    lein fig
 
 and open your browser at [localhost:3449](http://localhost:3449/).
 This will auto compile and send all changes to the browser without the

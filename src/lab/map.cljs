@@ -1,4 +1,4 @@
-(ns lab.map
+( ns lab.map
   (:require [lab.views :refer [components views set-mode!]]
             [cljsjs.leaflet]
             [cljsjs.leaflet-omnivore])
@@ -94,6 +94,7 @@
     (.fitBounds m (.getBounds layer))))
 
 (comment
+
   (with-view
       (clear-markers!)
       (add-marker! 60.4436501 22.2673988)

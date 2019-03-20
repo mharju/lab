@@ -4,8 +4,9 @@
   (:require [clojure.string :as string]
             [cljsjs.jquery]
             [cljsjs.codemirror]
-            [cljsjs.parinfer-codemirror]
+            [cljsjs.codemirror.addon.hint.show-hint]
             [cljsjs.codemirror.mode.clojure]
+            [cljsjs.parinfer-codemirror]
             [clojure.set]
             [lab.eval :as evl]
             [lab.views :refer [add-view!]]
@@ -60,6 +61,10 @@
   (set! (.. (js/document.getElementById "repl") -style -height) (str new-height "em"))
   (set! (.. (js/document.querySelector ".CodeMirror") -style -height) (str new-height "em")))
 
+(defn full-repl! []
+  (set! (.. (js/document.getElementById "repl") -style -height) "100vh")
+  (set! (.. (js/document.querySelector ".CodeMirror") -style -height) "100vh"))
+
 (defn- handle-key [e]
   (when (.-metaKey e)
     (case (.-keyCode e)
@@ -81,8 +86,14 @@
         (reset! cm-inst cm)
         (js/parinferCodeMirror.init cm)
         (.setOption cm "extraKeys"
-                    #js {"Cmd-E" (fn [cm]
-                                   (evl/try-eval! cm :comment-evaled @comment-evaled))})
+                    #js {"Cmd-E"        (fn [cm]
+                                           (evl/try-eval! cm :comment-evaled @comment-evaled))
+                         "Cmd-F"        (fn [cm]
+                                           (full-repl!))
+                         "Shift-Cmd-F"  (fn [cm]
+                                          (resize-repl! 14))
+                         "Shift-Cmd-T"  (fn [cm]
+                                          (toggle-help!))})
         (.focus cm)
         (.setCursor cm #js {:line 3 :ch 0})
         (add-view! :view)

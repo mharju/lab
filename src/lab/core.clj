@@ -1,4 +1,5 @@
 (ns lab.core
+  (:refer-clojure :exclude [ns-publics ns-resolve])
   (:require [hiccup.core :refer [html]]
             [cljs.analyzer]
             [cljs.analyzer.api :refer [ns-publics ns-resolve]]))

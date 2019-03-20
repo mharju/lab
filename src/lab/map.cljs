@@ -29,6 +29,13 @@
                     (when (>= (.indexOf (.-className (.getPane layer)) "marker") 0)
                       (.remove layer))))))
 
+(defn clear! [view]
+  (let [l (get-in @components [view :map])]
+    (.eachLayer l (fn [layer]
+                    (println (.-className (.getPane layer)))
+                    (when-not (>= (.indexOf (.-className (.getPane layer)) "tile") 0)
+                      (.remove layer))))))
+
 (defn add-marker! [view lat lon & {:keys [rev] :or {rev false}}]
   (set-mode! view :map)
   (let [l (get-in @components [view :map])
@@ -49,13 +56,21 @@
     (.addTo m l)
     m))
 
+(def line-colors ["#0cc2aa" "#fcc100" "#a88add"])
+(let [index (atom 0)]
+  (defn next-color []
+    (let [result (nth line-colors (mod @index (count line-colors)))]
+      (swap! index inc)
+      result)))
+
 (defn add-polyline! [view points & {:keys [rev as-list] :or {rev false as-list false}}]
   (set-mode! view :map)
   (let [l (get-in @components [view :map])
         points (if-not as-list points (mapv vec (partition 2 points)))
         points (if-not rev points (mapv (fn [[lat lng]] [lng lat]) points))
-        m (.polyline js/L (clj->js points) #js {:color "#0cc2aa" })]
+        m (.polyline js/L (clj->js points) #js {:color (next-color)})]
     (.addTo m l)
+    (.fitBounds l (.getBounds m))
     m))
 
 (defn polyline-from-str! [view points]

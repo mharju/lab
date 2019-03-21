@@ -104,6 +104,8 @@
         (.setOption cm "extraKeys"
                     #js {"Cmd-E"        (fn [cm]
                                            (evl/try-eval! cm :comment-evaled @comment-evaled))
+                         "Shift-Cmd-E"  (fn [cm]
+                                          (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true))
                          "Shift-Cmd-T"  (fn [cm]
                                           (toggle-help!))})
         (.focus cm)

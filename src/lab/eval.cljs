@@ -19,8 +19,8 @@
         (when (pos? line) (recur {:line (dec line)
                                   :ch (count (.getLine cm (dec line)))}))))))
 
-(defn- nth-of [line ch n]
-  (loop [pos 0 match 0]
+(defn- nth-of [line ch n pos]
+  (loop [pos (or pos 0) match 0]
     (when (< pos (count line))
       (if (= (.charAt line pos) ch)
         (if (= (inc match) n)
@@ -28,25 +28,31 @@
           (recur (inc pos) (inc match)))
         (recur (inc pos) match)))))
 
-(defn- find-end-paren [cm cursor]
-  (loop [{:keys [line ch]} cursor open-paren-count 1 close-paren-count 0]
-    (let [current-line (.getLine cm line)
-          length (count current-line)
-          open-paren-on-line (-> (re-seq #"\(" (.substring current-line ch)) count)
-          close-paren-on-line (-> (re-seq #"\)" (.substring current-line ch)) count)
-          open-paren-count (+ open-paren-count open-paren-on-line)
-          close-paren-count (+ close-paren-count close-paren-on-line)]
-      (if (<= (- open-paren-count close-paren-count) 0)
-        (let [pos (nth-of current-line ")" open-paren-count)]
-          {:line line :ch (cond-> pos
-                            (< (count current-line) pos)
-                            inc)})
-        (when (< (inc line) (.lineCount cm))
-          (recur {:line (inc line) :ch 0}
-                 open-paren-count
-                 close-paren-count))))))
+(defn- match-parens [counter line]
+  (reduce
+    (fn [{:keys [counter pos]} ch]
+      (let [counter (cond
+                       (= ch "(") (inc counter)
+                       (= ch ")") (dec counter)
+                       :else counter)]
+        (if (zero? counter)
+          (reduced {:success true :pos pos})
+          {:counter counter :pos (inc pos)})))
+    {:counter counter :pos 0}
+    line))
 
-(defn- current-form [cm]
+(defn- find-end-paren [cm cursor]
+  (loop [{:keys [line ch]} cursor counter 1]
+    (let [current-line (.substring (.getLine cm line) ch)
+          {:keys [success counter pos]} (match-parens counter current-line)]
+     (if success
+       {:line line :ch (+ pos ch 1)}
+       (when (< (inc line) (.lineCount cm))
+         (recur
+           {:line (inc line) :ch 0}
+           counter))))))
+
+(defn- get-current-form [cm]
   (let [cursor (.getCursor cm)
         cursor {:line (.-line cursor) :ch (.-ch cursor)}
         start (find-start-paren cm cursor)
@@ -54,7 +60,23 @@
     (when (and start end)
       (.getRange cm (clj->js start) (clj->js end)))))
 
-(defn try-eval! [cm & {:keys [comment-evaled] :or {comment-evaled true}}]
+(defn- find-top-form [cm cursor]
+  (loop [{:keys [line]} cursor]
+    (let [current-line (.getLine cm line)]
+      (if (.startsWith current-line "(")
+        {:line line :ch 1}
+        (when (pos? (dec line)) (recur {:line (dec line) :ch 0}))))))
+
+(defn- get-top-form [cm]
+  (let [cursor (.getCursor cm)
+        cursor {:line (.-line cursor) :ch (.-ch cursor)}
+        cursor (find-top-form cm cursor)
+        start (find-start-paren cm cursor)
+        end (find-end-paren cm cursor)]
+    (when (and start end)
+      (.getRange cm (clj->js start) (clj->js end)))))
+
+(defn try-eval! [cm & {:keys [comment-evaled top-form] :or {comment-evaled true top-form false}}]
   (let [repl-opts (merge (rpl/options :browser
                            ["/js/compiled/out"]
                            rpl-io/fetch-file!)
@@ -68,9 +90,10 @@
                                                   [lab.vis :as vis]}
                                       :require-macros '[[lab.macros :refer [with-view markers]]]}
                            :callback #(js/console.info "Result" %)})
-        part (if-not (string/blank? (.getSelection cm))
-               (.getSelection cm)
-               (current-form cm))]
+        part (cond
+               (not (string/blank? (.getSelection cm))) (.getSelection cm)
+               top-form (get-top-form cm)
+               :else (get-current-form cm))]
     (rpl/read-eval-call repl-opts
                         (fn [result]
                           (let [value (.getValue cm)
@@ -84,8 +107,9 @@
 (comment
   (let [cursor (.getCursor @lab.core/cm-inst)
         cursor {:line (.-line cursor) :ch (.-ch cursor)}
-        start (find-start-paren @lab.core/cm-inst cursor)
-        end (find-end-paren @lab.core/cm-inst cursor)]
-    (js/console.log start end)
+        top-form (find-top-form @lab.core/cm-inst cursor)
+        start (find-start-paren @lab.core/cm-inst top-form)
+        end (find-end-paren @lab.core/cm-inst top-form)]
+    (js/console.log "top form at line" top-form start end)
     (when (and start end)
       (.getRange @lab.core/cm-inst (clj->js start) (clj->js end)))))

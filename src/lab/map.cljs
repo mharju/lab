@@ -4,19 +4,39 @@
             [cljsjs.leaflet-omnivore])
   (:require-macros [lab.macros :refer [with-view markers]]))
 
-(defn- map-for [id]
+(def esri (.tileLayer js/L
+              "//server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+              #js {:attribution "Source: Esri, DigitalGlobe, GeoEye, i-cubed, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community."}))
+
+(def cartodb-positron (.tileLayer js/L
+                        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                        #js {
+                          :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>"
+                          :subdomains "abcd"
+                          :maxZoom 19}))
+
+(def cartodb-voyager (.tileLayer js/L
+                        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                        #js {
+                          :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>"
+                          :subdomains "abcd"
+                          :maxZoom 19}))
+
+(def providers {:esri esri :cartodb-positron cartodb-positron :cartodb-voyager cartodb-voyager})
+
+(defn- map-for [id provider]
   (let [view (get @views id)
         instance (.map js/L (.querySelector view ".map"))
-        tile (.tileLayer js/L
-              "//server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
-              #js {:attribution "Source: Esri, DigitalGlobe, GeoEye, i-cubed, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community."})]
+        tile (or (get providers provider) cartodb-positron)]
     (.setView instance #js [60.4530898 22.3139035] 15)
     (.addTo tile instance)
     instance))
 
-(defn map! [view]
+(defn map! [view provider]
   (set-mode! view :map)
-  (swap! components assoc-in [view :map] (map-for view)))
+  (when-let [current (get-in @components [view :map])]
+    (.remove current))
+  (swap! components assoc-in [view :map] (map-for view provider)))
 
 (defn map-center! [view center & {:keys [zoom] :or {zoom 13}}]
   (let [l (get-in @components [view :map])]
@@ -99,4 +119,5 @@
       (clear-markers!)
       (add-marker! 60.4436501 22.2673988)
       (add-marker! 60.4456601 22.2673988))
+
   (markers :view 60.4504278,22.2738248,60.4485448,22.2538258))

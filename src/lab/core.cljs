@@ -57,18 +57,34 @@
                    (.focus @cm-inst))
                (.show $repl))))
 
+(def default-repl-size 14)
+(defonce repl-size (atom {:size default-repl-size :unit :em}))
+(add-watch repl-size :size-change
+  (fn [_key _atom old-state {:keys [size unit]}]
+    (set! (.. (js/document.getElementById "repl") -style -height) (str size (if (keyword? unit) (name unit) unit)))
+    (set! (.. (js/document.querySelector ".CodeMirror") -style -height) (str size (if (keyword? unit) (name unit) unit)))))
+
 (defn resize-repl! [new-height]
-  (set! (.. (js/document.getElementById "repl") -style -height) (str new-height "em"))
-  (set! (.. (js/document.querySelector ".CodeMirror") -style -height) (str new-height "em")))
+  (swap! repl-size assoc :size new-height :unit :em))
+
+(defn step-repl-size! [increment]
+  (swap! repl-size (fn [{:keys [size unit] :as s}]
+                     (if (= unit :em)
+                       {:size (+ size increment) :unit unit}
+                       (do (js/console.warn "Not in em mode while resizing!") s)))))
 
 (defn full-repl! []
-  (set! (.. (js/document.getElementById "repl") -style -height) "100vh")
-  (set! (.. (js/document.querySelector ".CodeMirror") -style -height) "100vh"))
+  (let [{:keys [size unit]} @repl-size]
+    (if (= unit :em)
+      (swap! repl-size assoc :size 100 :unit :vh)
+      (swap! repl-size assoc :size default-repl-size :unit :em))))
 
 (defn- handle-key [e]
   (when (.-metaKey e)
     (case (.-keyCode e)
       72 (do (toggle-repl!) (.preventDefault e))
+      70 (do (full-repl!) (.preventDefault e))
+      85 (do (when-not (.-altKey e) (step-repl-size! (if (.-shiftKey e) -1 1)) (.preventDefault e)))
       true)))
 
 (defonce init
@@ -88,10 +104,6 @@
         (.setOption cm "extraKeys"
                     #js {"Cmd-E"        (fn [cm]
                                            (evl/try-eval! cm :comment-evaled @comment-evaled))
-                         "Cmd-F"        (fn [cm]
-                                           (full-repl!))
-                         "Shift-Cmd-F"  (fn [cm]
-                                          (resize-repl! 14))
                          "Shift-Cmd-T"  (fn [cm]
                                           (toggle-help!))})
         (.focus cm)

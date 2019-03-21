@@ -27,16 +27,19 @@
 (defn- map-for [id provider]
   (let [view (get @views id)
         instance (.map js/L (.querySelector view ".map"))
-        tile (or (get providers provider) cartodb-positron)]
+        tile (get providers provider)]
     (.setView instance #js [60.4530898 22.3139035] 15)
     (.addTo tile instance)
     instance))
 
-(defn map! [view provider]
-  (set-mode! view :map)
-  (when-let [current (get-in @components [view :map])]
-    (.remove current))
-  (swap! components assoc-in [view :map] (map-for view provider)))
+(defn map!
+  ([view]
+   (map! view :cartodb-voyager))
+  ([view provider]
+   (set-mode! view :map)
+   (when-let [current (get-in @components [view :map])]
+     (.remove current))
+   (swap! components assoc-in [view :map] (map-for view provider))))
 
 (defn map-center! [view center & {:keys [zoom] :or {zoom 13}}]
   (let [l (get-in @components [view :map])]

@@ -115,6 +115,14 @@
         (add-view! :view)
         (map! :view)))))
 
+(defn save-session! [name]
+  (.setItem js/window.localStorage (str "session-" name) (js/JSON.stringify (.getValue @cm-inst))))
+
+(defn load-session! [name]
+  (->> (.getItem js/window.localStorage (str "session-" name))
+      js/JSON.parse
+      (.setValue @cm-inst)))
+
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application

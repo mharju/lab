@@ -84,7 +84,9 @@
     (case (.-keyCode e)
       72 (do (toggle-repl!) (.preventDefault e))
       70 (do (full-repl!) (.preventDefault e))
-      85 (do (when-not (.-altKey e) (step-repl-size! (if (.-shiftKey e) -1 1)) (.preventDefault e)))
+      89 (do (when-not (.-altKey e)
+               (step-repl-size!  (if (.-shiftKey e) -1 1))
+               (.preventDefault e)))
       true)))
 
 (defonce init

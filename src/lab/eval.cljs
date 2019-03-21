@@ -91,6 +91,7 @@
                                                   [lab.vis :as vis]}
                                       :require-macros '[[lab.macros :refer [with-view markers]]]}
                            :callback #(js/console.info "Result" %)})
+        cursor-pos (.getCursor cm)
         part (cond
                (not (string/blank? (.getSelection cm))) (.getSelection cm)
                top-form (get-top-form cm)
@@ -102,7 +103,7 @@
                                 result (rpl/unwrap-result result)
                                 new-value (if (and success comment-evaled) (.replace value (js/RegExp "^([^;])" "gm") ";; $1") value)]
                             (.setValue cm (str new-value (if (> 80 (count value)) "\r\n" " ") "\n;; => " result "\n"))
-                            (.setCursor cm (inc (.lastLine cm)) 0)))
+                            (.setCursor cm cursor-pos)))
                         part)))
 
 (comment

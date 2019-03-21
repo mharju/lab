@@ -6,7 +6,8 @@
             [lab.graph :as g]
             [lab.console :as console]
             [lab.views :as v]
-            [lab.vis :as vis]))
+            [lab.vis :as vis]
+            [goog.object :as gobj]))
 
 (defn- find-start-paren [cm cursor]
   (loop [{:keys [line ch]} cursor]
@@ -54,7 +55,7 @@
 
 (defn- get-current-form [cm]
   (let [cursor (.getCursor cm)
-        cursor {:line (.-line cursor) :ch (.-ch cursor)}
+        cursor {:line (gobj/get cursor "line") :ch (gobj/get cursor "ch")}
         start (find-start-paren cm cursor)
         end (find-end-paren cm cursor)]
     (when (and start end)
@@ -69,7 +70,7 @@
 
 (defn- get-top-form [cm]
   (let [cursor (.getCursor cm)
-        cursor {:line (.-line cursor) :ch (.-ch cursor)}
+        cursor {:line (gobj/get cursor "line") :ch (gobj/get cursor "ch")}
         cursor (find-top-form cm cursor)
         start (find-start-paren cm cursor)
         end (find-end-paren cm cursor)]
@@ -106,7 +107,7 @@
 
 (comment
   (let [cursor (.getCursor @lab.core/cm-inst)
-        cursor {:line (.-line cursor) :ch (.-ch cursor)}
+        cursor {:line (gobj/get cursor "line") :ch (gobj/get cursor "ch")}
         top-form (find-top-form @lab.core/cm-inst cursor)
         start (find-start-paren @lab.core/cm-inst top-form)
         end (find-end-paren @lab.core/cm-inst top-form)]

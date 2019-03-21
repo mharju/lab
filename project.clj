@@ -26,7 +26,7 @@
   :clean-targets ^{:protect false} ["target/public" :target-path]
 
   :aliases {"fig" ["trampoline" "run" "-m" "figwheel.main" "-b" "lab" "-r"]
-            "release" ["do" "clean," "trampoline" "run" "-m" "figwheel.main" "-O" "advanced" "-bo" "lab"]}
+            "release" ["do" "clean," "trampoline" "run" "-m" "figwheel.main" "-O" "simple" "-bo" "lab"]}
 
   :profiles {:dev {:dependencies [[com.bhauman/figwheel-main "0.2.0"]
                                   [binaryage/devtools "0.9.10"]

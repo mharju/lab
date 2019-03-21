@@ -37,7 +37,10 @@
           open-paren-count (+ open-paren-count open-paren-on-line)
           close-paren-count (+ close-paren-count close-paren-on-line)]
       (if (<= (- open-paren-count close-paren-count) 0)
-        {:line line :ch (-> (nth-of current-line ")" open-paren-count) inc)}
+        (let [pos (nth-of current-line ")" open-paren-count)]
+          {:line line :ch (cond-> pos
+                            (< (count current-line) pos)
+                            inc)})
         (when (< (inc line) (.lineCount cm))
           (recur {:line (inc line) :ch 0}
                  open-paren-count
@@ -45,9 +48,9 @@
 
 (defn- current-form [cm]
   (let [cursor (.getCursor cm)
-               cursor {:line (.-line cursor) :ch (.-ch cursor)}
-               start (find-start-paren cm cursor)
-               end (find-end-paren cm cursor)]
+        cursor {:line (.-line cursor) :ch (.-ch cursor)}
+        start (find-start-paren cm cursor)
+        end (find-end-paren cm cursor)]
     (when (and start end)
       (.getRange cm (clj->js start) (clj->js end)))))
 
@@ -83,5 +86,6 @@
         cursor {:line (.-line cursor) :ch (.-ch cursor)}
         start (find-start-paren @lab.core/cm-inst cursor)
         end (find-end-paren @lab.core/cm-inst cursor)]
+    (js/console.log start end)
     (when (and start end)
       (.getRange @lab.core/cm-inst (clj->js start) (clj->js end)))))

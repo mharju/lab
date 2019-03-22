@@ -82,6 +82,7 @@
 (defn- handle-key [e]
   (when (.-metaKey e)
     (case (.-keyCode e)
+      71 (do (toggle-help!) (.preventDefault e))
       72 (do (toggle-repl!) (.preventDefault e))
       70 (do (full-repl!) (.preventDefault e))
       89 (do (when-not (.-altKey e)
@@ -100,7 +101,7 @@
                      #js {:mode "clojure"
                           :lineNumbers false
                           :theme "solarized dark"
-                          :value ";; Welcome to Console REPL. Eval (c/toggle-help!) to get docs or (c/toggle-comment-evaled!)\r\n;; to disable commenting evaled expressions. Enter value and press cmd-e to evaluate\r\n;; the current form on the cursor or selection.\r\n" })]
+                          :value ";; Welcome to Console REPL. Cmd-G show help, Cmd-H toggle repl, Cmd-F full repl, Cmd-(Shift)-Y Resize repl\r\n;; Cmd-(Shift)-e Eval current (topmost) expression." })]
         (reset! cm-inst cm)
         (js/parinferCodeMirror.init cm)
         (.setOption cm "extraKeys"

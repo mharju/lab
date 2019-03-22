@@ -21,7 +21,8 @@
                                       :let [fn-info (if (nil? fn-info) (get-in fn-info [:fn-var]) fn-info)]
                                             args (or (get-in fn-info [:top-fn :arglists])
                                                      (second (get fn-info :arglists)))]
-                                   [:td "(" fn-name (when args (str " " args))   ")"])
+                                   [:td (when (:doc fn-info) {:class "has-doc"}) "(" fn-name (when args (str " " args))   ")"
+                                     [:div.doc (:doc fn-info)]])
                                (partition 1)
                                (remove nil?))]
                     [:tr part]))]]))])))

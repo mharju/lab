@@ -174,3 +174,21 @@ text {
     font-family: 'Droid Sans Mono',monospace;
     font-size: 9pt;
 }
+.help .section td.has-doc {
+    text-decoration: underline;
+    cursor: pointer;
+    position: relative;
+}
+.help .section td .doc {
+  display: none;
+}
+.help .section td.has-doc:hover .doc {
+  display: block;
+  position: absolute;
+  background: white;
+  border: 1px solid black;
+  top: 1.4em;
+  left: 0px;
+  width: 300px;
+  padding: 1em;
+}

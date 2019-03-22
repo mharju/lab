@@ -4,7 +4,10 @@
 
 (def color-pattern {:pattern ["#0cc2aa" "#fcc100" "#a88add"]})
 
-(defn line-graph! [view data axis]
+(defn line-graph!
+  "Generate line graph. Data needs to have at least {:columns [\"axis_name\" ...]}.
+  Example: (g/line-graph! :view {:columns [\"x\" 1 2 3 4 5 6 5 4 3 2 1))"
+  [view data axis]
   (set-mode! view :graph)
   (swap! components assoc-in [view :graph]
     (.generate js/c3

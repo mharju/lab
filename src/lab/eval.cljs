@@ -7,6 +7,7 @@
             [lab.console :as console]
             [lab.views :as v]
             [lab.vis :as vis]
+            [lab.hud :as hud]
             [goog.object :as gobj]))
 
 (defn- find-start-paren [cm cursor]
@@ -77,7 +78,7 @@
     (when (and start end)
       (.getRange cm (clj->js start) (clj->js end)))))
 
-(defn try-eval! [cm & {:keys [comment-evaled top-form] :or {comment-evaled true top-form false}}]
+(defn try-eval! [cm & {:keys [comment-evaled top-form hud-result] :or {comment-evaled true top-form false hud-result false}}]
   (let [repl-opts (merge (rpl/options :browser
                            ["/js/compiled/out"]
                            rpl-io/fetch-file!)
@@ -102,7 +103,9 @@
                                 success (rpl/success? result)
                                 result (rpl/unwrap-result result)
                                 new-value (if (and success comment-evaled) (.replace value (js/RegExp "^([^;])" "gm") ";; $1") value)]
-                            (.setValue cm (str new-value (if (> 80 (count value)) "\r\n" " ") "\n;; => " result "\n"))
+                            (if-not hud-result
+                              (.setValue cm (str new-value (if (> 80 (count value)) "\r\n" " ") "\n;; => " result "\n"))
+                              (hud/show! result))
                             (.setCursor cm cursor-pos)))
                         part)))
 

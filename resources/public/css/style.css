@@ -192,3 +192,23 @@ text {
   width: 300px;
   padding: 1em;
 }
+
+#hud {
+  z-index: 1000;
+  position: absolute;
+  top: calc(50vh - 4em);
+  left: 15vw;
+  width: 70vw;
+  font-size: 3em;
+  background-color: rgba(0,0,0,0.4);
+  border-radius: 16px;
+  color: white;
+  padding: 0.5em;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.2s ease-in;
+}
+#hud.visible {
+  transition: opacity 0.2s ease-out ;
+  opacity: 1;
+}

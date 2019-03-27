@@ -50,6 +50,16 @@
   (swap! comment-evaled not)
   (.setItem js/localStorage "comment_evaled" @comment-evaled))
 
+(defonce hud-result
+  (let [stored (js/JSON.parse (.getItem js/localStorage "hud_result"))]
+    (atom (if-not (nil? stored) stored true))))
+
+(defn toggle-hud-result!
+  "Eval to show the evaluation results in HUD instead of writing it to the console."
+  []
+  (swap! hud-result not)
+  (.setItem js/localStorage "hud_result" @hud-result))
+
 (defn toggle-repl! []
   (let [$repl (js/$ "#repl")]
              (if (.is $repl ":visible")
@@ -106,9 +116,9 @@
         (js/parinferCodeMirror.init cm)
         (.setOption cm "extraKeys"
                     #js {"Cmd-E"        (fn [cm]
-                                           (evl/try-eval! cm :comment-evaled @comment-evaled))
+                                           (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result @hud-result))
                          "Shift-Cmd-E"  (fn [cm]
-                                          (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true))
+                                          (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result @hud-result))
                          "Shift-Cmd-T"  (fn [cm]
                                           (toggle-help!))})
         (.focus cm)

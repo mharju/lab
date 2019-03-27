@@ -207,6 +207,10 @@ text {
   text-align: center;
   opacity: 0;
   transition: opacity 0.2s ease-in;
+  font-family: Menlo,'Droid Sans Mono',monospace;
+  max-height: 30vh;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 #hud.visible {
   transition: opacity 0.2s ease-out ;

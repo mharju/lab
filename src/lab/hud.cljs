@@ -2,7 +2,13 @@
 
 (let [timeout (atom nil)]
   (defn show! [message]
-    (let [hud (js/$ "#hud")]
+    (let [hud (js/$ "#hud")
+          message (if (> (count message) 140)
+                    (str (.substring message 0 120)
+                         " ... "
+                         (.substring message
+                           (- (count message) 15)))
+                    message)]
       (when @timeout
         (js/clearTimeout timeout))
       (-> hud

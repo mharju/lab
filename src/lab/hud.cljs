@@ -12,6 +12,10 @@
       (when @timeout
         (js/clearTimeout timeout))
       (-> hud
+          (.show)
           (.text message)
           (.addClass "visible"))
-      (reset! timeout (js/setTimeout #(.removeClass hud "visible") 1000)))))
+      (reset! timeout (js/setTimeout (fn []
+                                        (.removeClass hud "visible")
+                                        (js/setTimeout #(.hide hud) 300))
+                                     1000)))))

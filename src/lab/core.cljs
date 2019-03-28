@@ -92,6 +92,7 @@
 (defn paste! []
   (->
     (js/$ "#pasteboard")
+    (.show)
     (.addClass "visible")
     (.find "input")
     (.focus)))
@@ -112,6 +113,7 @@
   (.ready (js/$ js/document)
     (fn [e]
       (.append (js/$ js/document.body) (render-help))
+      (.hide (js/$ "#hud, #pasteboard"))
       (.on (js/$ js/document) "keydown" handle-key)
       (.delegate (js/$ js/document) ".help a" "click" (fn [e] (toggle-help!) (.preventDefault e)))
       (.delegate (js/$ js/document) "#pasteboard button" "click" (fn [e]
@@ -124,7 +126,9 @@
                                                                       (.val textarea "")
                                                                       (.removeClass (js/$ "#pasteboard") "visible")
                                                                       (js/setTimeout
-                                                                        #(evl/eval! (str "(def " var-name " \"" value "\")"))
+                                                                        (fn []
+                                                                          (.hide (js/$ "#pasteboard"))
+                                                                          (evl/eval! (str "(def " var-name " \"" value "\")")))
                                                                         800)
                                                                       (.preventDefault e))))
       (toggle-help!)

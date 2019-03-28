@@ -132,7 +132,7 @@
                      #js {:mode "clojure"
                           :lineNumbers false
                           :theme "solarized dark"
-                          :value ";; Welcome to Console REPL. Cmd-G show help, Cmd-H toggle repl, Cmd-F full repl, Cmd-(Shift)-Y Resize repl\r\n;; Cmd-(Shift)-e Eval current (topmost) expression.\r\n" })]
+                          :value ";; Welcome to Console REPL. Cmd-G show help, Cmd-H toggle repl, Cmd-F full repl, Cmd-(Shift)-Y Resize repl\r\n;; Cmd-(Shift)-e Eval current (topmost) expression. Cmd-J for pasting content as vars.\r\n" })]
         (reset! cm-inst cm)
         (js/parinferCodeMirror.init cm)
         (.setOption cm "extraKeys"

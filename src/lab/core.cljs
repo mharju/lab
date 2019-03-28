@@ -89,12 +89,20 @@
       (swap! repl-size assoc :size 100 :unit :vh)
       (swap! repl-size assoc :size default-repl-size :unit :em))))
 
+(defn paste! []
+  (->
+    (js/$ "#pasteboard")
+    (.addClass "visible")
+    (.find "input")
+    (.focus)))
+
 (defn- handle-key [e]
   (when (.-metaKey e)
     (case (.-keyCode e)
+      70 (do (full-repl!) (.preventDefault e))
       71 (do (toggle-help!) (.preventDefault e))
       72 (do (toggle-repl!) (.preventDefault e))
-      70 (do (full-repl!) (.preventDefault e))
+      74 (do (paste!) (.preventDefault e))
       89 (do (when-not (.-altKey e)
                (step-repl-size!  (if (.-shiftKey e) -1 1))
                (.preventDefault e)))
@@ -106,6 +114,19 @@
       (.append (js/$ js/document.body) (render-help))
       (.on (js/$ js/document) "keydown" handle-key)
       (.delegate (js/$ js/document) ".help a" "click" (fn [e] (toggle-help!) (.preventDefault e)))
+      (.delegate (js/$ js/document) "#pasteboard button" "click" (fn [e]
+                                                                    (let [input (js/$ "#pasteboard input")
+                                                                          textarea (js/$ "#pasteboard textarea")
+                                                                          var-name (.val input)
+                                                                          value (.val textarea)]
+                                                                      (js/console.log "store var" var-name "as" value)
+                                                                      (.val input "")
+                                                                      (.val textarea "")
+                                                                      (.removeClass (js/$ "#pasteboard") "visible")
+                                                                      (js/setTimeout
+                                                                        #(evl/eval! (str "(def " var-name " \"" value "\")"))
+                                                                        800)
+                                                                      (.preventDefault e))))
       (toggle-help!)
       (let [cm (js/CodeMirror. (js/document.querySelector "#repl")
                      #js {:mode "clojure"

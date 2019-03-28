@@ -78,21 +78,29 @@
     (when (and start end)
       (.getRange cm (clj->js start) (clj->js end)))))
 
+(def repl-opts
+  (merge (rpl/options :browser
+                      ["/js/compiled/out"]
+                      rpl-io/fetch-file!)
+         {:warning-as-error false
+          :verbose true
+          :preloads {:require '#{[lab.map :as m]
+                                 [lab.core :as c]
+                                 [lab.graph :as g]
+                                 [lab.views :as v]
+                                 [lab.console :as console]
+                                 [lab.vis :as vis]}
+                     :require-macros '[[lab.macros :refer [with-view markers]]]}
+          :callback #(js/console.info "Result" %)}))
+
+(defn eval! [value]
+  (rpl/read-eval-call repl-opts
+                        (fn [result]
+                          (hud/show! (rpl/unwrap-result result)))
+                        value))
+
 (defn try-eval! [cm & {:keys [comment-evaled top-form hud-result] :or {comment-evaled true top-form false hud-result false}}]
-  (let [repl-opts (merge (rpl/options :browser
-                           ["/js/compiled/out"]
-                           rpl-io/fetch-file!)
-                          {:warning-as-error false
-                           :verbose true
-                           :preloads {:require '#{[lab.map :as m]
-                                                  [lab.core :as c]
-                                                  [lab.graph :as g]
-                                                  [lab.views :as v]
-                                                  [lab.console :as console]
-                                                  [lab.vis :as vis]}
-                                      :require-macros '[[lab.macros :refer [with-view markers]]]}
-                           :callback #(js/console.info "Result" %)})
-        cursor-pos (.getCursor cm)
+  (let [cursor-pos (.getCursor cm)
         part (cond
                (not (string/blank? (.getSelection cm))) (.getSelection cm)
                top-form (get-top-form cm)

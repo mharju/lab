@@ -6,7 +6,7 @@
 
   :min-lein-version "2.7.1"
 
-  :dependencies [[org.clojure/clojure "1.9.0"]
+  :dependencies [[org.clojure/clojure "1.10.0"]
                  [org.clojure/clojurescript "1.10.520"]
                  [org.clojure/core.async  "0.4.490"
                   :exclusions [org.clojure/tools.reader]]
@@ -30,6 +30,6 @@
 
   :profiles {:dev {:dependencies [[com.bhauman/figwheel-main "0.2.0"]
                                   [binaryage/devtools "0.9.10"]
-                                  [cider/piggieback "0.3.8"]]
+                                  [cider/piggieback "0.4.0"]]
                    :source-paths ["src" "dev"]
                    :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}})

@@ -111,9 +111,13 @@
                                 success (rpl/success? result)
                                 result (rpl/unwrap-result result)
                                 new-value (if (and success comment-evaled) (.replace value (js/RegExp "^([^;])" "gm") ";; $1") value)]
-                            (if-not hud-result
-                              (.setValue cm (str new-value (if (> 80 (count value)) "\r\n" " ") "\n;; => " result "\n"))
-                              (hud/show! result))
+                            (if (not success)
+                              (let [message (.-message result)
+                                    cause (.-cause result)]
+                                (js/alert (str message ": " cause)))
+                              (if-not hud-result
+                                (.setValue cm (str new-value (if (> 80 (count value)) "\r\n" " ") "\n;; => " result "\n"))
+                                (hud/show! result)))
                             (.setCursor cm cursor-pos)))
                         part)))
 

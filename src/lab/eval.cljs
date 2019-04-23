@@ -99,7 +99,7 @@
                           (hud/show! (rpl/unwrap-result result)))
                         value))
 
-(defn try-eval! [cm & {:keys [comment-evaled top-form hud-result] :or {comment-evaled true top-form false hud-result false}}]
+(defn try-eval! [cm & {:keys [comment-evaled top-form hud-result hud-duration] :or {comment-evaled true top-form false hud-result false hud-duration 3000}}]
   (let [cursor-pos (.getCursor cm)
         part (cond
                (not (string/blank? (.getSelection cm))) (.getSelection cm)
@@ -112,12 +112,12 @@
                                 result (rpl/unwrap-result result)
                                 new-value (if (and success comment-evaled) (.replace value (js/RegExp "^([^;])" "gm") ";; $1") value)]
                             (if (not success)
-                              (let [message (.-message result)
-                                    cause (.-cause result)]
+                              (let [message (gobj/get result "message")
+                                    cause (gobj/get result "cause")]
                                 (js/alert (str message ": " cause)))
                               (if-not hud-result
                                 (.setValue cm (str new-value (if (> 80 (count value)) "\r\n" " ") "\n;; => " result "\n"))
-                                (hud/show! result)))
+                                (hud/show! result :duration hud-duration)))
                             (.setCursor cm cursor-pos)))
                         part)))
 

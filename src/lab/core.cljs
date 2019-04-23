@@ -54,11 +54,21 @@
   (let [stored (js/JSON.parse (.getItem js/localStorage "hud_result"))]
     (atom (if-not (nil? stored) stored true))))
 
+(defonce hud-duration
+  (let [stored (js/JSON.parse (.getItem js/localStorage "hud_duration"))]
+    (atom (if-not (nil? stored) stored 3000))))
+
 (defn toggle-hud-result!
   "Eval to show the evaluation results in HUD instead of writing it to the console."
   []
-  (swap! hud-result not)
-  (.setItem js/localStorage "hud_result" @hud-result))
+  (->> (swap! hud-result not)
+       (.setItem js/localStorage "hud_result")))
+
+(defn set-hud-duration!
+  "Set the duration in milliseconds the HUD will be shown (needs hud-result to be true)"
+  [duration]
+  (->> (reset! hud-duration duration)
+       (.setItem js/localStorage "hud_duration")))
 
 (defn toggle-repl! []
   (let [$repl (js/$ "#repl")]
@@ -141,9 +151,13 @@
         (js/parinferCodeMirror.init cm)
         (.setOption cm "extraKeys"
                     #js {"Cmd-E"        (fn [cm]
-                                           (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result @hud-result))
+                                           (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result @hud-result :hud-duration @hud-duration))
                          "Shift-Cmd-E"  (fn [cm]
-                                          (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result @hud-result))
+                                          (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result @hud-result :hud-duration @hud-duration))
+                         "Cmd-R"        (fn [cm]
+                                          (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result false))
+                         "Shift-Cmd-R"  (fn [cm]
+                                          (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result false))
                          "Shift-Cmd-T"  (fn [cm]
                                           (toggle-help!))})
         (.focus cm)

@@ -240,9 +240,10 @@ text {
   transform: translate3d(0,0,0);
   transition: all 0.3s ease-out;
 }
-#pasteboard input {
+#pasteboard input[type=text] {
     background-color: transparent;
-    border: none;
+    border: 1px solid #ccc;
+    padding: 1em;
     outline: none;
     margin-bottom: 1em;
     font-family: Menlo,'Droid Sans Mono',monospace;
@@ -252,14 +253,19 @@ text {
     flex: 1;
     background-color: transparent;
     outline: none;
-    border: none;
+    border: 1px solid #ccc;
     font-size: 14pt;
     font-family: Menlo,'Droid Sans Mono',monospace;
-    margin-bottom: 2em;
+    margin-bottom: 1em;
+}
+#pasteboard .buttons {
+  display: flex;
+  justify-content: space-between;
 }
 #pasteboard button {
+    flex: 1;
     padding: 1em;
-    border: none;
+    border: 1px solid #ccc;
     font-family: Menlo,'Droid Sans Mono',monospace;
     font-size: 14pt;
     font-weight: bold;
@@ -269,4 +275,7 @@ text {
     background-color: rgba(0,0,0,0.4);
     cursor: pointer;
 }
-
+#save { margin-right: 1em; }
+#pasteboard input[type=checkbox] {
+  margin-bottom: 1em;
+}

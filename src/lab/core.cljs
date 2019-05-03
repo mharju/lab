@@ -126,21 +126,32 @@
       (.hide (js/$ "#hud, #pasteboard"))
       (.on (js/$ js/document) "keydown" handle-key)
       (.delegate (js/$ js/document) ".help a" "click" (fn [e] (toggle-help!) (.preventDefault e)))
-      (.delegate (js/$ js/document) "#pasteboard button" "click" (fn [e]
-                                                                    (let [input (js/$ "#pasteboard input")
-                                                                          textarea (js/$ "#pasteboard textarea")
-                                                                          var-name (.val input)
-                                                                          value (.val textarea)]
-                                                                      (js/console.log "store var" var-name "as" value)
-                                                                      (.val input "")
-                                                                      (.val textarea "")
-                                                                      (.removeClass (js/$ "#pasteboard") "visible")
-                                                                      (js/setTimeout
-                                                                        (fn []
-                                                                          (.hide (js/$ "#pasteboard"))
-                                                                          (evl/eval! (str "(def " var-name " \"" value "\")")))
-                                                                        800)
-                                                                      (.preventDefault e))))
+      (.delegate (js/$ js/document) "#save" "click" (fn [e]
+                                                      (let [input (js/$ "#pasteboard input[name=var]")
+                                                            textarea (js/$ "#pasteboard textarea")
+                                                            wrap (js/$ "#pasteboard input[name=wrap]")
+                                                            var-name (.val input)
+                                                            value (.val textarea)
+                                                            wrap-to-string? (.prop wrap "checked")]
+                                                        (js/console.log "store var" var-name "as" value)
+                                                        (.val input "")
+                                                        (.val textarea "")
+                                                        (.prop wrap "checked" false)
+                                                        (.removeClass (js/$ "#pasteboard") "visible")
+                                                        (js/setTimeout
+                                                          (fn []
+                                                            (.hide (js/$ "#pasteboard"))
+                                                            (evl/eval! (str "(def " var-name " " (if wrap-to-string? (str "\"" (string/replace value #"\"" "\\\"") "\"") value) ")")))
+                                                          800)
+                                                        (.preventDefault e))))
+      (.delegate (js/$ js/document) "#cancel" "click" (fn [e]
+                                                        (let [input (js/$ "#pasteboard input[name=var]")
+                                                              textarea (js/$ "#pasteboard textarea")
+                                                              wrap (js/$ "#pasteboard input[name=wrap]")]
+                                                          (.val input "")
+                                                          (.val textarea "")
+                                                          (.prop wrap "checked" false)
+                                                          (.hide (js/$ "#pasteboard")))))
       (toggle-help!)
       (let [cm (js/CodeMirror. (js/document.querySelector "#repl")
                      #js {:mode "clojure"

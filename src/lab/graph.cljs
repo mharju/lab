@@ -10,7 +10,7 @@
   [view data axis]
   (set-mode! view :graph)
   (swap! components assoc-in [view :graph]
-    (.generate js/c3
+    (js/c3.generate
       (clj->js (merge {:bindto (str "#" (name view) " .graph")
                  :color color-pattern
                  :data data}
@@ -20,7 +20,7 @@
   (set-mode! view :graph)
   (let [x-axis (into {:type type} (when (= type :category) {:categories categories}))]
     (swap! components assoc-in [view :graph]
-      (.generate js/c3
+      (js/c3.generate
         (clj->js {:bindto (str "#" (name view) " .graph")
                   :axis {
                     :x x-axis}
@@ -34,12 +34,20 @@
 (defn scatter-plot! [view data axis]
   (set-mode! view :graph)
   (swap! components assoc-in [view :graph]
-    (.generate js/c3
+    (js/c3.generate
       (clj->js (merge {
                  :bindto (str "#" (name view) " .graph")
                  :color color-pattern
                  :data (merge {:type "scatter"} data)}
                  (when axis {:axis axis}))))))
+
+(defn pie-chart! [view data]
+  (set-mode! view :graph)
+  (swap! components assoc-in [view :graph]
+    (js/c3.generate (clj->js
+                      {:bindto (str "#" (name view) " .graph")
+                      :color color-pattern
+                      :data (merge {:type "pie"} data)}))))
 
 (defn flow [view data]
   (let [graph (get-in @components [view :graph])]

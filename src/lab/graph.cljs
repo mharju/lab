@@ -4,84 +4,21 @@
 
 (def color-pattern {:pattern ["#0cc2aa" "#fcc100" "#a88add"]})
 
-(defn line-graph!
-  "Generate line graph. Data needs to have at least {:columns [\"axis_name\" ...]}.
-  Example: (g/line-graph! :view {:columns [\"x\" 1 2 3 4 5 6 5 4 3 2 1))"
-  [view data axis]
-  (set-mode! view :graph)
-  (swap! components assoc-in [view :graph]
-    (js/c3.generate
-      (clj->js (merge {:bindto (str "#" (name view) " .graph")
-                 :color color-pattern
-                 :data data}
-                 (when axis {:axis axis}))))))
+(defn columnize [data x y]
+  (->> data
+       (reduce (fn [columns row]
+                 (update columns (get row x) conj (get row y)))
+               {})
+       (mapv (fn [[k v]]
+               (into [k] v)))))
 
-(defn bar-graph! [view values & {:keys [title type categories] :or {title "data" type :indexed categories nil}}]
-  (set-mode! view :graph)
-  (let [x-axis (into {:type type} (when (= type :category) {:categories categories}))]
-    (swap! components assoc-in [view :graph]
-      (js/c3.generate
-        (clj->js {:bindto (str "#" (name view) " .graph")
-                  :axis {
-                    :x x-axis}
-                  :color color-pattern
-                  :data {
-                    :type "bar"
-                    :columns (if (vector? (first values))
-                               values
-                               [(into [title] values)])}})))))
-
-(defn scatter-plot! [view data axis]
-  (set-mode! view :graph)
-  (swap! components assoc-in [view :graph]
-    (js/c3.generate
-      (clj->js (merge {
-                 :bindto (str "#" (name view) " .graph")
-                 :color color-pattern
-                 :data (merge {:type "scatter"} data)}
-                 (when axis {:axis axis}))))))
-
-(defn pie-chart! [view data]
+(defn graph!
+  "Generate a graph with C3.js. By default contains a default color pattern and binding to the view's graph container."
+  [view opts]
   (set-mode! view :graph)
   (swap! components assoc-in [view :graph]
     (js/c3.generate (clj->js
-                      {:bindto (str "#" (name view) " .graph")
-                      :color color-pattern
-                      :data (merge {:type "pie"} data)}))))
-
-(defn flow [view data]
-  (let [graph (get-in @components [view :graph])]
-    (.flow graph (clj->js
-                   (merge {:color color-pattern
-                    :duration 500
-                    :length 0}
-                    data)))))
-
-(defn load-data [view data]
-  (let [graph (get-in @components [view :graph])]
-    (.load graph (clj->js {:columns data :type "bar"}))))
-
-(defn time-series! [view]
-  (line-graph! view
-     {:columns [["t"] ["y"]] :x "t"}
-     {:x {:type "timeseries" :tick {:format "%H:%M:%S"}}}))
-
-(defn time-flow [view ts value & args]
-  (flow :view (merge {:columns [["t" ts] ["y" value]] :length 0} (or (first args) {}))))
-
-(comment
-  (scatter-plot! :view
-     {:columns [["x" 10 20 30 40] ["data" 11 12 13 14]] :x "x"})
-
-  (with-connection
-    (time-series! :view)
-    (fn [data]
-      ()))
-
-  (time-series! :view)
-  (def iv (js/setInterval (fn [] (time-flow :view (js/Date.) (js/Math.random) {:length 1})) 1000))
-  (js/clearInterval iv)
-
-  (flow :view {:columns [["x" 1522647282000] ["latency" 5] ["id" 7]] :length 1})
-
-  (bar-graph! :view [1 5 2 3] :title "Number of Stuffs" :type :category :categories ["seppo" "teppo" "lappo" "pappo"]))
+                      (merge
+                        {:bindto (str "#" (name view) " .graph")
+                         :color color-pattern}
+                        opts)))))

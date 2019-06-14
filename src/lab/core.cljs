@@ -2,15 +2,14 @@
   (:require-macros  [lab.core :refer [render-help]]
                     [lab.macros :refer [with-view]])
   (:require [clojure.string :as string]
+            [lab.eval :as evl]
+            [lab.views :refer [add-view!]]
+            [lab.map :refer [map!]]
             [cljsjs.jquery]
             [cljsjs.codemirror]
             [cljsjs.codemirror.addon.hint.show-hint]
             [cljsjs.codemirror.mode.clojure]
-            [cljsjs.parinfer-codemirror]
-            [clojure.set]
-            [lab.eval :as evl]
-            [lab.views :refer [add-view!]]
-            [lab.map :refer [map!]]))
+            [cljsjs.parinfer-codemirror]))
 
 (enable-console-print!)
 
@@ -29,7 +28,7 @@
         (let [s (js/WebSocket. (str "ws://" host ":" port))]
           (set!  (.-onopen s) #(.log js/console "Data socket opened at ws://localhost:7889"))
           (set!  (.-onmessage s) (fn [e]
-                                   (let [{:strs [id data] :or {id "unknown" data nil} :as p} (js->clj (.parseJSON js/$(.-data e)))
+                                   (let [{:strs [id data] :or {id "unknown" data nil}} (js->clj (.parseJSON js/$(.-data e)))
                                        listener (get-in @data-connection [:listeners id])]
                                      (when listener
                                        (apply listener [data])))))
@@ -92,22 +91,18 @@
     (cond-> (js/$ js/document.body)
       horizontal?        (.addClass "horizontal")
       (not horizontal?)  (.removeClass "horizontal"))
-    (println "reset repl size" {:size (default-repl-size) :unit (repl-size-unit)})
     (reset! repl-size {:size (default-repl-size) :unit (repl-size-unit)})))
 
 (add-watch repl-size :size-change
   (fn [_key _atom _old-state {:keys [size unit]}]
-    (println "ping pong" size unit)
     (doall
       (for [elem [(js/document.getElementById "repl") (js/document.querySelector ".CodeMirror")]
             :let [size (str size (if (keyword? unit) (name unit) unit))]]
-        (do
-          (println "change" elem (if @repl-direction-horizontal? "width" "height") "to" size "with" unit)
-          (if @repl-direction-horizontal?
-            (do (set! (.. elem -style -height) size)
-                (set! (.. elem -style -width) "100%"))
-            (do (set! (.. elem -style -width) size)
-                (set! (.. elem -style -height) "100%"))))))))
+        (if @repl-direction-horizontal?
+          (do (set! (.. elem -style -height) size)
+              (set! (.. elem -style -width) "100%"))
+          (do (set! (.. elem -style -width) size)
+              (set! (.. elem -style -height) "100%")))))))
 
 (defn toggle-direction! []
   (swap! repl-direction-horizontal? not))
@@ -122,7 +117,7 @@
                        (do (js/console.warn "Not in em mode while resizing!") s)))))
 
 (defn full-repl! []
-  (let [{:keys [size unit]} @repl-size]
+  (let [{:keys [unit]} @repl-size]
     (if (and (not= unit :vh) (not= unit :vw))
       (swap! repl-size assoc :size 100 :unit (repl-opposize-size-unit))
       (swap! repl-size assoc :size (default-repl-size) :unit (repl-size-unit)))))
@@ -142,14 +137,14 @@
       71 (do (toggle-help!) (.preventDefault e))
       72 (do (toggle-repl!) (.preventDefault e))
       74 (do (paste!) (.preventDefault e))
-      89 (do (when-not (.-altKey e)
-               (step-repl-size!  (if (.-shiftKey e) -1 1))
-               (.preventDefault e)))
+      89 (when-not (.-altKey e)
+           (step-repl-size!  (if (.-shiftKey e) -1 1))
+           (.preventDefault e))
       true)))
 
 (defonce init
   (.ready (js/$ js/document)
-    (fn [e]
+    (fn [_]
       (.append (js/$ js/document.body) (render-help))
       (.hide (js/$ "#hud, #pasteboard"))
       (.on (js/$ js/document) "keydown" handle-key)
@@ -172,7 +167,7 @@
                                                             (evl/eval! (str "(def " var-name " " (if wrap-to-string? (str "\"" (string/replace value #"\"" "\\\"") "\"") value) ")")))
                                                           800)
                                                         (.preventDefault e))))
-      (.delegate (js/$ js/document) "#cancel" "click" (fn [e]
+      (.delegate (js/$ js/document) "#cancel" "click" (fn [_]
                                                         (let [input (js/$ "#pasteboard input[name=var]")
                                                               textarea (js/$ "#pasteboard textarea")
                                                               wrap (js/$ "#pasteboard input[name=wrap]")]
@@ -197,7 +192,7 @@
                                           (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result false))
                          "Shift-Cmd-R"  (fn [cm]
                                           (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result false))
-                         "Shift-Cmd-T"  (fn [cm]
+                         "Shift-Cmd-T"  (fn [_]
                                           (toggle-help!))})
         (.focus cm)
         (.setCursor cm #js {:line 3 :ch 0})
@@ -224,55 +219,6 @@
   (add-view! :view-2)
 
   (rename-view! :map :view)
-
-  (do
-    (connect!)
-    (line-graph! :view-2 [] :title "foobar")
-    (listen!
-      "delay"
-      (fn [data]
-        (flow :view-2 (into ["data"] data)))))
-
-  (let [markers (atom {})]
-    (set-mode! :view :map)
-    (clear-markers! :view)
-    (connect!)
-    (listen!
-      "vehicles"
-      (fn [{:strs [vehicle lat lon]}]
-        (if-let [marker (get @markers vehicle)]
-          (.setLatLng marker (js/L.LatLng. lat lon))
-          (swap! markers assoc
-                 vehicle (marker :view [lat lon]))))))
-
-  (do
-    (connect!)
-    (let [graph (bar-graph [3 3 2 3] :title "data")]
-      (listen!
-        "test"
-        (fn [data]
-          (print "load" data)
-          (load-data graph [(into ["data"] data)])))))
-
-  (do
-    (clear-markers!)
-    (connect!)
-    (let [m (polyline [])]
-      (listen!
-        "test"
-        (fn [data]
-          (.setLatLngs m (clj->js data))))))
-
-  (do
-    (let [graph (scatter-plot [] :title "data")]
-      (connect!)
-      (listen!
-        "points"
-        (fn [data]
-          (println data)
-          (.flow graph (clj->js {:columns data
-                                 :duration 500
-                                 :length 0}))))))
 
   (with-view
     (map identity (range 10))

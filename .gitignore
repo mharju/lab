@@ -15,3 +15,5 @@ pom.xml
 .DS_Store
 .cljs_rhino_repl/
 .lein-failures
+.rebel_readline_history
+.cljs_nashorn_repl/

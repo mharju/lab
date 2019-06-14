@@ -77,27 +77,55 @@
                    (.focus @cm-inst))
                (.show $repl))))
 
-(def default-repl-size 14)
-(defonce repl-size (atom {:size default-repl-size :unit :em}))
+
+(declare repl-direction-horizontal?)
+(defn default-repl-size []
+ (if @repl-direction-horizontal? 50 50))
+(defn repl-size-unit []
+ (if @repl-direction-horizontal? :vh :vw))
+(defn repl-opposize-size-unit []
+  (if (= repl-opposize-size-unit) :vw) :vh :vw)
+(defonce repl-direction-horizontal? (atom false))
+(defonce repl-size (atom {:size (default-repl-size) :unit (repl-size-unit)}))
+(add-watch repl-direction-horizontal? :size-change
+  (fn [_key _atom _old-state horizontal?]
+    (cond-> (js/$ js/document.body)
+      horizontal?        (.addClass "horizontal")
+      (not horizontal?)  (.removeClass "horizontal"))
+    (println "reset repl size" {:size (default-repl-size) :unit (repl-size-unit)})
+    (reset! repl-size {:size (default-repl-size) :unit (repl-size-unit)})))
+
 (add-watch repl-size :size-change
-  (fn [_key _atom old-state {:keys [size unit]}]
-    (set! (.. (js/document.getElementById "repl") -style -height) (str size (if (keyword? unit) (name unit) unit)))
-    (set! (.. (js/document.querySelector ".CodeMirror") -style -height) (str size (if (keyword? unit) (name unit) unit)))))
+  (fn [_key _atom _old-state {:keys [size unit]}]
+    (println "ping pong" size unit)
+    (doall
+      (for [elem [(js/document.getElementById "repl") (js/document.querySelector ".CodeMirror")]
+            :let [size (str size (if (keyword? unit) (name unit) unit))]]
+        (do
+          (println "change" elem (if @repl-direction-horizontal? "width" "height") "to" size "with" unit)
+          (if @repl-direction-horizontal?
+            (do (set! (.. elem -style -height) size)
+                (set! (.. elem -style -width) "100%"))
+            (do (set! (.. elem -style -width) size)
+                (set! (.. elem -style -height) "100%"))))))))
+
+(defn toggle-direction! []
+  (swap! repl-direction-horizontal? not))
 
 (defn resize-repl! [new-height]
-  (swap! repl-size assoc :size new-height :unit :em))
+  (swap! repl-size assoc :size new-height :unit :vh))
 
 (defn step-repl-size! [increment]
   (swap! repl-size (fn [{:keys [size unit] :as s}]
-                     (if (= unit :em)
+                     (if (or (= unit :vh) (= unit :vw))
                        {:size (+ size increment) :unit unit}
                        (do (js/console.warn "Not in em mode while resizing!") s)))))
 
 (defn full-repl! []
   (let [{:keys [size unit]} @repl-size]
-    (if (= unit :em)
-      (swap! repl-size assoc :size 100 :unit :vh)
-      (swap! repl-size assoc :size default-repl-size :unit :em))))
+    (if (and (not= unit :vh) (not= unit :vw))
+      (swap! repl-size assoc :size 100 :unit (repl-opposize-size-unit))
+      (swap! repl-size assoc :size (default-repl-size) :unit (repl-size-unit)))))
 
 (defn paste! []
   (->

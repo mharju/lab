@@ -136,7 +136,7 @@ text {
   left: 0;
   top: inherit !important;
   width: 100%;
-  height: 50vh;
+  height: 40vh;
   border: 0;
   z-index: 1500;
   font-size: 12pt;
@@ -149,7 +149,7 @@ text {
 .horizontal #repl {
   height: 100vh;
   top: 0;
-  width: 50vw;
+  width: 40vw;
 }
 
 .help {

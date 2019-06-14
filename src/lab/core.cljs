@@ -78,12 +78,15 @@
 
 
 (declare repl-direction-horizontal?)
-(defn default-repl-size []
- (if @repl-direction-horizontal? 50 50))
-(defn repl-size-unit []
- (if @repl-direction-horizontal? :vh :vw))
-(defn repl-opposize-size-unit []
-  (if (= repl-opposize-size-unit) :vw) :vh :vw)
+(defn default-repl-size
+  ([] (default-repl-size @repl-direction-horizontal?))
+  ([_direction] 40))
+(defn repl-size-unit
+  ([] (repl-size-unit @repl-direction-horizontal?))
+  ([direction] (if direction :vw :vh)))
+(defn repl-opposize-size-unit
+  ([] (repl-opposize-size-unit @repl-direction-horizontal?))
+  ([direction] (if (= (repl-size-unit direction) :vw) :vh :vw)))
 (defonce repl-direction-horizontal? (atom false))
 (defonce repl-size (atom {:size (default-repl-size) :unit (repl-size-unit)}))
 (add-watch repl-direction-horizontal? :size-change
@@ -91,18 +94,23 @@
     (cond-> (js/$ js/document.body)
       horizontal?        (.addClass "horizontal")
       (not horizontal?)  (.removeClass "horizontal"))
-    (reset! repl-size {:size (default-repl-size) :unit (repl-size-unit)})))
+    (reset! repl-size {:size (default-repl-size horizontal?) :unit (repl-size-unit horizontal?)})))
 
-(add-watch repl-size :size-change
-  (fn [_key _atom _old-state {:keys [size unit]}]
+(defn update-repl-size
+  ([] (update-repl-size @repl-direction-horizontal? @repl-size))
+  ([direction {:keys [size unit]}]
     (doall
       (for [elem [(js/document.getElementById "repl") (js/document.querySelector ".CodeMirror")]
             :let [size (str size (if (keyword? unit) (name unit) unit))]]
-        (if @repl-direction-horizontal?
-          (do (set! (.. elem -style -height) size)
-              (set! (.. elem -style -width) "100%"))
+        (if direction
           (do (set! (.. elem -style -width) size)
-              (set! (.. elem -style -height) "100%")))))))
+              (set! (.. elem -style -height) "100%"))
+          (do (set! (.. elem -style -height) size)
+              (set! (.. elem -style -width) "100%")))))))
+
+(add-watch repl-size :size-change
+  (fn [_key _atom _old-state size]
+    (update-repl-size @repl-direction-horizontal? size)))
 
 (defn toggle-direction! []
   (swap! repl-direction-horizontal? not))
@@ -197,7 +205,8 @@
         (.focus cm)
         (.setCursor cm #js {:line 3 :ch 0})
         (add-view! :view)
-        (map! :view)))))
+        (map! :view)
+        (update-repl-size)))))
 
 (defn save-session! [name]
   (.setItem js/window.localStorage (str "session-" name) (js/JSON.stringify (.getValue @cm-inst))))

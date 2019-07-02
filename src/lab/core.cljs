@@ -84,8 +84,8 @@
 (defn repl-size-unit
   ([] (repl-size-unit @repl-direction-horizontal?))
   ([direction] (if direction :vw :vh)))
-(defn repl-opposize-size-unit
-  ([] (repl-opposize-size-unit @repl-direction-horizontal?))
+(defn repl-opposite-size-unit
+  ([] (repl-opposite-size-unit @repl-direction-horizontal?))
   ([direction] (if (= (repl-size-unit direction) :vw) :vh :vw)))
 (defonce repl-direction-horizontal? (atom false))
 (defonce repl-size (atom {:size (default-repl-size) :unit (repl-size-unit)}))
@@ -127,7 +127,7 @@
 (defn full-repl! []
   (let [{:keys [unit]} @repl-size]
     (if (and (not= unit :vh) (not= unit :vw))
-      (swap! repl-size assoc :size 100 :unit (repl-opposize-size-unit))
+      (swap! repl-size assoc :size 100 :unit (repl-opposite-size-unit))
       (swap! repl-size assoc :size (default-repl-size) :unit (repl-size-unit)))))
 
 (defn paste! []

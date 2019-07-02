@@ -14,12 +14,14 @@
                              [:div.info [:span.id id] [:span.connection-status]]
                              [:div.map] [:div.graph] [:div.vis] [:div.console]])]
       (.append (js/$ parent) template)
+      (.attr (js/$ parent) "class" (str "n-" (inc (count @views))))
       (swap! views assoc id (js/document.getElementById (name id)))
       (swap! components assoc id {}))))
 
 (defn remove-view! [id]
   (swap! views dissoc id)
   (swap! components dissoc id)
+  (.attr (js/$ "#dashboard") "class" (str "n-" (count @views)))
   (.remove (js/document.querySelector (str "#" (name id)))))
 
 (defn rename-view! [id new-id]

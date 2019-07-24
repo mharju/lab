@@ -1,2 +1,3 @@
-^{:css-dirs ["resources/public/css"]}
+^{:css-dirs ["resources/public/css"]
+  :open-url false}
 {:main lab.core}

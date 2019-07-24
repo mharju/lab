@@ -4,14 +4,14 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :min-lein-version "2.7.1"
+  :min-lein-version "2.9.1"
 
-  :dependencies [[org.clojure/clojure "1.10.0"]
+  :dependencies [[org.clojure/clojure "1.10.1"]
                  [org.clojure/clojurescript "1.10.520"]
-                 [org.clojure/core.async  "0.4.490"
+                 [org.clojure/core.async  "0.4.500"
                   :exclusions [org.clojure/tools.reader]]
-                 [cljsjs/jquery "3.2.1-0"]
-                 [cljsjs/leaflet "1.4.0-0"]
+                 [cljsjs/jquery "3.4.0-0"]
+                 [cljsjs/leaflet "1.5.1-0"]
                  [cljsjs/leaflet-omnivore "0.3.1-0"]
                  [cljsjs/c3 "0.6.8-0"]
                  [cljsjs/vis "4.21.0-1"]
@@ -28,8 +28,8 @@
   :aliases {"fig" ["trampoline" "run" "-m" "figwheel.main" "-b" "lab" "-r"]
             "release" ["do" "clean," "trampoline" "run" "-m" "figwheel.main" "-O" "simple" "-bo" "lab"]}
 
-  :profiles {:dev {:dependencies [[com.bhauman/figwheel-main "0.2.0"]
+  :profiles {:dev {:dependencies [[com.bhauman/figwheel-main "0.2.3"]
                                   [binaryage/devtools "0.9.10"]
-                                  [cider/piggieback "0.4.0"]]
+                                  [cider/piggieback "0.4.1"]]
                    :source-paths ["src" "dev"]
                    :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}})

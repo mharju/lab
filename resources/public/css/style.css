@@ -146,8 +146,8 @@ text {
   font-size: 12pt;
   overflow: auto;
 
-  box-shadow: 0px 0px 6px 2px rgba(7, 54, 66, 0.99) !important;
-  background-color: rgba(7, 54, 66, 0.99);
+  box-shadow: 0px 3px 7px 4px rgba(2, 43, 53, 0.99) !important;
+  background-color: rgba(2, 43, 53, 0.99);
 }
 
 .horizontal #repl {

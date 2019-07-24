@@ -26,7 +26,7 @@
 
 (defn- map-for [id provider]
   (let [view (get @views id)
-        instance (.map js/L (.querySelector view ".map"))
+        instance (.map js/L (.querySelector view ".map") #js {:zoomControl false})
         tile (get providers provider)]
     (.setView instance #js [60.4530898 22.3139035] 15)
     (.addTo tile instance)

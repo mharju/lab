@@ -17,3 +17,5 @@ pom.xml
 .lein-failures
 .rebel_readline_history
 .cljs_nashorn_repl/
+src/lab/experiments
+nashorn_code_cache/

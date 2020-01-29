@@ -42,28 +42,34 @@ html {
     height: 100%;
     width: 100%;
     font-family: 'Roboto',sans-serif;
-} body {
+}
+body {
     margin: 0; padding: 0;
-    min-height: 100%;
-    max-width: 100%;
+    min-height: 100vw;
+    max-width: 100vh;
+    overflow: hidden;
 }
 #dashboard {
   display: grid;
   width: 100vw;
   height: 100vh;
   grid-template-columns: auto;
-  grid-template-rows: auto;
+  grid-template-rows: 100vh;
 }
-#dashboard.n-2 {
-  grid-template-columns: auto auto;
+#dashboard.n-2, #dashboard.n-3 {
+  grid-template-columns: 50vw 50vw;
 }
-#dashboard.n-3 :nth-child(3) {
+#dashboard.n-3 {
+  grid-template-rows: 42vh 58vh;
+}
+#dashboard.n-3 > :nth-child(3) {
   grid-column-start: 1;
   grid-column-end: 3;
+  border-top: 1px solid #C8CBD6;
 }
 #dashboard.n-4 {
-    grid-template-columns: auto auto;
-    grid-template-rows: auto auto;
+    grid-template-columns: 50vw 50vw;
+    grid-template-rows: 50vh 50vh;
 }
 
 .view {
@@ -97,6 +103,7 @@ html {
   z-index: 10000;
   text-align: right;
   padding: 5px 10px;
+  display: none;
 }
 
 .graph, .map, .vis, .console {
@@ -105,19 +112,57 @@ html {
 }
 
 .console {
+  background-color: #F1F3F6;
+  overflow-x: hidden;
+}
+
+.console span.row > table {
+  width: 100%;
+  margin: 0 auto;
+  color: #2D4357;
+}
+.console table td:first-child {
+  color: #93BADE;
+  padding-right: 0.5em;
+  vertical-align: top;
+}
+.console table td:nth-child(2) {
+  font-weight: bold;
+}
+.console span.row > table > tbody > tr > td:first-child {
+  width: 50%;
+  text-align: right;
+}
+.console span.row > table > tbody > tr > td > table {
+  margin: 0;
+  padding: 0;
+}
+
+.graph {
+  padding-top: 30px;
+}
+
+.console {
     overflow: auto;
+    padding-top: 30px;
+    padding-left: 20px;
+    height: calc(100% - 30px);
 }
 .console span.row {
     display: block;
     font-family: "Menlo";
-    font-size: 10pt;
+    font-size: 8pt;
     margin-bottom: 0.25em;
 }
 .console span.date {
     font-weight: bold;
+    color: #2D4357;
 }
 .console span.date:after {
     content: " - ";
+}
+.console > :last-child {
+  padding-bottom: 3em;
 }
 
 .c3-axis {
@@ -148,6 +193,7 @@ text {
 
   box-shadow: 0px 3px 7px 4px rgba(2, 43, 53, 0.99) !important;
   background-color: rgba(2, 43, 53, 0.99);
+  display: none;
 }
 
 .horizontal #repl {
@@ -289,4 +335,17 @@ text {
 #save { margin-right: 1em; }
 #pasteboard input[type=checkbox] {
   margin-bottom: 1em;
+}
+
+.vis {
+  font-size: 10pt;
+}
+.vis-labelset .vis-label {
+  color: #2D4357;
+  font-weight: 700;
+}
+.vis-item {
+  border-color: #2D4357;
+  background-color: #93BADE;
+  color: #2D4357;
 }

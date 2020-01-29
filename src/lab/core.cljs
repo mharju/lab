@@ -69,12 +69,18 @@
   (->> (reset! hud-duration duration)
        (.setItem js/localStorage "hud_duration")))
 
-(defn toggle-repl! []
-  (let [$repl (js/$ "#repl")]
-             (if (.is $repl ":visible")
-               (do (.hide $repl)
-                   (.focus @cm-inst))
-               (.show $repl))))
+(defn toggle-repl!
+  ([]
+   (let [$repl (js/$ "#repl")
+         visible? (not (.is $repl ":visible"))]
+     (toggle-repl! visible?)
+     (.setItem js/localStorage "repl_visibility" visible?)))
+  ([visible?]
+    (let [$repl (js/$ "#repl")]
+      (if visible?
+        (.show $repl)
+        (do (.hide $repl)
+            (.focus @cm-inst))))))
 
 
 (declare repl-direction-horizontal?)
@@ -202,8 +208,10 @@
                                           (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result false))
                          "Shift-Cmd-T"  (fn [_]
                                           (toggle-help!))})
-        (.focus cm)
-        (.setCursor cm #js {:line 3 :ch 0})
+        (let [visible? (.getItem js/localStorage "repl_visibility")]
+          (when (= visible? "true")
+            (toggle-repl! false)
+            (.setCursor cm #js {:line 3 :ch 0})))
         (add-view! :view)
         (map! :view)
         (update-repl-size)))))

@@ -31,3 +31,21 @@
                         {:bindto (str "#" (name view) " .graph")
                          :color color-pattern}
                         opts)))))
+
+(defn load!
+  "Load data into existing graph in view.
+
+  Example:
+  (g/load! :view {:data {:columns [\"data\" 2 3 4 5 6]}})"
+  [view opts]
+  (let [graph (get-in @components [view :graph])]
+    (.load graph (clj->js opts))))
+
+(defn flow!
+  "Flow data into existing graph in view.
+
+  Example:
+  (g/flow! :view {:columns [[\"x\" 8 9 10 11 12 13] [\"data\" 1 3 4 5 6 7]]}})"
+  [view opts]
+  (let [graph (get-in @components [view :graph])]
+    (.flow graph (clj->js opts))))

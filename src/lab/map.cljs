@@ -1,4 +1,4 @@
-( ns lab.map
+(ns lab.map
   (:require [lab.views :refer [components views set-mode!]]
             [cljsjs.leaflet]
             [cljsjs.leaflet-omnivore])
@@ -6,6 +6,10 @@
 
 (def esri (.tileLayer js/L
               "//server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
+              #js {:attribution "Source: Esri, DigitalGlobe, GeoEye, i-cubed, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community."}))
+
+(def rotterdam (.tileLayer js/L
+              "//tiles.arcgis.com/tiles/lQWQklF3MTod4sFp/arcgis/rest/services/50k/MapServer/tile/{z}/{x}/{y}"
               #js {:attribution "Source: Esri, DigitalGlobe, GeoEye, i-cubed, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community."}))
 
 (def cartodb-positron (.tileLayer js/L
@@ -16,13 +20,13 @@
                           :maxZoom 19}))
 
 (def cartodb-voyager (.tileLayer js/L
-                        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                         #js {
                           :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>"
                           :subdomains "abcd"
                           :maxZoom 19}))
 
-(def providers {:esri esri :cartodb-positron cartodb-positron :cartodb-voyager cartodb-voyager})
+(def providers {:esri esri :rotterdam rotterdam :cartodb-positron cartodb-positron :cartodb-voyager cartodb-voyager})
 
 (defn- map-for [id provider]
   (let [view (get @views id)
@@ -41,10 +45,15 @@
      (.remove current))
    (swap! components assoc-in [view :map] (map-for view provider))))
 
-(defn map-center! [view center & {:keys [zoom] :or {zoom 13}}]
-  (let [l (get-in @components [view :map])]
-    (set-mode! view :map)
-    (.setView l (clj->js center) zoom)))
+(defn map-center!
+  ([view center]
+    (map-center! view center 13))
+  ([view center zoom]
+    (map-center! view center zoom {:padding [0 0]}))
+  ([view center zoom opts]
+    (let [l (get-in @components [view :map])]
+      (set-mode! view :map)
+      (.setView l (clj->js center) zoom (clj->js opts)))))
 
 (defn clear-markers! [view]
   (let [l (get-in @components [view :map])]
@@ -59,14 +68,21 @@
                     (when-not (>= (.indexOf (.-className (.getPane layer)) "tile") 0)
                       (.remove layer))))))
 
-(defn add-marker! [view lat lon & {:keys [rev] :or {rev false}}]
+(defn add-marker! [view lat lon & {:keys [rev center? zoom center-opts icon] :or {rev false center? true zoom 13 center-opts {:padding [10 10]}}}]
   (set-mode! view :map)
   (let [l (get-in @components [view :map])
         coords (if-not rev [lat lon] [lon lat])
-        m (.marker js/L (clj->js coords))]
+        m (if icon
+            (let [ic (js/L.Icon. (clj->js icon))]
+              (.marker js/L (clj->js coords) (clj->js {:icon ic})))
+            (.marker js/L (clj->js coords)))]
     (.addTo m l)
-    (map-center! view coords #js {:padding 5})
+    (when center? (map-center! view coords zoom center-opts))
     m))
+
+(defn add-custom-layer! [view layer]
+  (let [m (get-in @components [view :map])]
+    (.addTo layer m)))
 
 (defn add-markers! [view points & {:keys [rev] :or {rev false}}]
   (doseq [point points]
@@ -86,14 +102,15 @@
       (swap! index inc)
       result)))
 
-(defn add-polyline! [view points & {:keys [rev as-list] :or {rev false as-list false}}]
+(defn add-polyline! [view points & {:keys [rev as-list fit-bounds] :or {rev false as-list false fit-bounds true}}]
   (set-mode! view :map)
   (let [l (get-in @components [view :map])
         points (if-not as-list points (mapv vec (partition 2 points)))
         points (if-not rev points (mapv (fn [[lat lng]] [lng lat]) points))
+        _ (println points)
         m (.polyline js/L (clj->js points) #js {:color (next-color)})]
     (.addTo m l)
-    (.fitBounds l (.getBounds m))
+    (when fit-bounds (.fitBounds l (.getBounds m)))
     m))
 
 (defn polyline-from-str! [view points]
@@ -116,11 +133,20 @@
     (.addTo layer m)
     (.fitBounds m (.getBounds layer))))
 
+;; Helpers
+(defn map-center-and-radius [view]
+  (let [m (get-in @components [view :map])
+        bounds (.getBounds m)
+        center (.getCenter bounds)
+        radius (.distanceTo center (.getSouthWest bounds))]
+    {:center (js->clj center :keywordize-keys true) :radius radius}))
+
+(defn pan-to!
+  ([view lat lon]
+   (pan-to! view lat lon false))
+  ([view lat lon animate?]
+   (let [m (get-in @components [view :map])]
+     (.panTo m (js/L.LatLng. lat lon) #js {:animate animate?}))))
+
 (comment
-
-  (with-view
-      (clear-markers!)
-      (add-marker! 60.4436501 22.2673988)
-      (add-marker! 60.4456601 22.2673988))
-
   (markers :view 60.4504278,22.2738248,60.4485448,22.2538258))

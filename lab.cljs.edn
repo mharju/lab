@@ -1,3 +1,6 @@
 ^{:css-dirs ["resources/public/css"]
   :open-url false}
-{:main lab.core}
+{:main lab.core
+ :foreign-libs [{:file "src/leaflet.movingmarker.js"
+                 :requires ["cljsjs.leaflet"]
+                 :provides ["leaflet-movingmarker"]}]}

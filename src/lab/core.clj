@@ -5,7 +5,7 @@
             [cljs.analyzer]
             [cljs.analyzer.api :refer [ns-publics ns-resolve]]))
 
-(def symbols
+(defn internal-symbols []
   (let [ns-list '[lab.map lab.graph lab.console lab.vis lab.core]]
     (->>
       (doall
@@ -25,8 +25,8 @@
      (filterv (fn [sym#]
               (when (str/includes? sym# ~part)
                 sym#))
-     ~symbols)
-     ~symbols))
+       ~(internal-symbols))
+     ~(internal-symbols)))
 
 (defmacro render-help []
   (let [ns-list '[lab.map lab.graph lab.console lab.vis lab.core]]

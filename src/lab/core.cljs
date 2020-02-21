@@ -74,10 +74,10 @@
   ([]
    (let [$repl (js/$ "#repl")
          visible? (not (.is $repl ":visible"))]
-     (toggle-repl! visible?)
-     (.setItem js/localStorage "repl_visibility" visible?)))
+     (toggle-repl! visible?)))
   ([visible?]
     (let [$repl (js/$ "#repl")]
+      (.setItem js/localStorage "repl_visibility" visible?)
       (if visible?
         (.show $repl)
         (do (.hide $repl)
@@ -234,7 +234,7 @@
         (.setOption cm "hintOptions" #js {"hint" get-completions})
         (let [visible? (.getItem js/localStorage "repl_visibility")]
           (when (= visible? "true")
-            (toggle-repl! false)
+            (toggle-repl! true)
             (.setCursor cm #js {:line 3 :ch 0})))
         (add-view! :view)
         (map! :view)

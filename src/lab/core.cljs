@@ -1,5 +1,5 @@
 (ns lab.core
-  (:require-macros  [lab.core :refer [render-help]]
+  (:require-macros  [lab.core :refer [render-help resolve-symbol]]
                     [lab.macros :refer [with-view]])
   (:require [clojure.string :as string]
             [lab.eval :as evl]
@@ -9,7 +9,8 @@
             [cljsjs.codemirror]
             [cljsjs.codemirror.addon.hint.show-hint]
             [cljsjs.codemirror.mode.clojure]
-            [cljsjs.parinfer-codemirror]))
+            [cljsjs.parinfer-codemirror]
+            [goog.object :as gobj]))
 
 (enable-console-print!)
 
@@ -144,6 +145,27 @@
     (.find "input")
     (.focus)))
 
+(defn find-start-of-word [line ch]
+  (->> (.substring line 0 ch)
+       (reverse)
+       (drop-while #(re-matches #"[\w\.\-\/]" %))
+       count))
+
+(defn get-completions [cm option]
+  (js/Promise.
+    (fn [accept]
+      (let [cursor (.getCursor cm)
+            line (.getLine cm (gobj/get cursor "line"))
+            current-line (gobj/get cursor "line")
+            end-ch (gobj/get cursor "ch")
+            start-ch (find-start-of-word line end-ch)
+            from {:line current-line :ch start-ch}
+            word (.substring line start-ch end-ch)
+            symbols (resolve-symbol word)]
+        (accept (clj->js {:list symbols
+                          :from from
+                          :to cursor}))))))
+
 (defn- handle-key [e]
   (when (.-metaKey e)
     (case (.-keyCode e)
@@ -207,7 +229,9 @@
                          "Shift-Cmd-R"  (fn [cm]
                                           (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result false))
                          "Shift-Cmd-T"  (fn [_]
-                                          (toggle-help!))})
+                                          (toggle-help!))
+                         "Ctrl-Space"   "autocomplete"})
+        (.setOption cm "hintOptions" #js {"hint" get-completions})
         (let [visible? (.getItem js/localStorage "repl_visibility")]
           (when (= visible? "true")
             (toggle-repl! false)

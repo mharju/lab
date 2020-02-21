@@ -116,9 +116,12 @@
                                     cause (gobj/get result "cause")]
                                 (js/alert (str message ": " cause)))
                               (if-not hud-result
-                                (.setValue cm (str new-value (if (> 80 (count value)) "\r\n" " ") "\n;; => " result "\n"))
-                                (hud/show! result :duration hud-duration)))
-                            (.setCursor cm cursor-pos)))
+                                (do
+                                  (.setValue cm (str new-value (if (> 80 (count value)) "\r\n" " ") "\n;; => " result "\n"))
+                                  (.setCursor cm (.lineCount cm) 1))
+                                (do
+                                  (hud/show! result :duration hud-duration)
+                                  (.setCursor cm cursor-pos))))))
                         part)))
 
 (comment

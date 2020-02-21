@@ -132,9 +132,9 @@
                        (do (js/console.warn "Not in em mode while resizing!") s)))))
 
 (defn full-repl! []
-  (let [{:keys [unit]} @repl-size]
-    (if (and (not= unit :vh) (not= unit :vw))
-      (swap! repl-size assoc :size 100 :unit (repl-opposite-size-unit))
+  (let [{:keys [size unit]} @repl-size]
+    (if (not= size 100)
+      (swap! repl-size assoc :size 100 :unit (repl-size-unit))
       (swap! repl-size assoc :size (default-repl-size) :unit (repl-size-unit)))))
 
 (defn paste! []
@@ -144,6 +144,14 @@
     (.addClass "visible")
     (.find "input")
     (.focus)))
+
+(defn save-session! [name]
+  (.setItem js/window.localStorage (str "session-" name) (js/JSON.stringify (.getValue @cm-inst))))
+
+(defn load-session! [name]
+  (->> (.getItem js/window.localStorage (str "session-" name))
+      js/JSON.parse
+      (.setValue @cm-inst)))
 
 (defn find-start-of-word [line ch]
   (->> (.substring line 0 ch)
@@ -216,7 +224,7 @@
                      #js {:mode "clojure"
                           :lineNumbers false
                           :theme "solarized dark"
-                          :value ";; Welcome to Console REPL. Cmd-G show help, Cmd-H toggle repl, Cmd-F full repl, Cmd-(Shift)-Y Resize repl\r\n;; Cmd-(Shift)-e Eval current (topmost) expression. Cmd-J for pasting content as vars.\r\n" })]
+                          :value ";; Welcome to Console REPL. Cmd-G show help, Cmd-H toggle repl, Cmd-F full repl, Cmd-(Shift)-Y Resize repl\r\n;; Cmd-(Shift)-e Eval current (topmost) expression. Cmd-J for pasting content as vars. Ctrl-Space for autocomplete.\r\n" })]
         (reset! cm-inst cm)
         (js/parinferCodeMirror.init cm)
         (.setOption cm "extraKeys"
@@ -239,14 +247,6 @@
         (add-view! :view)
         (map! :view)
         (update-repl-size)))))
-
-(defn save-session! [name]
-  (.setItem js/window.localStorage (str "session-" name) (js/JSON.stringify (.getValue @cm-inst))))
-
-(defn load-session! [name]
-  (->> (.getItem js/window.localStorage (str "session-" name))
-      js/JSON.parse
-      (.setValue @cm-inst)))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on

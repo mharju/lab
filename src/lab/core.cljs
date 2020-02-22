@@ -145,6 +145,15 @@
     (.find "input")
     (.focus)))
 
+(defn list-sessions! []
+  (->>
+    (js/Object.keys js/window.localStorage)
+    (js->clj)
+    (filterv (fn [item]
+               (println item)
+               (when (string/starts-with? item "session-")
+                 (.substring item (count "session-")))))))
+
 (defn save-session! [name]
   (.setItem js/window.localStorage (str "session-" name) (js/JSON.stringify (.getValue @cm-inst))))
 

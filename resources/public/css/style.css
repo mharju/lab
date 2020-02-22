@@ -209,7 +209,7 @@ text {
     width: 100%;
     top: 0;
     left: 0;
-    z-index: 100000;
+    z-index: 800;
     background-color: white;
     padding: 0.5em 1em;
 
@@ -243,6 +243,7 @@ text {
   display: block;
   position: absolute;
   background: white;
+  z-index: 900;
   border: 1px solid black;
   top: 1.4em;
   left: 0px;

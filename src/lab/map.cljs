@@ -37,6 +37,7 @@
     instance))
 
 (defn map!
+  "Create a new map for view. Optional provider (:esri, :cartodb-positron or :cartodb-voyager)"
   ([view]
    (map! view :cartodb-voyager))
   ([view provider]
@@ -46,6 +47,7 @@
    (swap! components assoc-in [view :map] (map-for view provider))))
 
 (defn map-center!
+  "Center the map to the given point and zoom level. Zoom defaults to 13."
   ([view center]
     (map-center! view center 13))
   ([view center zoom]
@@ -56,19 +58,23 @@
       (.setView l (clj->js center) zoom (clj->js opts)))))
 
 (defn clear-markers! [view]
+  "Clear all markers in the given view."
   (let [l (get-in @components [view :map])]
     (.eachLayer l (fn [layer]
                     (when (>= (.indexOf (.-className (.getPane layer)) "marker") 0)
                       (.remove layer))))))
 
 (defn clear! [view]
+  "Clear all layers from the given view."
   (let [l (get-in @components [view :map])]
     (.eachLayer l (fn [layer]
                     (println (.-className (.getPane layer)))
                     (when-not (>= (.indexOf (.-className (.getPane layer)) "tile") 0)
                       (.remove layer))))))
 
-(defn add-marker! [view lat lon & {:keys [rev center? zoom center-opts icon] :or {rev false center? true zoom 13 center-opts {:padding [10 10]}}}]
+(defn add-marker!
+  "Add a new marker to view with latitude and longitude."
+  [view lat lon & {:keys [rev center? zoom center-opts icon] :or {rev false center? true zoom 13 center-opts {:padding [10 10]}}}]
   (set-mode! view :map)
   (let [l (get-in @components [view :map])
         coords (if-not rev [lat lon] [lon lat])
@@ -81,14 +87,17 @@
     m))
 
 (defn add-custom-layer! [view layer]
+  "Add a custom layer to the view."
   (let [m (get-in @components [view :map])]
     (.addTo layer m)))
 
 (defn add-markers! [view points & {:keys [rev] :or {rev false}}]
+  "Add markers from the provided seq of lat-lon -pairs to the view."
   (doseq [point points]
     (apply add-marker! view point rev)))
 
 (defn add-geojson! [view data]
+  "Add a GeoJSON object to the view."
   (set-mode! view :map)
   (let [l (get-in @components [view :map])
         m (.geoJSON js/L (clj->js data))]
@@ -98,11 +107,14 @@
 (def line-colors ["#0cc2aa" "#fcc100" "#a88add"])
 (let [index (atom 0)]
   (defn next-color []
+    "Cycles through colors defined in line-colors vector."
     (let [result (nth line-colors (mod @index (count line-colors)))]
       (swap! index inc)
       result)))
 
-(defn add-polyline! [view points & {:keys [rev as-list fit-bounds] :or {rev false as-list false fit-bounds true}}]
+(defn add-polyline!
+  "Add a polyline with the given seq of lat-lon pairs or flattened list (:as-list true)."
+  [view points & {:keys [rev as-list fit-bounds] :or {rev false as-list false fit-bounds true}}]
   (set-mode! view :map)
   (let [l (get-in @components [view :map])
         points (if-not as-list points (mapv vec (partition 2 points)))
@@ -113,20 +125,26 @@
     (when fit-bounds (.fitBounds l (.getBounds m)))
     m))
 
-(defn polyline-from-str! [view points]
+(defn polyline-from-str!
+  "Add a polyline from a string value with each row containing comma-separated lat and long values."
+  [view points]
   (-> points
     (clojure.string/split #"\n")
     (->> (map #(clojure.string/split % #","))
     	 (mapv #(mapv js/parseFloat %))
          (add-polyline! view))))
 
-(defn polyline-from-dbdump! [view dump]
+(defn polyline-from-dbdump!
+  "Parse a Postgres DB dump and get latitude-longitude pairs from a column that has comma-separated lat and long value."
+  [view dump]
   (->> (re-seq #"\|\s*(\d+\.\d+,\d+\.\d+)\s*\|" dump)
        (map #(clojure.string/split (second %) #","))
        (mapv #(mapv js/parseFloat %))
        (add-polyline! view)))
 
-(defn add-wkt! [view wkt-string]
+(defn add-wkt!
+  "Add a WKT object to the view"
+  [view wkt-string]
   (set-mode! view :map)
   (let [m (get-in @components [view :map])
         layer (js/omnivore.wkt.parse wkt-string)]
@@ -134,7 +152,9 @@
     (.fitBounds m (.getBounds layer))))
 
 ;; Helpers
-(defn map-center-and-radius [view]
+(defn map-center-and-radius
+  "Get the map's current center and radius"
+  [view]
   (let [m (get-in @components [view :map])
         bounds (.getBounds m)
         center (.getCenter bounds)
@@ -142,6 +162,7 @@
     {:center (js->clj center :keywordize-keys true) :radius radius}))
 
 (defn pan-to!
+  "Pan the map to the given latitude and longitude position."
   ([view lat lon]
    (pan-to! view lat lon false))
   ([view lat lon animate?]

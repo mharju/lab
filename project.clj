@@ -7,8 +7,8 @@
   :min-lein-version "2.9.1"
 
   :dependencies [[org.clojure/clojure "1.10.1"]
-                 [org.clojure/clojurescript "1.10.520"]
-                 [org.clojure/core.async  "0.4.500"
+                 [org.clojure/clojurescript "1.10.597"]
+                 [org.clojure/core.async  "1.0.567"
                   :exclusions [org.clojure/tools.reader]]
                  [cljsjs/jquery "3.4.0-0"]
                  [cljsjs/leaflet "1.5.1-0"]
@@ -29,7 +29,7 @@
             "release" ["do" "clean," "trampoline" "run" "-m" "figwheel.main" "-O" "simple" "-bo" "lab"]}
 
   :profiles {:dev {:dependencies [[com.bhauman/figwheel-main "0.2.3"]
-                                  [binaryage/devtools "0.9.10"]
-                                  [cider/piggieback "0.4.1"]]
+                                  [binaryage/devtools "1.0.0"]
+                                  [cider/piggieback "0.4.2"]]
                    :source-paths ["src" "dev"]
                    :repl-options {:nrepl-middleware [cider.piggieback/wrap-cljs-repl]}}})

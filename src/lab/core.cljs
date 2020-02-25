@@ -165,7 +165,7 @@
 (defn find-start-of-word [line ch]
   (->> (.substring line 0 ch)
        (reverse)
-       (drop-while #(re-matches #"[\w\.\-\/]" %))
+       (drop-while #(re-matches #"[\w\.\-\/:!]" %))
        count))
 
 (defn get-completions [cm option]
@@ -266,10 +266,4 @@
 
 (comment
   (add-view! :view)
-  (add-view! :view-2)
-
-  (rename-view! :map :view)
-
-  (with-view
-    (map identity (range 10))
-    (println "Hello")))
+  (add-view! :view-2))

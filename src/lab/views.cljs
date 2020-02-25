@@ -42,3 +42,8 @@
   (let [p (js/$ (get @views view))]
     (.show (.find p (str "." (name mode))))
     (.hide (.find p (str "> div:not(." (name mode) ", .info)")))))
+
+(defn list-views []
+  (->> (keys @views)
+       (map str)
+       (into [])))

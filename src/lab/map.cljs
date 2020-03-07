@@ -1,7 +1,8 @@
 (ns lab.map
   (:require [lab.views :refer [components views set-mode!]]
             [cljsjs.leaflet]
-            [cljsjs.leaflet-omnivore])
+            [cljsjs.leaflet-omnivore]
+            [cljsjs.leaflet-draw])
   (:require-macros [lab.macros :refer [with-view markers]]))
 
 (def esri (.tileLayer js/L
@@ -28,23 +29,28 @@
 
 (def providers {:esri esri :rotterdam rotterdam :cartodb-positron cartodb-positron :cartodb-voyager cartodb-voyager})
 
-(defn- map-for [id provider]
+(defn- map-for [id provider draw-mode?]
   (let [view (get @views id)
         instance (.map js/L (.querySelector view ".map") #js {:zoomControl false})
         tile (get providers provider)]
     (.setView instance #js [60.4530898 22.3139035] 15)
     (.addTo tile instance)
+    (when (boolean draw-mode?)
+      (let [toolbar (js/L.Control.Draw. (clj->js {:draw {:circle false :circlemarker false}}))]
+        (.addControl instance toolbar)))
     instance))
 
 (defn map!
   "Create a new map for view. Optional provider (:esri, :cartodb-positron or :cartodb-voyager)"
-  ([view]
-   (map! view :cartodb-voyager))
-  ([view provider]
-   (set-mode! view :map)
-   (when-let [current (get-in @components [view :map])]
-     (.remove current))
-   (swap! components assoc-in [view :map] (map-for view provider))))
+  [view & {:keys [provider draw-mode?] :or {provider :cartodb-voyager draw-mode? nil}}]
+  (set-mode! view :map)
+  (when-let [current (get-in @components [view :map])]
+   (.remove current))
+  (let [component (map-for view provider draw-mode?)]
+  (swap! components assoc-in [view :map] component)
+   (when-not (nil? draw-mode?)
+     (.on component "draw:created" (if (fn? draw-mode?) draw-mode? (resolve 'lab.core/on-draw-created))))
+   component))
 
 (defn map-center!
   "Center the map to the given point and zoom level. Zoom defaults to 13."

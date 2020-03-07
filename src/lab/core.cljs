@@ -39,6 +39,30 @@
 
 (defonce cm-inst (atom nil))
 
+(defn on-draw-created [e]
+  (let [layer-type (.-layerType e)
+        layer (.-layer e)
+        inst @cm-inst
+        cursor (.getCursor inst)
+        geometry (cond
+                   (= layer-type "marker")
+                   (let [ll (.getLatLng layer)]
+                       (str (.-lat ll) " " (.-lng ll)))
+
+                   :else
+                   (with-out-str
+                     (cljs.pprint/pprint
+                       (->>
+                         (js->clj (.getLatLngs layer) :keywordize-keys true)
+                         ((fn [latlngs]
+                            (if (vector? (first latlngs))
+                              (first latlngs)
+                              latlngs)))
+                         (mapv #(vector (:lat %) (:lng %)))))))]
+    (.replaceRange inst
+                   geometry
+                   cursor)))
+
 (defn toggle-help! []
   (.toggle (js/$ ".help")))
 

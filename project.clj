@@ -13,6 +13,7 @@
                  [cljsjs/jquery "3.4.0-0"]
                  [cljsjs/leaflet "1.5.1-0"]
                  [cljsjs/leaflet-omnivore "0.3.1-0"]
+                 [cljsjs/leaflet-draw "0.4.12-0"]
                  [cljsjs/c3 "0.6.8-0"]
                  [cljsjs/vis "4.21.0-1"]
                  [cljsjs/codemirror "5.44.0-1"]

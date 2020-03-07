@@ -1,6 +1,7 @@
 (ns lab.vis
   (:require [lab.views :refer [views components set-mode!]]
             [cljsjs.vis]))
+
 (defn- data-set [data] (js/vis.DataSet. (clj->js data)))
 
 (defn update! [view nodes edges]

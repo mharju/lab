@@ -83,7 +83,7 @@
                       ["/js/compiled/out"]
                       rpl-io/fetch-file!)
          {:warning-as-error false
-          :verbose true
+          :verbose  false
           :preloads {:require '#{[lab.map :as m]
                                  [lab.core :as c]
                                  [lab.graph :as g]

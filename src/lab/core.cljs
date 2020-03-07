@@ -27,10 +27,10 @@
       ws
       (swap! data-connection assoc :ws
         (let [s (js/WebSocket. (str "ws://" host ":" port))]
-          (set!  (.-onopen s) #(.log js/console "Data socket opened at ws://localhost:7889"))
+          (set!  (.-onopen s) #(.log js/console "Data socket opened at ws://" host ":" port))
           (set!  (.-onmessage s) (fn [e]
                                    (let [{:strs [id data] :or {id "unknown" data nil}} (js->clj (.parseJSON js/$(.-data e)))
-                                       listener (get-in @data-connection [:listeners id])]
+                                         listener (get-in @data-connection [:listeners id])]
                                      (when listener
                                        (apply listener [data])))))
           s)))))
@@ -257,7 +257,7 @@
                      #js {:mode "clojure"
                           :lineNumbers false
                           :theme "solarized dark"
-                          :value ";; Welcome to Console REPL. Cmd-G show help, Cmd-H toggle repl, Cmd-F full repl, Cmd-(Shift)-Y Resize repl\r\n;; Cmd-(Shift)-e Eval current (topmost) expression. Cmd-J for pasting content as vars. Ctrl-Space for autocomplete.\r\n" })]
+                          :value ";; Welcome to Console REPL. Cmd-G show help, Cmd-H toggle repl, Cmd-F full repl, Cmd-(Shift)-Y Resize repl\r\n;; Cmd-(Shift)-(E|R) Eval current (topmost) expression. Cmd-J for pasting content as vars. Ctrl-Space for autocomplete.\r\n" })]
         (reset! cm-inst cm)
         (js/parinferCodeMirror.init cm)
         (.setOption cm "extraKeys"
@@ -266,9 +266,9 @@
                          "Shift-Cmd-E"  (fn [cm]
                                           (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result @hud-result :hud-duration @hud-duration))
                          "Cmd-R"        (fn [cm]
-                                          (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result false))
+                                          (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result (not @hud-result)))
                          "Shift-Cmd-R"  (fn [cm]
-                                          (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result false))
+                                          (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result (not @hud-result)))
                          "Shift-Cmd-T"  (fn [_]
                                           (toggle-help!))
                          "Ctrl-Space"   "autocomplete"})

@@ -69,8 +69,19 @@
             :vis-groups groups))))
 
 (comment
-  (vis! :view [{:id 1 :label "First"} {:id 2 :label "Second"} {:id 3 :label "Third"}]
-              [{:from 1 :to 2} {:from 1 :to 3} {:from 2 :to 3}])
+  (vis! :view
+        [{:id 1 :label "c/normalize"} {:id 2 :label "m/add-marker!"} {:id 3 :label "c/vis!"}]
+        [{:from 1 :to 2} {:from 2 :to 3}]
+        {:physics {:enabled true}
+         :nodes {:color {:border "gray" :background "white"
+                :highlight {:border "black" :background "white"}}
+                :shape :box
+                :shapeProperties {:borderRadius 0}
+                :margin {:top 10 :right 15 :bottom 7 :left 15}
+                :font {:face "Menlo, Courier, Monospace" :size 11}}
+         :edges   {:arrows {:to {:enabled true}}}
+         :layout  {:hierarchical {:enabled true :direction "LR"}
+                   :randomSeed 0}})
 
   (grouped-timeline! :view
              [{:id 1 :content "Mikko" :start "2019-07-20" :group 1}

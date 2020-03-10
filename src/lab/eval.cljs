@@ -2,11 +2,6 @@
   (:require [clojure.string :as string]
             [replumb.core :as rpl]
             [lab.io :as rpl-io]
-            [lab.map :as m]
-            [lab.graph :as g]
-            [lab.console :as console]
-            [lab.views :as v]
-            [lab.vis :as vis]
             [lab.hud :as hud]
             [goog.object :as gobj]))
 
@@ -20,15 +15,6 @@
         {:line line :ch (- length index 1)}
         (when (pos? line) (recur {:line (dec line)
                                   :ch (count (.getLine cm (dec line)))}))))))
-
-(defn- nth-of [line ch n pos]
-  (loop [pos (or pos 0) match 0]
-    (when (< pos (count line))
-      (if (= (.charAt line pos) ch)
-        (if (= (inc match) n)
-          pos
-          (recur (inc pos) (inc match)))
-        (recur (inc pos) match)))))
 
 (defn- match-parens [counter line]
   (reduce
@@ -80,18 +66,18 @@
 
 (def repl-opts
   (merge (rpl/options :browser
-                      ["/js/compiled/out"]
+                      ["/js"]
                       rpl-io/fetch-file!)
          {:warning-as-error false
-          :verbose  false
-          :preloads {:require '#{[lab.map :as m]
-                                 [lab.core :as c]
-                                 [lab.graph :as g]
-                                 [lab.views :as v]
-                                 [lab.console :as console]
-                                 [lab.vis :as vis]}
-                     :require-macros '[[lab.macros :refer [with-view markers]]]}
-          :callback #(js/console.info "Result" %)}))
+          :verbose          true
+          :ns               'user
+          :preloads         {:require '#{[lab.map :as m]
+                                         [lab.core :as c]
+                                         [lab.graph :as g]
+                                         [lab.views :as v]
+                                         [lab.console :as console]
+                                         [lab.vis :as vis]}}
+          :callback         #(js/console.info "Result" %)}))
 
 (defn eval! [value]
   (rpl/read-eval-call repl-opts

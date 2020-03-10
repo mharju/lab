@@ -2,15 +2,16 @@
   (:require-macros  [lab.core :refer [render-help resolve-symbol]]
                     [lab.macros :refer [with-view]])
   (:require [clojure.string :as string]
+            [cljs.pprint]
             [lab.eval :as evl]
             [lab.views :refer [add-view!]]
             [lab.map :refer [map!]]
-            [cljsjs.jquery]
-            [cljsjs.codemirror]
-            [cljsjs.codemirror.addon.hint.show-hint]
-            [cljsjs.codemirror.mode.clojure]
-            [cljsjs.parinfer-codemirror]
-            [goog.object :as gobj]))
+            [goog.object :as gobj]
+            ["jquery" :as $]
+            ["codemirror" :as CodeMirror]
+            ["codemirror/addon/hint/show-hint"]
+            ["codemirror/mode/clojure/clojure"]
+            ["parinfer-codemirror" :as pcm]))
 
 (enable-console-print!)
 
@@ -18,7 +19,7 @@
 
 (defn listen! [id target-view listener]
   (let [selector (str "#" (name target-view) " .connection-status")]
-    (.addClass (js/$ selector) "connected")
+    (.addClass ($ selector) "connected")
     (swap! data-connection assoc-in [:listeners id] listener)))
 
 (defn connect! [{:keys [host port] :or {host "localhost" port 7889}}]
@@ -29,7 +30,7 @@
         (let [s (js/WebSocket. (str "ws://" host ":" port))]
           (set!  (.-onopen s) #(.log js/console "Data socket opened at ws://" host ":" port))
           (set!  (.-onmessage s) (fn [e]
-                                   (let [{:strs [id data] :or {id "unknown" data nil}} (js->clj (.parseJSON js/$(.-data e)))
+                                   (let [{:strs [id data] :or {id "unknown" data nil}} (js->clj (.parseJSON $(.-data e)))
                                          listener (get-in @data-connection [:listeners id])]
                                      (when listener
                                        (apply listener [data])))))
@@ -64,7 +65,7 @@
                    cursor)))
 
 (defn toggle-help! []
-  (.toggle (js/$ ".help")))
+  (.toggle ($ ".help")))
 
 (defonce comment-evaled
   (let [stored (js/JSON.parse (.getItem js/localStorage "comment_evaled"))]
@@ -96,11 +97,11 @@
 
 (defn toggle-repl!
   ([]
-   (let [$repl (js/$ "#repl")
+   (let [$repl ($ "#repl")
          visible? (not (.is $repl ":visible"))]
      (toggle-repl! visible?)))
   ([visible?]
-    (let [$repl (js/$ "#repl")]
+    (let [$repl ($ "#repl")]
       (.setItem js/localStorage "repl_visibility" visible?)
       (if visible?
         (.show $repl)
@@ -122,7 +123,7 @@
 (defonce repl-size (atom {:size (default-repl-size) :unit (repl-size-unit)}))
 (add-watch repl-direction-horizontal? :size-change
   (fn [_key _atom _old-state horizontal?]
-    (cond-> (js/$ js/document.body)
+    (cond-> ($ js/document.body)
       horizontal?        (.addClass "horizontal")
       (not horizontal?)  (.removeClass "horizontal"))
     (reset! repl-size {:size (default-repl-size horizontal?) :unit (repl-size-unit horizontal?)})))
@@ -163,7 +164,7 @@
 
 (defn paste! []
   (->
-    (js/$ "#pasteboard")
+    ($ "#pasteboard")
     (.show)
     (.addClass "visible")
     (.find "input")
@@ -220,16 +221,16 @@
       true)))
 
 (defonce init
-  (.ready (js/$ js/document)
+  (.ready ($ js/document)
     (fn [_]
-      (.append (js/$ js/document.body) (render-help))
-      (.hide (js/$ "#hud, #pasteboard"))
-      (.on (js/$ js/document) "keydown" handle-key)
-      (.delegate (js/$ js/document) ".help a" "click" (fn [e] (toggle-help!) (.preventDefault e)))
-      (.delegate (js/$ js/document) "#save" "click" (fn [e]
-                                                      (let [input (js/$ "#pasteboard input[name=var]")
-                                                            textarea (js/$ "#pasteboard textarea")
-                                                            wrap (js/$ "#pasteboard input[name=wrap]")
+      (.append ($ js/document.body) (render-help))
+      (.hide ($ "#hud, #pasteboard"))
+      (.on ($ js/document) "keydown" handle-key)
+      (.delegate ($ js/document) ".help a" "click" (fn [e] (toggle-help!) (.preventDefault e)))
+      (.delegate ($ js/document) "#save" "click" (fn [e]
+                                                      (let [input ($ "#pasteboard input[name=var]")
+                                                            textarea ($ "#pasteboard textarea")
+                                                            wrap ($ "#pasteboard input[name=wrap]")
                                                             var-name (.val input)
                                                             value (.val textarea)
                                                             wrap-to-string? (.prop wrap "checked")]
@@ -237,29 +238,29 @@
                                                         (.val input "")
                                                         (.val textarea "")
                                                         (.prop wrap "checked" false)
-                                                        (.removeClass (js/$ "#pasteboard") "visible")
+                                                        (.removeClass ($ "#pasteboard") "visible")
                                                         (js/setTimeout
                                                           (fn []
-                                                            (.hide (js/$ "#pasteboard"))
+                                                            (.hide ($ "#pasteboard"))
                                                             (evl/eval! (str "(def " var-name " " (if wrap-to-string? (str "\"" (string/replace value #"\"" "\\\"") "\"") value) ")")))
                                                           800)
                                                         (.preventDefault e))))
-      (.delegate (js/$ js/document) "#cancel" "click" (fn [_]
-                                                        (let [input (js/$ "#pasteboard input[name=var]")
-                                                              textarea (js/$ "#pasteboard textarea")
-                                                              wrap (js/$ "#pasteboard input[name=wrap]")]
+      (.delegate ($ js/document) "#cancel" "click" (fn [_]
+                                                        (let [input ($ "#pasteboard input[name=var]")
+                                                              textarea ($ "#pasteboard textarea")
+                                                              wrap ($ "#pasteboard input[name=wrap]")]
                                                           (.val input "")
                                                           (.val textarea "")
                                                           (.prop wrap "checked" false)
-                                                          (.hide (js/$ "#pasteboard")))))
+                                                          (.hide ($ "#pasteboard")))))
       (toggle-help!)
-      (let [cm (js/CodeMirror. (js/document.querySelector "#repl")
+      (let [cm (CodeMirror. (js/document.querySelector "#repl")
                      #js {:mode "clojure"
                           :lineNumbers false
                           :theme "solarized dark"
                           :value ";; Welcome to Console REPL. Cmd-G show help, Cmd-H toggle repl, Cmd-F full repl, Cmd-(Shift)-Y Resize repl\r\n;; Cmd-(Shift)-(E|R) Eval current (topmost) expression. Cmd-J for pasting content as vars. Ctrl-Space for autocomplete.\r\n" })]
         (reset! cm-inst cm)
-        (js/parinferCodeMirror.init cm)
+        (pcm/init cm)
         (.setOption cm "extraKeys"
                     #js {"Cmd-E"        (fn [cm]
                                            (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result @hud-result :hud-duration @hud-duration))
@@ -285,8 +286,8 @@
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
-  (.off (js/$ js/document) "keydown")
-  (.on (js/$ js/document) "keydown" handle-key))
+  (.off ($ js/document) "keydown")
+  (.on ($ js/document) "keydown" handle-key))
 
 (comment
   (add-view! :view)

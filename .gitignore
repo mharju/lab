@@ -19,3 +19,6 @@ pom.xml
 .cljs_nashorn_repl/
 src/lab/experiments
 nashorn_code_cache/
+node_modules/
+resources/public/js
+.shadow-cljs

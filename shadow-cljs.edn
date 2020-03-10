@@ -1,0 +1,14 @@
+{
+  :source-paths ["src"]
+  :dependencies [[org.clojure/core.async  "1.0.567"
+                  :exclusions [org.clojure/tools.reader]]
+                 [hiccup "1.0.5"]
+                 [hiccups "0.3.0"]
+                 [com.cognitect/transit-cljs "0.8.256"]
+                 [replumb "0.2.4"]]
+  :dev-http      {9500 "resources/public"}
+  :builds        {:lab {:target :browser
+                        :output-dir "resources/public/js"
+                        :asset-path "/js"
+                        :modules {:main {:entries [lab.core replumb.core]}}}}
+}

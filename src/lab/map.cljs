@@ -1,26 +1,26 @@
 (ns lab.map
   (:require [lab.views :refer [components views set-mode!]]
-            [cljsjs.leaflet]
-            [cljsjs.leaflet-omnivore]
-            [cljsjs.leaflet-draw])
-  (:require-macros [lab.macros :refer [with-view markers]]))
+            ["leaflet" :refer [tileLayer Icon LatLng] :as L]
+            ["leaflet-omnivore"]
+            ["leaflet-draw" :as LD])
+  (:require-macros [lab.macros :refer [markers]]))
 
-(def esri (.tileLayer js/L
+(def esri (tileLayer
               "//server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
               #js {:attribution "Source: Esri, DigitalGlobe, GeoEye, i-cubed, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community."}))
 
-(def rotterdam (.tileLayer js/L
+(def rotterdam (tileLayer
               "//tiles.arcgis.com/tiles/lQWQklF3MTod4sFp/arcgis/rest/services/50k/MapServer/tile/{z}/{x}/{y}"
               #js {:attribution "Source: Esri, DigitalGlobe, GeoEye, i-cubed, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community."}))
 
-(def cartodb-positron (.tileLayer js/L
+(def cartodb-positron (tileLayer
                         "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                         #js {
                           :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>"
                           :subdomains "abcd"
                           :maxZoom 19}))
 
-(def cartodb-voyager (.tileLayer js/L
+(def cartodb-voyager (tileLayer
                         "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
                         #js {
                           :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>"
@@ -31,12 +31,12 @@
 
 (defn- map-for [id provider draw-mode?]
   (let [view (get @views id)
-        instance (.map js/L (.querySelector view ".map") #js {:zoomControl false})
+        instance (L/map (.querySelector view ".map") #js {:zoomControl false})
         tile (get providers provider)]
     (.setView instance #js [60.4530898 22.3139035] 15)
     (.addTo tile instance)
     (when (boolean draw-mode?)
-      (let [toolbar (js/L.Control.Draw. (clj->js {:draw {:circle false :circlemarker false}}))]
+      (let [toolbar (LD/Control.Draw. (clj->js {:draw {:circle false :circlemarker false}}))]
         (.addControl instance toolbar)))
     instance))
 
@@ -85,9 +85,9 @@
   (let [l (get-in @components [view :map])
         coords (if-not rev [lat lon] [lon lat])
         m (if icon
-            (let [ic (js/L.Icon. (clj->js icon))]
-              (.marker js/L (clj->js coords) (clj->js {:icon ic})))
-            (.marker js/L (clj->js coords)))]
+            (let [ic (Icon. (clj->js icon))]
+              (.marker L (clj->js coords) (clj->js {:icon ic})))
+            (.marker L (clj->js coords)))]
     (.addTo m l)
     (when center? (map-center! view coords zoom center-opts))
     m))
@@ -106,7 +106,7 @@
   "Add a GeoJSON object to the view."
   (set-mode! view :map)
   (let [l (get-in @components [view :map])
-        m (.geoJSON js/L (clj->js data))]
+        m (.geoJSON L (clj->js data))]
     (.addTo m l)
     m))
 
@@ -126,7 +126,7 @@
         points (if-not as-list points (mapv vec (partition 2 points)))
         points (if-not rev points (mapv (fn [[lat lng]] [lng lat]) points))
         _ (println points)
-        m (.polyline js/L (clj->js points) #js {:color (next-color)})]
+        m (.polyline L (clj->js points) #js {:color (next-color)})]
     (.addTo m l)
     (when fit-bounds (.fitBounds l (.getBounds m)))
     m))
@@ -173,7 +173,7 @@
    (pan-to! view lat lon false))
   ([view lat lon animate?]
    (let [m (get-in @components [view :map])]
-     (.panTo m (js/L.LatLng. lat lon) #js {:animate animate?}))))
+     (.panTo m (LatLng. lat lon) #js {:animate animate?}))))
 
 (comment
   (markers :view 60.4504278,22.2738248,60.4485448,22.2538258))

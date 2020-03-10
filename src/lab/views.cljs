@@ -1,7 +1,7 @@
 (ns lab.views
   (:require-macros [hiccups.core :as hiccups :refer [html]])
   (:require [hiccups.runtime]
-            [cljsjs.jquery]
+            ["jquery" :as $]
             [clojure.set]))
 
 (defonce views (atom {}))
@@ -14,15 +14,15 @@
       (let [template (html [:div.view {:id (name id)}
                                [:div.info [:span.id id] [:span.connection-status]]
                                [:div.map] [:div.graph] [:div.vis] [:div.console]])]
-        (.append (js/$ parent) template)
-        (.attr (js/$ parent) "class" (str "n-" (inc (count @views))))
+        (.append ($ parent) template)
+        (.attr ($ parent) "class" (str "n-" (inc (count @views))))
         (swap! views assoc id (js/document.getElementById (name id)))
         (swap! components assoc id {})))))
 
 (defn remove-view! [id]
   (swap! views dissoc id)
   (swap! components dissoc id)
-  (.attr (js/$ "#dashboard") "class" (str "n-" (count @views)))
+  (.attr ($ "#dashboard") "class" (str "n-" (count @views)))
   (.remove (js/document.querySelector (str "#" (name id)))))
 
 (defn rename-view! [id new-id]
@@ -34,12 +34,12 @@
       (swap! components clojure.set/rename-keys {id new-id}))))
 
 (defn swap-view! [index another-index]
-  (let [subject (-> (js/$ "#dashboard") (.children) (.get index) js/$)
-        object (-> (js/$ "#dashboard") (.children) (.get another-index))]
+  (let [subject (-> ($ "#dashboard") (.children) (.get index) $)
+        object (-> ($ "#dashboard") (.children) (.get another-index))]
     (.insertAfter subject object)))
 
 (defn set-mode! [view mode]
-  (let [p (js/$ (get @views view))]
+  (let [p ($ (get @views view))]
     (.show (.find p (str "." (name mode))))
     (.hide (.find p (str "> div:not(." (name mode) ", .info)")))))
 

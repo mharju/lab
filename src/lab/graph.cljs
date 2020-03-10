@@ -1,6 +1,6 @@
 (ns lab.graph
   (:require [lab.views :refer [components set-mode!]]
-            [cljsjs.c3]))
+            ["c3" :as c3]))
 
 (def color-pattern {:pattern ["#0cc2aa" "#fcc100" "#a88add"]})
 
@@ -26,7 +26,7 @@
   [view opts]
   (set-mode! view :graph)
   (swap! components assoc-in [view :graph]
-    (js/c3.generate (clj->js
+    (c3/generate (clj->js
                       (merge
                         {:bindto (str "#" (name view) " .graph")
                          :color color-pattern}

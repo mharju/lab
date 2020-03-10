@@ -7,6 +7,7 @@
 
   See doc at https://developers.google.com/closure/library/docs/xhrio"
   [file-url src-cb]
+  (println "Fetching file" file-url)
   (try
     (.send XhrIo file-url
            (fn [e]

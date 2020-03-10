@@ -1,9 +1,11 @@
 (ns lab.eval
   (:require [clojure.string :as string]
             [replumb.core :as rpl]
+            [replumb.repl]
             [lab.io :as rpl-io]
             [lab.hud :as hud]
-            [goog.object :as gobj]))
+            [goog.object :as gobj]
+            [shadow.cljs.bootstrap.browser :as boot]))
 
 (defn- find-start-paren [cm cursor]
   (loop [{:keys [line ch]} cursor]
@@ -69,8 +71,7 @@
                       ["/js"]
                       rpl-io/fetch-file!)
          {:warning-as-error false
-          :verbose          true
-          :ns               'user
+          :verbose          false
           :preloads         {:require '#{[lab.map :as m]
                                          [lab.core :as c]
                                          [lab.graph :as g]
@@ -110,7 +111,10 @@
                                   (.setCursor cm cursor-pos))))))
                         part)))
 
+(boot/init replumb.repl/st {:path "/js/bootstrap"} (fn [] (println "Such complete init!")))
+
 (comment
+  (require '[lab.core])
   (let [cursor (.getCursor @lab.core/cm-inst)
         cursor {:line (gobj/get cursor "line") :ch (gobj/get cursor "ch")}
         top-form (find-top-form @lab.core/cm-inst cursor)

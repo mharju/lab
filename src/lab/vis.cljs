@@ -1,8 +1,9 @@
 (ns lab.vis
   (:require [lab.views :refer [views components set-mode!]]
-            ["visjs-network" :as vis]))
+            ["vis-network" :refer [Network DataSet]]
+            ["vis-timeline" :refer [Timeline]]))
 
-(defn- data-set [data] (vis/DataSet. (clj->js data)))
+(defn- data-set [data] (DataSet. (clj->js data)))
 
 (defn update! [view nodes edges]
   (let [v (get-in @components [view :vis])
@@ -33,7 +34,7 @@
   ([view nodes edges options]
     (set-mode! view :vis)
     (swap! components assoc-in [view :vis]
-       (vis/Network.
+       (Network.
           (.querySelector (get @views view) ".vis")
           (js-obj "nodes" (data-set nodes) "edges" (data-set edges))
           (clj->js options)))))
@@ -44,7 +45,7 @@
   ([view items options]
    (set-mode! view :vis)
    (let [items (data-set items)]
-     (swap! components update view assoc :vis (vis/Timeline.
+     (swap! components update view assoc :vis (Timeline.
                                                 (.querySelector (get @views view) ".vis")
                                                 items
                                                 (clj->js options))
@@ -60,7 +61,7 @@
          c (get-in @components [view :vis])]
      (when c
        (.destroy c))
-     (swap! components update view assoc :vis (vis/Timeline.
+     (swap! components update view assoc :vis (Timeline.
                                                 (.querySelector (get @views view) ".vis")
                                                 items
                                                 groups

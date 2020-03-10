@@ -5,10 +5,14 @@
                  [hiccup "1.0.5"]
                  [hiccups "0.3.0"]
                  [com.cognitect/transit-cljs "0.8.256"]
-                 [replumb "0.2.4"]]
+                 [replumb "0.2.5-SNAPSHOT"]]
   :dev-http      {9500 "resources/public"}
   :builds        {:lab {:target :browser
                         :output-dir "resources/public/js"
                         :asset-path "/js"
-                        :modules {:main {:entries [lab.core replumb.core]}}}}
-}
+                        :modules {:main {:entries [lab.core lab.map lab.graph lab.console lab.vis]}}}
+
+                  :bootstrap {:target :bootstrap
+                              :output-dir "resources/public/js/bootstrap"
+                              :exclude #{cljs.js cljs.core.async.macros}
+                              :entries [cljs.js]}}}

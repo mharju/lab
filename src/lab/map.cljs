@@ -1,6 +1,6 @@
 (ns lab.map
   (:require [lab.views :refer [components views set-mode!]]
-            ["leaflet" :refer [tileLayer Icon LatLng] :as L]
+            ["leaflet" :refer [tileLayer Icon LatLng marker polyline] :as L]
             ["leaflet-omnivore"]
             ["leaflet-draw" :as LD])
   (:require-macros [lab.macros :refer [markers]]))
@@ -45,7 +45,7 @@
   [view & {:keys [provider draw-mode?] :or {provider :cartodb-voyager draw-mode? nil}}]
   (set-mode! view :map)
   (when-let [current (get-in @components [view :map])]
-   (.remove current))
+    (.remove current))
   (let [component (map-for view provider draw-mode?)]
   (swap! components assoc-in [view :map] component)
    (when-not (nil? draw-mode?)
@@ -86,8 +86,8 @@
         coords (if-not rev [lat lon] [lon lat])
         m (if icon
             (let [ic (Icon. (clj->js icon))]
-              (.marker L (clj->js coords) (clj->js {:icon ic})))
-            (.marker L (clj->js coords)))]
+              (marker (clj->js coords) (clj->js {:icon ic})))
+            (marker (clj->js coords)))]
     (.addTo m l)
     (when center? (map-center! view coords zoom center-opts))
     m))
@@ -126,7 +126,7 @@
         points (if-not as-list points (mapv vec (partition 2 points)))
         points (if-not rev points (mapv (fn [[lat lng]] [lng lat]) points))
         _ (println points)
-        m (.polyline L (clj->js points) #js {:color (next-color)})]
+        m (polyline (clj->js points) #js {:color (next-color)})]
     (.addTo m l)
     (when fit-bounds (.fitBounds l (.getBounds m)))
     m))
@@ -176,4 +176,6 @@
      (.panTo m (LatLng. lat lon) #js {:animate animate?}))))
 
 (comment
+  (clear! :view)
+  (add-marker! :view 60.22 21.22)
   (markers :view 60.4504278,22.2738248,60.4485448,22.2538258))

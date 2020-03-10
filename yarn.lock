@@ -2,6 +2,13 @@
 # yarn lockfile v1
 
 
+"@egjs/hammerjs@^2.0.17":
+  version "2.0.17"
+  resolved "https://registry.yarnpkg.com/@egjs/hammerjs/-/hammerjs-2.0.17.tgz#5dc02af75a6a06e4c2db0202cae38c9263895124"
+  integrity sha512-XQsZgjm2EcVUiZQf11UBJQfmZeEmOW8DpI1gsFeln6w0ae0ii4dMQEQ0kjl6DspdWX1aGY1/loyXnP0JS06e/A==
+  dependencies:
+    "@types/hammerjs" "^2.0.36"
+
 "@mapbox/leaflet-omnivore@^0.3.4":
   version "0.3.4"
   resolved "https://registry.yarnpkg.com/@mapbox/leaflet-omnivore/-/leaflet-omnivore-0.3.4.tgz#d8255eb981549cac421ccf9c1a56a78f6a350346"
@@ -14,6 +21,11 @@
     togeojson "0.13.0"
     topojson "1.6.26"
     wellknown "0.4.2"
+
+"@types/hammerjs@^2.0.36":
+  version "2.0.36"
+  resolved "https://registry.yarnpkg.com/@types/hammerjs/-/hammerjs-2.0.36.tgz#17ce0a235e9ffbcdcdf5095646b374c2bf615a4c"
+  integrity sha512-7TUK/k2/QGpEAv/BCwSHlYu3NXZhQ9ZwBYpzr9tjlPIL2C5BeGhH3DmVavRx3ZNyELX5TLC91JTz/cen6AAtIQ==
 
 acorn@^7.1.1:
   version "7.1.1"
@@ -587,10 +599,15 @@ isarray@~1.0.0:
   resolved "https://registry.yarnpkg.com/isarray/-/isarray-1.0.0.tgz#bb935d48582cba168c06834957a54a3e07124f11"
   integrity sha1-u5NdSFgsuhaMBoNJV6VKPgcSTxE=
 
-keycharm@^0.2.0:
-  version "0.2.0"
-  resolved "https://registry.yarnpkg.com/keycharm/-/keycharm-0.2.0.tgz#fa6ea2e43b90a68028843d27f2075d35a8c3e6f9"
-  integrity sha1-+m6i5DuQpoAohD0n8gddNajD5vk=
+jquery@^3.4.1:
+  version "3.4.1"
+  resolved "https://registry.yarnpkg.com/jquery/-/jquery-3.4.1.tgz#714f1f8d9dde4bdfa55764ba37ef214630d80ef2"
+  integrity sha512-36+AdBzCL+y6qjw5Tx7HgzeGCzC81MDDgaUP8ld2zhx58HdqXGoBd+tHdrBMiyjGQs0Hxs/MLZTu/eHNJJuWPw==
+
+keycharm@^0.3.0:
+  version "0.3.1"
+  resolved "https://registry.yarnpkg.com/keycharm/-/keycharm-0.3.1.tgz#1de258425454752b95c4d8a6cab9ec83218670de"
+  integrity sha512-zn47Ti4FJT9zdF+YBBLWJsfKF/fYQHkrYlBeB5Ez5e2PjW7SoIxr43yehAne2HruulIoid4NKZZxO0dHBygCtQ==
 
 leaflet-draw@^1.0.4:
   version "1.0.4"
@@ -656,11 +673,6 @@ minimist@~1.1.2:
   version "1.1.3"
   resolved "https://registry.yarnpkg.com/minimist/-/minimist-1.1.3.tgz#3bedfd91a92d39016fcfaa1c681e8faa1a1efda8"
   integrity sha1-O+39kaktOQFvz6ocaB6Pqhoe/ag=
-
-moment@^2.20.1:
-  version "2.24.0"
-  resolved "https://registry.yarnpkg.com/moment/-/moment-2.24.0.tgz#0d055d53f5052aa653c9f6eb68bb5d12bf5c2b5b"
-  integrity sha512-bV7f+6l2QigeBBZSM/6yTNq4P2fNpSWj/0e7jQcy87A8e7o2nAfP/34/2ky5Vw4B9S446EtIhodAzkFCcR4dQg==
 
 object-inspect@~0.4.0:
   version "0.4.0"
@@ -746,7 +758,12 @@ process-nextick-args@~2.0.0:
   resolved "https://registry.yarnpkg.com/process-nextick-args/-/process-nextick-args-2.0.1.tgz#7820d9b16120cc55ca9ae7792680ae7dba6d7fe2"
   integrity sha512-3ouUOpQhtgrbOa17J7+uxOTpITYWaGP7/AhoR3+A+/1e9skrzelGi/dXzEYyvbxubEF6Wn2ypscTKiKJFFn1ag==
 
-propagating-hammerjs@^1.4.6:
+process@^0.11.10:
+  version "0.11.10"
+  resolved "https://registry.yarnpkg.com/process/-/process-0.11.10.tgz#7332300e840161bda3e69a1d1d91a7d4bc16f182"
+  integrity sha1-czIwDoQBYb2j5podHZGn1LwW8YI=
+
+propagating-hammerjs@^1.4.7:
   version "1.4.7"
   resolved "https://registry.yarnpkg.com/propagating-hammerjs/-/propagating-hammerjs-1.4.7.tgz#671ab1791a7f88b9dccce8fd8b14a9655950e7d6"
   integrity sha512-oW9Wd+W2Tp5uOz6Fh4mEU7p+FoyU85smLH/mPga83Loh0pHa6AH4ZHGywvwMk3TWP31l7iUsvJyW265p4Ipwrg==
@@ -957,11 +974,6 @@ through2@~0.4.1:
     readable-stream "~1.0.17"
     xtend "~2.1.1"
 
-timsort@^0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/timsort/-/timsort-0.3.0.tgz#405411a8e7e6339fe64db9a234de11dc31e02bd4"
-  integrity sha1-QFQRqOfmM5/mTbmiNN4R3DHgK9Q=
-
 togeojson@0.13.0:
   version "0.13.0"
   resolved "https://registry.yarnpkg.com/togeojson/-/togeojson-0.13.0.tgz#0698890a0629375580f254688014657ae93be894"
@@ -1000,17 +1012,26 @@ util-deprecate@~1.0.1:
   resolved "https://registry.yarnpkg.com/util-deprecate/-/util-deprecate-1.0.2.tgz#450d4dc9fa70de732762fbd2d4a28981419a0ccf"
   integrity sha1-RQ1Nyfpw3nMnYvvS1KKJgUGaDM8=
 
-visjs-network@^4.24.11:
-  version "4.24.11"
-  resolved "https://registry.yarnpkg.com/visjs-network/-/visjs-network-4.24.11.tgz#b23a511cd30c11483cc243db22d56d35090b27c5"
-  integrity sha512-pG42egtTDcLC/5pSKg2Y698JTnrmaDadZoz6g82KlU7D5qk6p+oUaFu/iGamc3US4+ll2dMN2eS4ikp0Ue6TvA==
+vis-network@^7.3.6:
+  version "7.3.6"
+  resolved "https://registry.yarnpkg.com/vis-network/-/vis-network-7.3.6.tgz#b0fe0a2a4fea027327f15fe095e395d2ec81c305"
+  integrity sha512-XmcjZaKmwEuDMUkcOV1zDaQOo6ANVwIlAfFDSEtOkWbUi34sZLYbxhpr4UFPYxpQA//TnNC9Rgvoivt7uqdxTw==
+
+vis-timeline@^7.2.1:
+  version "7.2.1"
+  resolved "https://registry.yarnpkg.com/vis-timeline/-/vis-timeline-7.2.1.tgz#c36b0b593d5abc068a08b47d4edb38610b05cc0e"
+  integrity sha512-3ic5duUG5GoshfECa4doSayTX3FkhNM+2yQuWnZ7j27gfepq0J+GarC8RWbom8dU0c8XmYmBwVuXZPX8pc4jiQ==
   dependencies:
+    "@egjs/hammerjs" "^2.0.17"
     emitter-component "^1.1.1"
-    hammerjs "^2.0.8"
-    keycharm "^0.2.0"
-    moment "^2.20.1"
-    propagating-hammerjs "^1.4.6"
-    timsort "^0.3.0"
+    keycharm "^0.3.0"
+    propagating-hammerjs "^1.4.7"
+    vis-util "^3.0.0"
+
+vis-util@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/vis-util/-/vis-util-3.0.0.tgz#9b0da1e86e9beb5fbea17f5af3a49263c48d7c87"
+  integrity sha512-1B66y7E1Trc+SBjR8zhEULa4NzmPLitZoYoyw685Xi9CYn5UyJrNIB9TI/MAnwN+UioSQ4ogDQYOtO501CjREg==
 
 vlq@^0.2.2:
   version "0.2.3"

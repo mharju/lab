@@ -22,3 +22,4 @@ nashorn_code_cache/
 node_modules/
 resources/public/js
 .shadow-cljs
+*.log

@@ -7,12 +7,14 @@
                  [com.cognitect/transit-cljs "0.8.256"]
                  [replumb "0.2.5-SNAPSHOT"]]
   :dev-http      {9500 "resources/public"}
-  :builds        {:lab {:target :browser
-                        :output-dir "resources/public/js"
-                        :asset-path "/js"
-                        :modules {:main {:entries [lab.core lab.map lab.graph lab.console lab.vis]}}}
+  :builds        {:lab       {:target         :browser
+                              :output-dir     "resources/public/js"
+                              :compiler-options {:optimizations  :simple
+                                                 :output-wrapper false}
+                              :asset-path     "/js"
+                              :modules        {:main {:entries [lab.core lab.map lab.graph lab.console lab.vis]}}}
 
-                  :bootstrap {:target :bootstrap
-                              :output-dir "resources/public/js/bootstrap"
-                              :exclude #{cljs.js cljs.core.async.macros}
-                              :entries [cljs.js]}}}
+                  :bootstrap {:target        :bootstrap
+                              :output-dir    "resources/public/js/bootstrap"
+                              :exclude       #{cljs.js cljs.core.async.macros}
+                              :entries       [cljs.js goog]}}}

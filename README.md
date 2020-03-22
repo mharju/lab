@@ -30,7 +30,8 @@ The application hosts default sessions that are stored in `src/lab/experiments` 
 
 ## Screenshot
 
-This is a demo of evaluating some lat-long pairs and adding them to the view.
+Sample using the open live data from Foli to show locations of busses in the map. You can
+load the sample using  `(lab.core/load-session "foli")` to experiment with it yourself.
 
 ![Screenshot](screenshot.png)
 

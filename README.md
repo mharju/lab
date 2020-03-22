@@ -7,19 +7,17 @@ also hosts support for connecting into realtime data sources with websocket.
 
 ## Keyboard shortcuts
 
-| Keyboard shortcut | Description                                                                                      |
-|-------------------|--------------------------------------------------------------------------------------------------|
-| Cmd-E             | Evaluate expression in current cursor position. Show result in HUD.                              |
-| Cmd-Shift-E       | Evaluate topmost expression in current cursor position. Show result in HUD.                      |
-| Cmd-R             | Evaluate expression in current cursor position. Append result to the next row in editor.         |
-| Cmd-Shift-R       | Evaluate topmost expression in current cursor position. Append result to the next row in editor. |
-| Cmd-Shift-L       | Evaluate the whole editor content form by form.                                                  |
-| Cmd-Shift-T       | Toggle help.                                                                                     |
-| Control-Space     | Get autosuggestions of built in functions and currently available view name keywords.            |
-| Cmd-Shift-F       | Toggle Full REPL view.                                                                           |
-| Cmd-H             | Toggle REPL visibility.                                                                          |
-| Cmd-(Shift)-Y     | Make REPL bigger / smaller                                                                       |
-| Cmd-J             | Declare var from pasted content                                                                  |
+| Keyboard shortcut | Description                                                                                       |
+|-------------------|---------------------------------------------------------------------------------------------------|
+| Cmd-Shift-L       | Evaluate current editor content form by form.                                                     |
+| Cmd-(Shift)-E     | Evaluate (topmost) expression in current cursor position. Show result in HUD.                     |
+| Cmd-(Shift)-R     | Evaluate (topmost) expression in current cursor position. Append result to the next row in editor.|
+| Control-Space     | Get autosuggestions of built in functions and currently available view name keywords.             |
+| Cmd-Shift-F       | Toggle Full REPL view.                                                                            |
+| Cmd-(Shift)-Y     | Make REPL bigger / smaller                                                                        |
+| Cmd-G             | Toggle help.                                                                                      |
+| Cmd-H             | Toggle REPL visibility.                                                                           |
+| Cmd-J             | Paste var content                                                                                 |
 
 
 ## Sessions

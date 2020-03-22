@@ -54,7 +54,7 @@
                 (.setCursor cm cursor-pos)))))))))
 
 (boot/init compile-state-ref
-           {:path "/js/bootstrap"}
+           {:path "js/bootstrap"}
            (fn []
              (eval! "(do
                       (require '[lab.map :as m])

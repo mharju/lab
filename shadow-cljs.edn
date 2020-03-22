@@ -10,7 +10,7 @@
                               :output-dir     "resources/public/js"
                               :compiler-options {:optimizations  :simple
                                                  :output-wrapper false}
-                              :asset-path     "/js"
+                              :asset-path     "js"
                               :modules        {:main {:entries [lab.core]}}}
 
                   :bootstrap {:target        :bootstrap

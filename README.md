@@ -4,10 +4,11 @@ Starting point for a CLJS based "printf on steroids" supporting displaying data 
 a C3 graph (line, bar chart), ja vis.js network or plain text based console output. It
 also hosts support for connecting into realtime data sources with websocket.
 
+
 ## Keyboard shortcuts
 
-| Keyboard shortcut |                                            Description                                           |
-|-------------------|:------------------------------------------------------------------------------------------------:|
+| Keyboard shortcut | Description                                                                                      |
+|-------------------|--------------------------------------------------------------------------------------------------|
 | Cmd-E             | Evaluate expression in current cursor position. Show result in HUD.                              |
 | Cmd-Shift-E       | Evaluate topmost expression in current cursor position. Show result in HUD.                      |
 | Cmd-R             | Evaluate expression in current cursor position. Append result to the next row in editor.         |
@@ -28,17 +29,20 @@ You can list sessions using `(lab.core/list-sessions!)`, load sessions with `(la
 
 The application hosts default sessions that are stored in `src/lab/experiments` folder.
 
+
 ## Screenshot
 
 This is a demo of evaluating some lat-long pairs and adding them to the view.
 
 ![Screenshot](screenshot.png)
 
+
 ## Development setup
 
 To get an interactive development environment run:
 
     shadow-cljs watch lab bootstrap
+
 
 ## License
 

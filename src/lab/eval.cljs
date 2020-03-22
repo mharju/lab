@@ -1,125 +1,63 @@
 (ns lab.eval
   (:require [clojure.string :as string]
-            [replumb.core :as rpl]
-            [replumb.repl]
-            [lab.io :as rpl-io]
-            [lab.hud :as hud]
             [goog.object :as gobj]
-            [shadow.cljs.bootstrap.browser :as boot]))
+            [shadow.cljs.bootstrap.browser :as boot]
+            [cljs.js :as cljs]
+            [cljs.env :as env]
+            [lab.parsing :as parsing]
+            [lab.hud :as hud]))
 
-(defn- find-start-paren [cm cursor]
-  (loop [{:keys [line ch]} cursor]
-    (let [current-line (-> (.getLine cm line) string/reverse)
-          length (count current-line)
-          search-col (- length ch)
-          index (.indexOf current-line "(" search-col)]
-      (if (> index 0)
-        {:line line :ch (- length index 1)}
-        (when (pos? line) (recur {:line (dec line)
-                                  :ch (count (.getLine cm (dec line)))}))))))
-
-(defn- match-parens [counter line]
-  (reduce
-    (fn [{:keys [counter pos]} ch]
-      (let [counter (cond
-                       (= ch "(") (inc counter)
-                       (= ch ")") (dec counter)
-                       :else counter)]
-        (if (zero? counter)
-          (reduced {:success true :pos pos})
-          {:counter counter :pos (inc pos)})))
-    {:counter counter :pos 0}
-    line))
-
-(defn- find-end-paren [cm cursor]
-  (loop [{:keys [line ch]} cursor counter 1]
-    (let [current-line (.substring (.getLine cm line) ch)
-          {:keys [success counter pos]} (match-parens counter current-line)]
-     (if success
-       {:line line :ch (+ pos ch 1)}
-       (when (< (inc line) (.lineCount cm))
-         (recur
-           {:line (inc line) :ch 0}
-           counter))))))
-
-(defn- get-current-form [cm]
-  (let [cursor (.getCursor cm)
-        cursor {:line (gobj/get cursor "line") :ch (gobj/get cursor "ch")}
-        start (find-start-paren cm cursor)
-        end (find-end-paren cm cursor)]
-    (when (and start end)
-      (.getRange cm (clj->js start) (clj->js end)))))
-
-(defn- find-top-form [cm cursor]
-  (loop [{:keys [line]} cursor]
-    (let [current-line (.getLine cm line)]
-      (if (.startsWith current-line "(")
-        {:line line :ch 1}
-        (when (pos? (dec line)) (recur {:line (dec line) :ch 0}))))))
-
-(defn- get-top-form [cm]
-  (let [cursor (.getCursor cm)
-        cursor {:line (gobj/get cursor "line") :ch (gobj/get cursor "ch")}
-        cursor (find-top-form cm cursor)
-        start (find-start-paren cm cursor)
-        end (find-end-paren cm cursor)]
-    (when (and start end)
-      (.getRange cm (clj->js start) (clj->js end)))))
-
-(def repl-opts
-  (merge (rpl/options :browser
-                      ["/js"]
-                      rpl-io/fetch-file!)
-         {:warning-as-error false
-          :verbose          false
-          :preloads         {:require '#{[lab.map :as m]
-                                         [lab.core :as c]
-                                         [lab.graph :as g]
-                                         [lab.views :as v]
-                                         [lab.console :as console]
-                                         [lab.vis :as vis]}}
-          :callback         #(js/console.info "Result" %)}))
+(defonce compile-state-ref (env/default-compiler-env))
 
 (defn eval! [value]
-  (rpl/read-eval-call repl-opts
-                        (fn [result]
-                          (hud/show! (rpl/unwrap-result result)))
-                        value))
+  (cljs/eval-str
+    compile-state-ref
+    value
+    "[test]"
+    {:eval cljs/js-eval
+     :load (partial boot/load compile-state-ref)}
+    (fn [{:keys [value]}]
+      (hud/show! (if (string/blank? value) "OK" (str value))))))
+
+(defn eval-forms! [lines]
+  (doseq [form (parsing/lines->forms lines)]
+    (js/console.log "Eval" form)
+    (eval! form)))
 
 (defn try-eval! [cm & {:keys [comment-evaled top-form hud-result hud-duration] :or {comment-evaled true top-form false hud-result false hud-duration 3000}}]
   (let [cursor-pos (.getCursor cm)
+        cursor {:line (gobj/get cursor-pos "line") :ch (gobj/get cursor-pos "ch")}
         part (cond
                (not (string/blank? (.getSelection cm))) (.getSelection cm)
-               top-form (get-top-form cm)
-               :else (get-current-form cm))]
-    (rpl/read-eval-call repl-opts
-                        (fn [result]
-                          (let [value (.getValue cm)
-                                success (rpl/success? result)
-                                result (rpl/unwrap-result result)
-                                new-value (if (and success comment-evaled) (.replace value (js/RegExp "^([^;])" "gm") ";; $1") value)]
-                            (if (not success)
-                              (let [message (gobj/get result "message")
-                                    cause (gobj/get result "cause")]
-                                (js/alert (str message ": " cause)))
-                              (if-not hud-result
-                                (do
-                                  (.setValue cm (str new-value (if (> 80 (count value)) "\r\n" " ") "\n;; => " result "\n"))
-                                  (.setCursor cm (.lineCount cm) 1))
-                                (do
-                                  (hud/show! result :duration hud-duration)
-                                  (.setCursor cm cursor-pos))))))
-                        part)))
+               top-form (parsing/get-top-form cm cursor)
+               :else (parsing/get-current-form cm cursor))]
+    (cljs/eval-str
+      compile-state-ref
+      part
+      "[test]"
+      {:eval cljs/js-eval
+       :load (partial boot/load compile-state-ref)}
+      (fn [{:keys [value error] :as result}]
+        (let [editor-content (.getValue cm)
+              success (boolean (not error))
+              value (if (string/blank? value) "OK" value)
+              new-editor-content (if (and success comment-evaled) (.replace editor-content (js/RegExp "^([^;])" "gm") ";; $1") editor-content)]
+          (js/console.log result)
+          (if (not success)
+            (js/alert error)
+            (if-not hud-result
+              (do
+                (.setValue cm (str new-editor-content (if (> 80 (count editor-content)) "\r\n" " ") "\n;; => " value "\n"))
+                (.setCursor cm (.lineCount cm) 1))
+              (do
+                (hud/show! (str value) :duration hud-duration)
+                (.setCursor cm cursor-pos)))))))))
 
-(boot/init replumb.repl/st {:path "/js/bootstrap"} (fn [] (println "Such complete init!")))
-
-(comment
-  (require '[lab.core])
-  (let [cursor (.getCursor @lab.core/cm-inst)
-        cursor {:line (gobj/get cursor "line") :ch (gobj/get cursor "ch")}
-        top-form (find-top-form @lab.core/cm-inst cursor)
-        start (find-start-paren @lab.core/cm-inst top-form)
-        end (find-end-paren @lab.core/cm-inst top-form)]
-    (js/console.log "top form at line" top-form start end)
-    (when (and start end)
-      (.getRange @lab.core/cm-inst (clj->js start) (clj->js end)))))
+(boot/init compile-state-ref
+           {:path "/js/bootstrap"}
+           (fn []
+             (eval! "(do
+                      (require '[lab.map :as m])
+                      (require '[lab.graph :as g])
+                      (require '[lab.console :as c])
+                      (require '[lab.vis :as v]))")))

@@ -1,17 +1,20 @@
 (ns lab.core
-  (:require-macros  [lab.core :refer [render-help resolve-symbol]]
-                    [lab.macros :refer [with-view]])
   (:require [clojure.string :as string]
             [cljs.pprint]
-            [lab.eval :as evl]
-            [lab.views :refer [add-view!]]
-            [lab.map :refer [map!]]
             [goog.object :as gobj]
             ["jquery" :as $]
             ["codemirror" :as CodeMirror]
             ["codemirror/addon/hint/show-hint"]
             ["codemirror/mode/clojure/clojure"]
-            ["parinfer-codemirror" :as pcm]))
+            ["parinfer-codemirror" :as pcm]
+            [lab.eval :as evl]
+            [lab.views :refer [add-view!]]
+            [lab.map :refer [map!]]
+            [lab.graph]
+            [lab.vis]
+            [lab.console]
+            [lab.parsing])
+  (:require-macros  [lab.core :refer [render-help resolve-symbol default-sessions]]))
 
 (enable-console-print!)
 
@@ -170,22 +173,30 @@
     (.find "input")
     (.focus)))
 
+(def sessions (default-sessions))
+(def session-names (mapv name (keys sessions)))
+
 (defn list-sessions! []
   (->>
     (js/Object.keys js/window.localStorage)
     (js->clj)
     (filterv (fn [item]
-               (println item)
-               (when (string/starts-with? item "session-")
-                 (.substring item (count "session-")))))))
+               (string/starts-with? item "session-")))
+    (mapv (fn [item] (subs item (count "session-"))))
+    (into [session-names])))
 
 (defn save-session! [name]
   (.setItem js/window.localStorage (str "session-" name) (js/JSON.stringify (.getValue @cm-inst))))
 
+
 (defn load-session! [name]
-  (->> (.getItem js/window.localStorage (str "session-" name))
-      js/JSON.parse
-      (.setValue @cm-inst)))
+  (if ((set session-names) name)
+    (->> (get sessions (keyword name))
+         (lab.parsing/normalize-session)
+         (.setValue @cm-inst))
+    (->> (.getItem js/window.localStorage (str "session-" name))
+        js/JSON.parse
+        (.setValue @cm-inst))))
 
 (defn find-start-of-word [line ch]
   (->> (.substring line 0 ch)
@@ -270,6 +281,10 @@
                                           (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result (not @hud-result)))
                          "Shift-Cmd-R"  (fn [cm]
                                           (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result (not @hud-result)))
+                         "Shift-Cmd-L"  (fn [cm]
+                                          (-> (.getValue cm)
+                                              (string/split #"\n")
+                                              evl/eval-forms!))
                          "Shift-Cmd-T"  (fn [_]
                                           (toggle-help!))
                          "Ctrl-Space"   "autocomplete"})

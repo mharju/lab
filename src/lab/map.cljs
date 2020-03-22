@@ -2,8 +2,7 @@
   (:require [lab.views :refer [components views set-mode!]]
             ["leaflet" :refer [tileLayer Icon LatLng marker polyline] :as L]
             ["leaflet-omnivore"]
-            ["leaflet-draw" :as LD])
-  (:require-macros [lab.macros :refer [markers]]))
+            ["leaflet-draw" :as LD]))
 
 (def esri (tileLayer
               "//server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
@@ -74,7 +73,6 @@
   "Clear all layers from the given view."
   (let [l (get-in @components [view :map])]
     (.eachLayer l (fn [layer]
-                    (println (.-className (.getPane layer)))
                     (when-not (>= (.indexOf (.-className (.getPane layer)) "tile") 0)
                       (.remove layer))))))
 
@@ -125,7 +123,6 @@
   (let [l (get-in @components [view :map])
         points (if-not as-list points (mapv vec (partition 2 points)))
         points (if-not rev points (mapv (fn [[lat lng]] [lng lat]) points))
-        _ (println points)
         m (polyline (clj->js points) #js {:color (next-color)})]
     (.addTo m l)
     (when fit-bounds (.fitBounds l (.getBounds m)))

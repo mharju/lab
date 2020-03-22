@@ -17,9 +17,10 @@ pom.xml
 .lein-failures
 .rebel_readline_history
 .cljs_nashorn_repl/
-src/lab/experiments
 nashorn_code_cache/
 node_modules/
 resources/public/js
 .shadow-cljs
 *.log
+src/lab/experiments/private
+.DS_Store

@@ -4,14 +4,6 @@
             ["leaflet-omnivore"]
             ["leaflet-draw" :as LD]))
 
-(def esri (tileLayer
-              "//server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
-              #js {:attribution "Source: Esri, DigitalGlobe, GeoEye, i-cubed, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community."}))
-
-(def rotterdam (tileLayer
-              "//tiles.arcgis.com/tiles/lQWQklF3MTod4sFp/arcgis/rest/services/50k/MapServer/tile/{z}/{x}/{y}"
-              #js {:attribution "Source: Esri, DigitalGlobe, GeoEye, i-cubed, Earthstar Geographics, CNES/Airbus DS, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community."}))
-
 (def cartodb-positron (tileLayer
                         "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
                         #js {
@@ -26,7 +18,7 @@
                           :subdomains "abcd"
                           :maxZoom 19}))
 
-(def providers {:esri esri :rotterdam rotterdam :cartodb-positron cartodb-positron :cartodb-voyager cartodb-voyager})
+(def providers {:cartodb-positron cartodb-positron :cartodb-voyager cartodb-voyager})
 
 (defn- map-for [id provider draw-mode?]
   (let [view (get @views id)
@@ -40,7 +32,7 @@
     instance))
 
 (defn map!
-  "Create a new map for view. Optional provider (:esri, :cartodb-positron or :cartodb-voyager)"
+  "Create a new map for view. Optional provider :cartodb-positron"
   [view & {:keys [provider draw-mode?] :or {provider :cartodb-voyager draw-mode? nil}}]
   (set-mode! view :map)
   (when-let [current (get-in @components [view :map])]

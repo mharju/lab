@@ -296,7 +296,7 @@
                      #js {:mode "clojure"
                           :lineNumbers false
                           :theme "solarized dark"
-                          :value ";; Eval (lab.core/toggle-help!) for help. Cmd-(Shift)-(E|R) Eval current (topmost) expression.\r\n;; Cmd-J for pasting content as vars. Ctrl-Space for autocomplete." })]
+                          :value ";; Eval (lab.core/toggle-help!) for help. Cmd-(Shift)-(E|R) Eval current (topmost) expression.\r\n;; Cmd-J for pasting content as vars. Ctrl-Space for autocomplete.\r\n" })]
         (reset! cm-inst cm)
         (pcm/init cm)
         (set-shortcuts! cm)

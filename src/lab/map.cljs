@@ -2,7 +2,7 @@
   (:require [lab.views :refer [components views set-mode!]]
             ["leaflet" :refer [tileLayer Icon LatLng marker polyline] :as L]
             ["leaflet-omnivore"]
-            ["leaflet-draw" :as LD]))
+            ["leaflet-draw"]))
 
 (def cartodb-positron (tileLayer
                         "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
@@ -27,7 +27,7 @@
     (.setView instance #js [60.4530898 22.3139035] 15)
     (.addTo tile instance)
     (when (boolean draw-mode?)
-      (let [toolbar (LD/Control.Draw. (clj->js {:draw {:circle false :circlemarker false}}))]
+      (let [toolbar (L/Control.Draw. (clj->js {:draw {:circle false :circlemarker false}}))]
         (.addControl instance toolbar)))
     instance))
 

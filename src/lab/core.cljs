@@ -72,7 +72,7 @@
 
 (defonce comment-evaled
   (let [stored (js/JSON.parse (.getItem js/localStorage "comment_evaled"))]
-    (atom (if-not (nil? stored) stored true))))
+    (atom (if-not (nil? stored) stored false))))
 
 (defn toggle-comment-evaled! []
   (swap! comment-evaled not)
@@ -289,8 +289,9 @@
                                           (toggle-help!))
                          "Ctrl-Space"   "autocomplete"})
         (.setOption cm "hintOptions" #js {"hint" get-completions})
-        (let [visible? (.getItem js/localStorage "repl_visibility")]
-          (when (= visible? "true")
+        (let [stored (.getItem js/localStorage "repl_visibility")
+              visible? (if-not (nil? stored) (= stored "true") true)]
+          (when visible?
             (toggle-repl! true)
             (.setCursor cm #js {:line 3 :ch 0})))
         (add-view! :view)

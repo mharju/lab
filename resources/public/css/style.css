@@ -387,3 +387,14 @@ li.CodeMirror-hint-active {
   background: #d33682;
   color: white;
 }
+
+.help table {
+  width: 100%;
+}
+.help table thead th {
+  text-align: left;
+}
+.help table tbody td {
+  font-family: 'Droid Sans Mono',monospace;
+  font-size: 9pt;
+}

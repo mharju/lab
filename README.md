@@ -4,7 +4,6 @@ Starting point for a CLJS based "printf on steroids" supporting displaying data 
 a C3 graph (line, bar chart), ja vis.js network or plain text based console output. It
 also hosts support for connecting into realtime data sources with websocket.
 
-
 ## Keyboard shortcuts
 
 | Keyboard shortcut | Description                                                                                       |
@@ -31,7 +30,7 @@ The application hosts default sessions that are stored in `src/lab/experiments` 
 ## Screenshot
 
 Sample using the open live data from Foli to show locations of busses in the map. You can
-load the sample using  `(lab.core/load-session "foli")` to experiment with it yourself.
+load the sample by evaluating `(lab.core/load-session! "foli")`, and then evaluating the editor content with `Cmd-Shift-L` to experiment with it yourself.
 
 ![Screenshot](screenshot.png)
 

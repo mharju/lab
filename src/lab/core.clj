@@ -41,6 +41,27 @@
   (html
     [:div.help
       [:a.close "Close"]
+      [:table
+       [:thead
+        [:tr
+         [:th "Keyboard shortcut"] [:th "Description"]]]
+       [:tbody
+        [:tr
+         [:td "Cmd-Shift-L"] [:td "Evaluate current editor content form by form."]]
+        [:tr
+         [:td "Cmd-(Shift)-E"] [:td "Evaluate (topmost) expression in current cursor position. Show result in HUD."]]
+        [:tr
+         [:td "Cmd-(Shift)-R"] [:td "Evaluate (topmost) expression in current cursor position. Append result to the next row in editor."]]
+        [:tr
+         [:td "Control-Space"] [:td "Get autosuggestions of built in functions and currently available view name keywords."]]
+        [:tr
+         [:td "Cmd-Shift-F"] [:td "Toggle Full REPL view."]]
+        [:tr
+         [:td "Cmd-(Shift)-Y"] [:td "Make REPL bigger / smaller"]]
+        [:tr
+         [:td "Cmd-G"] [:td "Toggle help."]]
+        [:tr
+         [:td "Cmd-H"] [:td "Toggle REPL visibility."]] [:tr [:td "Cmd-J"] [:td "Paste var content"]]]]
       (doall
         (for [current-namespace ns-list
                                 :let [fns (ns-publics current-namespace)]]

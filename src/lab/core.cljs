@@ -231,6 +231,33 @@
            (.preventDefault e))
       true)))
 
+(defn alternate-keys [form]
+  (merge form
+    (reduce-kv
+      (fn [m k v]
+        (assoc m (.replace k "Cmd" "Ctrl") v))
+      {}
+      form)))
+
+(defn set-shortcuts! [cm]
+  (letfn [(eval-form [cm] (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result @hud-result :hud-duration @hud-duration))
+          (eval-top-form [cm] (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result @hud-result :hud-duration @hud-duration))
+          (eval-alt-form [cm] (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result (not @hud-result)))
+          (eval-alt-top-form [cm] (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result (not @hud-result)))
+          (eval-editor [cm] (-> (.getValue cm)
+                                   (string/split #"\n")
+                                   evl/eval-forms!))
+          (eval-toggle-help [_] (toggle-help!))]
+      (.setOption cm "extraKeys"
+        (-> (alternate-keys {"Cmd-E"        eval-form
+                             "Shift-Cmd-E"  eval-top-form
+                             "Cmd-R"        eval-alt-form
+                             "Shift-Cmd-R"  eval-alt-top-form
+                             "Shift-Cmd-L"  eval-editor
+                             "Shift-Cmd-T"  eval-toggle-help
+                             "Ctrl-Space"   "autocomplete"})
+            clj->js))))
+
 (defonce init
   (.ready ($ js/document)
     (fn [_]
@@ -269,25 +296,10 @@
                      #js {:mode "clojure"
                           :lineNumbers false
                           :theme "solarized dark"
-                          :value ";; Welcome to Console REPL. Cmd-G show help, Cmd-H toggle repl, Cmd-F full repl, Cmd-(Shift)-Y Resize repl\r\n;; Cmd-(Shift)-(E|R) Eval current (topmost) expression. Cmd-J for pasting content as vars. Ctrl-Space for autocomplete.\r\n" })]
+                          :value ";; Cmd-G show help/reference, Cmd-(Shift)-(E|R) Eval current (topmost) expression.\r\n;; Cmd-J for pasting content as vars. Ctrl-Space for autocomplete. Windows/Linux uses Ctrl instead of Cmd.\r\n" })]
         (reset! cm-inst cm)
         (pcm/init cm)
-        (.setOption cm "extraKeys"
-                    #js {"Cmd-E"        (fn [cm]
-                                           (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result @hud-result :hud-duration @hud-duration))
-                         "Shift-Cmd-E"  (fn [cm]
-                                          (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result @hud-result :hud-duration @hud-duration))
-                         "Cmd-R"        (fn [cm]
-                                          (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result (not @hud-result)))
-                         "Shift-Cmd-R"  (fn [cm]
-                                          (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result (not @hud-result)))
-                         "Shift-Cmd-L"  (fn [cm]
-                                          (-> (.getValue cm)
-                                              (string/split #"\n")
-                                              evl/eval-forms!))
-                         "Shift-Cmd-T"  (fn [_]
-                                          (toggle-help!))
-                         "Ctrl-Space"   "autocomplete"})
+        (set-shortcuts! cm)
         (.setOption cm "hintOptions" #js {"hint" get-completions})
         (let [stored (.getItem js/localStorage "repl_visibility")
               visible? (if-not (nil? stored) (= stored "true") true)]

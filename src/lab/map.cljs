@@ -43,6 +43,12 @@
      (.on component "draw:created" (if (fn? draw-mode?) draw-mode? (resolve 'lab.core/on-draw-created))))
    component))
 
+(defn invalidate-size! []
+  (doall
+    (for [m (map :map (vals @components))]
+      (do
+        (.invalidateSize m)))))
+
 (defn map-center!
   "Center the map to the given point and zoom level. Zoom defaults to 13."
   ([view center]

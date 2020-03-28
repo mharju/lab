@@ -60,4 +60,5 @@
                       (require '[lab.map :as m])
                       (require '[lab.graph :as g])
                       (require '[lab.console :as c])
-                      (require '[lab.vis :as v]))")))
+                      (require '[lab.vis :as v])
+                      (require '[lab.dashboard :as d]))")))

@@ -13,7 +13,7 @@
     (when-not (contains? @components id)
       (let [template (html [:div.view {:id (name id)}
                                [:div.info [:span.id id] [:span.connection-status]]
-                               [:div.map] [:div.graph] [:div.vis] [:div.console]])]
+                               [:div.map] [:div.graph] [:div.vis] [:div.console] [:div.dashboard]])]
         (.append ($ parent) template)
         (.attr ($ parent) "class" (str "n-" (inc (count @views))))
         (swap! views assoc id (js/document.getElementById (name id)))

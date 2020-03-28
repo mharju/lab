@@ -13,6 +13,7 @@
             [lab.graph]
             [lab.vis]
             [lab.console]
+            [lab.dashboard]
             [lab.parsing])
   (:require-macros  [lab.core :refer [render-help resolve-symbol default-sessions]]))
 
@@ -98,18 +99,30 @@
   (->> (reset! hud-duration duration)
        (.setItem js/localStorage "hud_duration")))
 
+(declare repl-size)
 (defn toggle-repl!
   ([]
    (let [$repl ($ "#repl")
          visible? (not (.is $repl ":visible"))]
      (toggle-repl! visible?)))
   ([visible?]
-    (let [$repl ($ "#repl")]
+    (let [$repl ($ "#repl")
+          dashboard (js/document.getElementById "dashboard")
+          {:keys [size unit]} @repl-size]
       (.setItem js/localStorage "repl_visibility" visible?)
       (if visible?
-        (.show $repl)
-        (do (.hide $repl)
-            (.focus @cm-inst))))))
+        (do
+          (.show $repl)
+          (set! (.. dashboard -style -height) (str (- 100 size) (if (keyword? unit) (name unit) unit))))
+        (do
+          (.hide $repl)
+          (set! (.. dashboard -style -height) "100vh")
+          (.focus @cm-inst)))
+      (js/setTimeout
+        (fn []
+          (lab.map/invalidate-size!)
+          (lab.graph/invalidate-size!))
+        0))))
 
 
 (declare repl-direction-horizontal?)
@@ -134,14 +147,18 @@
 (defn update-repl-size
   ([] (update-repl-size @repl-direction-horizontal? @repl-size))
   ([direction {:keys [size unit]}]
-    (doall
-      (for [elem [(js/document.getElementById "repl") (js/document.querySelector ".CodeMirror")]
-            :let [size (str size (if (keyword? unit) (name unit) unit))]]
-        (if direction
-          (do (set! (.. elem -style -width) size)
-              (set! (.. elem -style -height) "100%"))
-          (do (set! (.. elem -style -height) size)
-              (set! (.. elem -style -width) "100%")))))))
+   (let [dashboard (js/document.getElementById "dashboard")]
+     (doall
+       (for [elem [(js/document.getElementById "repl") (js/document.querySelector ".CodeMirror")]
+             :let [isize (str (- 100 size) (if (keyword? unit) (name unit) unit))
+                   size (str size (if (keyword? unit) (name unit) unit))]]
+         (if direction
+           (do (set! (.. elem -style -width) size)
+               (set! (.. dashboard -style -height) "100vh")
+               (set! (.. elem -style -height) "100%"))
+           (do (set! (.. elem -style -height) size)
+               (set! (.. dashboard -style -height) isize)
+               (set! (.. elem -style -width) "100%"))))))))
 
 (add-watch repl-size :size-change
   (fn [_key _atom _old-state size]

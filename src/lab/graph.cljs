@@ -29,8 +29,21 @@
     (c3/generate (clj->js
                       (merge
                         {:bindto (str "#" (name view) " .graph")
-                         :color color-pattern}
+                         :color color-pattern
+                         :padding {:top 30 :left 60 :right 60}}
                         opts)))))
+
+(defn invalidate-size! []
+  (doall
+    (for [[k v] @components
+          :let [{g :graph} v
+                p (.-parentNode (js/document.getElementById (name k)))
+                width (.-clientWidth p)
+                height (.-clientHeight p)]
+          :when (not (nil? g))]
+      (do
+        (.resize g #js {:width width :height height})
+        (.flush g)))))
 
 (defn load!
   "Load data into existing graph in view.

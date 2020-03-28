@@ -1,8 +1,21 @@
 # Lab
 
-Starting point for a CLJS based "printf on steroids" supporting displaying data in a map,
-a C3 graph (line, bar chart), ja vis.js network or plain text based console output. It
-also hosts support for connecting into realtime data sources with websocket.
+Web application that exposes bootstrapped Clojurescript REPL and provides simple tools to
+make ad-hoc dashboards, data visualizations or such when in need. You can use it via the
+built in REPL window or use the CLJS REPL through nREPL with your editor.
+
+It also supports retrieving and passing live data to views using websocket. This is handy
+if you want to have live updates from a production system.
+
+## Sessions
+
+The default session is stored on evaluation, in case you might press reload in the middle
+of implementation.
+
+You can list sessions using `(lab.core/list-sessions!)`, load sessions with
+`(lab.core/load-session! <session-name>)` and store them using `(lab.core/store-session!  <session-name>)`.
+
+The application hosts default sessions that are stored in `src/lab/experiments` folder.
 
 ## Keyboard shortcuts
 
@@ -17,15 +30,6 @@ also hosts support for connecting into realtime data sources with websocket.
 | Cmd-G             | Toggle help.                                                                                      |
 | Cmd-H             | Toggle REPL visibility.                                                                           |
 | Cmd-J             | Paste var content                                                                                 |
-
-
-## Sessions
-
-You can list sessions using `(lab.core/list-sessions!)`, load sessions with `(lab.core/load-session! <session-name>)` and store them using
-`(lab.core/store-session! <session-name>)`.
-
-The application hosts default sessions that are stored in `src/lab/experiments` folder.
-
 
 ## Screenshot
 

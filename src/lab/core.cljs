@@ -195,8 +195,15 @@
     (.find "input")
     (.focus)))
 
+(def help-text
+";; Eval (lab.core/toggle-help!) for help. Cmd-(Shift)-(E|R) Eval current (topmost) expression.
+;; Cmd-J for pasting content as vars. Ctrl-Space for autocomplete.\n" )
+(def save-session-proto
+  #"\(lab.core/save-session\!.*\)")
+
 (def sessions (default-sessions))
 (def session-names (mapv name (keys sessions)))
+(defonce loaded-session (atom "default"))
 
 (defn list-sessions! []
   (->>
@@ -208,17 +215,33 @@
     (into [session-names])))
 
 (defn save-session! [name]
-  (.setItem js/window.localStorage (str "session-" name) (js/JSON.stringify (.getValue @cm-inst))))
+  (.setItem
+    js/window.localStorage
+    (str "session-" name)
+    (-> (.getValue @cm-inst)
+        (.replace help-text "")
+        (.replace save-session-proto "")
+        (js/JSON.stringify))))
 
+(defn maybe-save-default! [form]
+  (when (and (= @loaded-session "default")
+             (not (re-find #"session\!" form)))
+    (save-session! "default")))
+
+(defn delete-session! [name]
+  (.removeItem js/window.localStorage (str "session-" name)))
 
 (defn load-session! [name]
+  (reset! loaded-session name)
   (if ((set session-names) name)
     (->> (get sessions (keyword name))
          (lab.parsing/normalize-session)
+         (str help-text)
          (.setValue @cm-inst))
-    (->> (.getItem js/window.localStorage (str "session-" name))
-        js/JSON.parse
-        (.setValue @cm-inst))))
+    (some->> (or (.getItem js/window.localStorage (str "session-" name)) "\"\"")
+             js/JSON.parse
+             (str help-text)
+             (.setValue @cm-inst))))
 
 (defn find-start-of-word [line ch]
   (->> (.substring line 0 ch)
@@ -262,10 +285,10 @@
       form)))
 
 (defn set-shortcuts! [cm]
-  (letfn [(eval-form [cm] (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result @hud-result :hud-duration @hud-duration))
-          (eval-top-form [cm] (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result @hud-result :hud-duration @hud-duration))
-          (eval-alt-form [cm] (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result (not @hud-result)))
-          (eval-alt-top-form [cm] (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result (not @hud-result)))
+  (letfn [(eval-form [cm] (-> (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result @hud-result :hud-duration @hud-duration) (maybe-save-default!)))
+          (eval-top-form [cm] (-> (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result @hud-result :hud-duration @hud-duration) (maybe-save-default!)))
+          (eval-alt-form [cm] (-> (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result (not @hud-result)) (maybe-save-default!)))
+          (eval-alt-top-form [cm] (-> (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result (not @hud-result)) (maybe-save-default!)))
           (eval-editor [cm] (-> (.getValue cm)
                                    (string/split #"\n")
                                    evl/eval-forms!))
@@ -317,8 +340,7 @@
       (let [cm (CodeMirror. (js/document.querySelector "#repl")
                      #js {:mode "clojure"
                           :lineNumbers false
-                          :theme "solarized dark"
-                          :value ";; Eval (lab.core/toggle-help!) for help. Cmd-(Shift)-(E|R) Eval current (topmost) expression.\r\n;; Cmd-J for pasting content as vars. Ctrl-Space for autocomplete.\r\n" })]
+                          :theme "solarized dark"})]
         (reset! cm-inst cm)
         (pcm/init cm)
         (set-shortcuts! cm)
@@ -328,6 +350,7 @@
           (when visible?
             (toggle-repl! true)
             (.setCursor cm #js {:line 3 :ch 0})))
+        (load-session! "default")
         (add-view! :view)
         (map! :view)
         (update-repl-size)))))

@@ -51,7 +51,8 @@
                 (.setCursor cm (.lineCount cm) 1))
               (do
                 (hud/show! (str value) :duration hud-duration)
-                (.setCursor cm cursor-pos)))))))))
+                (.setCursor cm cursor-pos)))))))
+    part))
 
 (boot/init compile-state-ref
            {:path "js/bootstrap"}

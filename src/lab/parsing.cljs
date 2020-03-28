@@ -108,9 +108,13 @@
 (defn normalize-ns [ns-form]
   (let [dcl (->> ns-form
                  cljs.reader/read-string
-                 (drop 2)
-                 (map (fn [[_ arg]]
-                        (list 'require arg))))]
+                 (drop-while #(do
+                                (println %)
+                                (or (not (seq? %))
+                                    (not= :require (first %)))))
+                 first
+                 (drop 1)
+                 (map (fn [args] (list 'require args))))]
      (-> (string/join " " dcl)
          (string/replace #"\[" "'["))))
 
@@ -134,6 +138,10 @@
     (js/console.log "top form at line" top-form start end)
     (when (and start end)
       (.getRange @lab.core/cm-inst (clj->js start) (clj->js end))))
+
+  (let [code ["(ns foo (:import [test]) (:require [foo] [bar] [baz]) (:require-macros [seppo :as s]))"]
+        res (lines->forms code)]
+    (normalize-ns (first res)))
 
   (-> (.getValue @lab.core/cm-inst)
       (string/split  #"\n")

@@ -99,6 +99,13 @@
   (->> (reset! hud-duration duration)
        (.setItem js/localStorage "hud_duration")))
 
+(defn invalidate-sizes! []
+  (js/setTimeout
+        (fn []
+          (lab.map/invalidate-size!)
+          (lab.graph/invalidate-size!))
+        0))
+
 (declare repl-size)
 (defn toggle-repl!
   ([]
@@ -118,11 +125,7 @@
           (.hide $repl)
           (set! (.. dashboard -style -height) "100vh")
           (.focus @cm-inst)))
-      (js/setTimeout
-        (fn []
-          (lab.map/invalidate-size!)
-          (lab.graph/invalidate-size!))
-        0))))
+      (invalidate-sizes!))))
 
 
 (declare repl-direction-horizontal?)
@@ -152,13 +155,15 @@
        (for [elem [(js/document.getElementById "repl") (js/document.querySelector ".CodeMirror")]
              :let [isize (str (- 100 size) (if (keyword? unit) (name unit) unit))
                    size (str size (if (keyword? unit) (name unit) unit))]]
-         (if direction
-           (do (set! (.. elem -style -width) size)
-               (set! (.. dashboard -style -height) "100vh")
-               (set! (.. elem -style -height) "100%"))
-           (do (set! (.. elem -style -height) size)
-               (set! (.. dashboard -style -height) isize)
-               (set! (.. elem -style -width) "100%"))))))))
+         (do
+           (if direction
+             (do (set! (.. elem -style -width) size)
+                 (set! (.. dashboard -style -height) "100vh")
+                 (set! (.. elem -style -height) "100%"))
+             (do (set! (.. elem -style -height) size)
+                 (set! (.. dashboard -style -height) isize)
+                 (set! (.. elem -style -width) "100%")))
+           (invalidate-sizes!)))))))
 
 (add-watch repl-size :size-change
   (fn [_key _atom _old-state size]

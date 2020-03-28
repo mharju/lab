@@ -4,26 +4,28 @@
             ["leaflet-omnivore"]
             ["leaflet-draw"]))
 
-(def cartodb-positron (tileLayer
-                        "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                        #js {
-                          :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>"
-                          :subdomains "abcd"
-                          :maxZoom 19}))
+(defn cartodb-positron []
+  (tileLayer
+    "https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+    #js {
+         :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>"
+         :subdomains "abcd"
+         :maxZoom 19}))
 
-(def cartodb-voyager (tileLayer
-                        "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-                        #js {
-                          :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>"
-                          :subdomains "abcd"
-                          :maxZoom 19}))
+(defn cartodb-voyager []
+  (tileLayer
+    "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+    #js {
+         :attribution "&copy; <a href=\"https://www.openstreetmap.org/copyright\">OpenStreetMap</a> contributors &copy; <a href=\"https://carto.com/attributions\">CARTO</a>"
+         :subdomains "abcd"
+         :maxZoom 19}))
 
 (def providers {:cartodb-positron cartodb-positron :cartodb-voyager cartodb-voyager})
 
 (defn- map-for [id provider draw-mode?]
   (let [view (get @views id)
         instance (L/map (.querySelector view ".map") #js {:zoomControl false})
-        tile (get providers provider)]
+        tile ((get providers provider))]
     (.setView instance #js [60.4530898 22.3139035] 15)
     (.addTo tile instance)
     (when (boolean draw-mode?)
@@ -46,8 +48,7 @@
 (defn invalidate-size! []
   (doall
     (for [m (map :map (vals @components))]
-      (do
-        (.invalidateSize m)))))
+      (.invalidateSize m))))
 
 (defn map-center!
   "Center the map to the given point and zoom level. Zoom defaults to 13."

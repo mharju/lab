@@ -303,12 +303,25 @@
                              "Ctrl-Space"   "autocomplete"})
             clj->js))))
 
+(defn handle-drop [e]
+  (.preventDefault e)
+  (let [f  (aget (gobj/getValueByKeys e "dataTransfer" "files") 0)]
+    (-> (.text f)
+        (.then (fn [content]
+                 (gobj/set (js/document.getElementById "drop-target") "value" content))))))
+
+(defn handle-dragover [e]
+  (.preventDefault e))
+
 (defonce init
   (.ready ($ js/document)
     (fn [_]
       (.append ($ js/document.body) (render-help))
       (.hide ($ "#hud, #pasteboard"))
       (.on ($ js/document) "keydown" handle-key)
+      (let [drop-target (js/document.getElementById "drop-target")]
+        (.addEventListener drop-target "drop" handle-drop)
+        (.addEventListener  drop-target "dragover" handle-dragover))
       (.delegate ($ js/document) ".help a" "click" (fn [e] (toggle-help!) (.preventDefault e)))
       (.delegate ($ js/document) "#save" "click" (fn [e]
                                                       (let [input ($ "#pasteboard input[name=var]")

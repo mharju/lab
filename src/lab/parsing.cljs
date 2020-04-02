@@ -113,12 +113,13 @@
                                 (or (not (seq? %))
                                     (not= :require (first %)))))
                  first
-                 (drop 1)
-                 (map (fn [args] (list 'require args))))]
-     (-> (string/join " " dcl)
-         (string/replace #"\[" "'["))))
+                 (drop 1))]
+    (str "(require "
+          (-> (string/join " " dcl)
+              (string/replace #"\[" "'[")) ")")))
 
 (defn normalize-session [session]
+  session
   (let [forms (-> session
                   (string/split #"\n")
                   lines->forms)]

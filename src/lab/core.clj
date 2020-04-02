@@ -7,7 +7,7 @@
             [cljs.analyzer.api :refer [ns-publics ns-resolve]])
   (:import (java.io File)))
 
-(def ns-list '[lab.map lab.graph lab.console lab.vis lab.core lab.views lab.dashboard])
+(def ns-list '[lab.map lab.graph lab.console lab.vis lab.core lab.views lab.dashboard lab.helpers])
 
 (defn internal-symbols []
   (->>
@@ -88,7 +88,9 @@
 (defn list-files [input-dir]
   (let [directory (clojure.java.io/file input-dir)]
     (->>
-      (for [file (only-cljs-files (file-seq directory))]
+      (for [file (->> (file-seq directory)
+                      (remove #(str/includes? % "private"))
+                      only-cljs-files)]
           (.getPath file))
       (into []))))
 

@@ -47,3 +47,9 @@
   (->> (keys @views)
        (map str)
        (into [])))
+
+(defn set-width! [w]
+  (.setProperty
+    (.-style (js/document.getElementById "dashboard"))
+    "grid-template-columns"
+    (str w "vw " (- 100 w) "vw")))

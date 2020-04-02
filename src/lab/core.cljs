@@ -14,7 +14,8 @@
             [lab.vis]
             [lab.console]
             [lab.dashboard]
-            [lab.parsing])
+            [lab.parsing]
+            [lab.helpers])
   (:require-macros  [lab.core :refer [render-help resolve-symbol default-sessions]]))
 
 (enable-console-print!)
@@ -212,7 +213,7 @@
     (filterv (fn [item]
                (string/starts-with? item "session-")))
     (mapv (fn [item] (subs item (count "session-"))))
-    (into [session-names])))
+    (into session-names)))
 
 (defn save-session! [name]
   (.setItem
@@ -363,10 +364,10 @@
           (when visible?
             (toggle-repl! true)
             (.setCursor cm #js {:line 3 :ch 0})))
-        (load-session! "default")
         (add-view! :view)
         (map! :view)
-        (update-repl-size)))))
+        (update-repl-size)
+        (load-session! "default")))))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on

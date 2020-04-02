@@ -9,15 +9,21 @@
 
 (defonce compile-state-ref (env/default-compiler-env))
 
-(defn eval! [value]
-  (cljs/eval-str
-    compile-state-ref
-    value
-    "[test]"
-    {:eval cljs/js-eval
-     :load (partial boot/load compile-state-ref)}
-    (fn [{:keys [value]}]
-      (hud/show! (if (string/blank? value) "OK" (str value))))))
+(defn eval!
+  ([value]
+   (eval!
+     value
+     (fn [{:keys [value] :as result}]
+          (js/console.log result)
+          (hud/show! (if (string/blank? value) result (str value))))))
+  ([value complete-fn]
+    (cljs/eval-str
+      compile-state-ref
+      value
+      "[test]"
+      {:eval cljs/js-eval
+       :load (partial boot/load compile-state-ref)}
+      complete-fn)))
 
 (defn eval-forms! [lines]
   (doseq [form (parsing/lines->forms lines)]
@@ -31,12 +37,8 @@
                (not (string/blank? (.getSelection cm))) (.getSelection cm)
                top-form (parsing/get-top-form cm cursor)
                :else (parsing/get-current-form cm cursor))]
-    (cljs/eval-str
-      compile-state-ref
+    (eval!
       part
-      "[test]"
-      {:eval cljs/js-eval
-       :load (partial boot/load compile-state-ref)}
       (fn [{:keys [value error] :as result}]
         (let [editor-content (.getValue cm)
               success (boolean (not error))
@@ -57,10 +59,12 @@
 (boot/init compile-state-ref
            {:path "js/bootstrap"}
            (fn []
-             (eval! "(do
-                      (require '[lab.map :as m])
-                      (require '[lab.graph :as g])
-                      (require '[lab.console :as c])
-                      (require '[lab.vis :as v])
-                      (require '[lab.views :as views])
-                      (require '[lab.dashboard :as d]))")))
+             (js/console.info "Bootstrap ready. Evaluating default")
+             (eval! "(ns cljs.user
+                       (:require [lab.map :as m]
+                                 [lab.graph :as g]
+                                 [lab.console :as c]
+                                 [lab.vis :as v]
+                                 [lab.views :as views]
+                                 [lab.helpers :as h]
+                                 [lab.dashboard :as d]))")))

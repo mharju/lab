@@ -1,5 +1,6 @@
 (ns lab.map
   (:require [lab.views :refer [components views set-mode!]]
+            [lab.layout :as layout]
             ["leaflet" :refer [tileLayer Icon LatLng marker polyline] :as L]
             ["leaflet-omnivore"]
             ["leaflet-draw"]))
@@ -50,6 +51,7 @@
     (for [m (map :map (vals @components))
           :when (not (nil? m))]
       (.invalidateSize m))))
+(layout/register-handler! invalidate-size!)
 
 (defn map-center!
   "Center the map to the given point and zoom level. Zoom defaults to 13."

@@ -180,6 +180,7 @@
       70 (do (layout/full-repl!) (.preventDefault e))
       72 (do (layout/toggle-repl!) (.preventDefault e))
       71 (do (toggle-help!) (.preventDefault e))
+      ;; window mode HJKL
       74 (do (paste!) (.preventDefault e))
       89 (when-not (.-altKey e)
            (layout/step-repl-size!  (if (.-shiftKey e) -1 1))

@@ -1,14 +1,20 @@
 (ns lab.layout
   (:require ["jquery" :as $]
-            [lab.codemirror :as cm]
-            [lab.map]
-            [lab.graph]))
+            [lab.codemirror :as cm]))
+
+
+(defonce handlers (atom #{}))
+(defn register-handler! [handler]
+  (swap! handlers conj handler))
+(defn remove-handler! [handler]
+  (swap! handlers disj handler))
 
 (defn invalidate-sizes! []
   (js/setTimeout
     (fn []
-      (lab.map/invalidate-size!)
-      (lab.graph/invalidate-size!))
+      (doall
+        (for [handler @handlers]
+          (handler))))
     0))
 
 (declare repl-size)

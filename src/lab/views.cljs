@@ -1,8 +1,9 @@
 (ns lab.views
   (:require-macros [hiccups.core :as hiccups :refer [html]])
   (:require [hiccups.runtime]
-            ["jquery" :as $]
-            [clojure.set]))
+            [clojure.set]
+            [lab.layout :as layout]
+            ["jquery" :as $]))
 
 (defonce views (atom {}))
 (defonce components (atom {}))
@@ -16,6 +17,7 @@
                                [:div.map] [:div.graph] [:div.vis] [:div.console] [:div.dashboard]])]
         (.append ($ parent) template)
         (.attr ($ parent) "class" (str "n-" (inc (count @views))))
+        (layout/invalidate-sizes!)
         (swap! views assoc id (js/document.getElementById (name id)))
         (swap! components assoc id {})))))
 
@@ -23,7 +25,9 @@
   (swap! views dissoc id)
   (swap! components dissoc id)
   (.attr ($ "#dashboard") "class" (str "n-" (count @views)))
-  (.remove (js/document.querySelector (str "#" (name id)))))
+  (.remove (js/document.querySelector (str "#" (name id))))
+  (layout/invalidate-sizes!))
+
 
 (defn rename-view! [id new-id]
   (when-not (contains? @components new-id)

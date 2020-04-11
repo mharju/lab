@@ -1,5 +1,6 @@
 (ns lab.graph
   (:require [lab.views :refer [components set-mode!]]
+            [lab.layout :as layout]
             ["c3" :as c3]))
 
 (def color-pattern {:pattern ["#0cc2aa" "#fcc100" "#a88add"]})
@@ -38,14 +39,14 @@
   (doall
     (for [[k v] @components
           :let [{g :graph} v
-                o (js/document.getElementById (name k))
-                p (.-parentElement (js/document.getElementById (name k)))
-                width (min (.-clientWidth p) (.-clientWidth o))
-                height (min (.-clientHeight p) (.-clientWidth o))]
+                p (js/document.getElementById (name k))
+                width (.-clientWidth p)
+                height (.-clientHeight p)]
           :when (not (nil? g))]
       (do
         (.resize g #js {:width width :height height})
         (.flush g)))))
+(layout/register-handler! invalidate-size!)
 
 (defn load!
   "Load data into existing graph in view.

@@ -1,4 +1,8 @@
 {
+  "scripts": {
+    "start": "shadow-cljs watch lab bootstrap",
+    "release": "shadow-cljs release lab bootstrap"
+  },
   "dependencies": {
     "@mapbox/leaflet-omnivore": "^0.3.4",
     "c3": "^0.7.15",

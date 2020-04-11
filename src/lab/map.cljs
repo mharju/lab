@@ -47,7 +47,8 @@
 
 (defn invalidate-size! []
   (doall
-    (for [m (map :map (vals @components))]
+    (for [m (map :map (vals @components))
+          :when (not (nil? m))]
       (.invalidateSize m))))
 
 (defn map-center!

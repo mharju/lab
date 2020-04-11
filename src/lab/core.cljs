@@ -9,7 +9,9 @@
             ["parinfer-codemirror" :as pcm]
             [lab.eval :as evl]
             [lab.views :refer [add-view!]]
+            [lab.layout :as layout]
             [lab.map :refer [map!]]
+            [lab.codemirror :as cm]
             [lab.graph]
             [lab.vis]
             [lab.console]
@@ -43,13 +45,10 @@
 
 ;; editor functions
 
-(defonce cm-inst (atom nil))
-
 (defn on-draw-created [e]
   (let [layer-type (.-layerType e)
         layer (.-layer e)
-        inst @cm-inst
-        cursor (.getCursor inst)
+        cursor (cm/get-cursor)
         geometry (cond
                    (= layer-type "marker")
                    (let [ll (.getLatLng layer)]
@@ -65,9 +64,7 @@
                               (first latlngs)
                               latlngs)))
                          (mapv #(vector (:lat %) (:lng %)))))))]
-    (.replaceRange inst
-                   geometry
-                   cursor)))
+    (cm/replace-range geometry cursor)))
 
 (defn toggle-help! []
   (.toggle ($ ".help")))
@@ -100,94 +97,6 @@
   (->> (reset! hud-duration duration)
        (.setItem js/localStorage "hud_duration")))
 
-(defn invalidate-sizes! []
-  (js/setTimeout
-        (fn []
-          (lab.map/invalidate-size!)
-          (lab.graph/invalidate-size!))
-        0))
-
-(declare repl-size)
-(defn toggle-repl!
-  ([]
-   (let [$repl ($ "#repl")
-         visible? (not (.is $repl ":visible"))]
-     (toggle-repl! visible?)))
-  ([visible?]
-    (let [$repl ($ "#repl")
-          dashboard (js/document.getElementById "dashboard")
-          {:keys [size unit]} @repl-size]
-      (.setItem js/localStorage "repl_visibility" visible?)
-      (if visible?
-        (do
-          (.show $repl)
-          (set! (.. dashboard -style -height) (str (- 100 size) (if (keyword? unit) (name unit) unit))))
-        (do
-          (.hide $repl)
-          (set! (.. dashboard -style -height) "100vh")
-          (.focus @cm-inst)))
-      (invalidate-sizes!))))
-
-
-(declare repl-direction-horizontal?)
-(defn default-repl-size
-  ([] (default-repl-size @repl-direction-horizontal?))
-  ([_direction] 40))
-(defn repl-size-unit
-  ([] (repl-size-unit @repl-direction-horizontal?))
-  ([direction] (if direction :vw :vh)))
-(defn repl-opposite-size-unit
-  ([] (repl-opposite-size-unit @repl-direction-horizontal?))
-  ([direction] (if (= (repl-size-unit direction) :vw) :vh :vw)))
-(defonce repl-direction-horizontal? (atom false))
-(defonce repl-size (atom {:size (default-repl-size) :unit (repl-size-unit)}))
-(add-watch repl-direction-horizontal? :size-change
-  (fn [_key _atom _old-state horizontal?]
-    (cond-> ($ js/document.body)
-      horizontal?        (.addClass "horizontal")
-      (not horizontal?)  (.removeClass "horizontal"))
-    (reset! repl-size {:size (default-repl-size horizontal?) :unit (repl-size-unit horizontal?)})))
-
-(defn update-repl-size
-  ([] (update-repl-size @repl-direction-horizontal? @repl-size))
-  ([direction {:keys [size unit]}]
-   (let [dashboard (js/document.getElementById "dashboard")]
-     (doall
-       (for [elem [(js/document.getElementById "repl") (js/document.querySelector ".CodeMirror")]
-             :let [isize (str (- 100 size) (if (keyword? unit) (name unit) unit))
-                   size (str size (if (keyword? unit) (name unit) unit))]]
-         (do
-           (if direction
-             (do (set! (.. elem -style -width) size)
-                 (set! (.. dashboard -style -height) "100vh")
-                 (set! (.. elem -style -height) "100%"))
-             (do (set! (.. elem -style -height) size)
-                 (set! (.. dashboard -style -height) isize)
-                 (set! (.. elem -style -width) "100%")))
-           (invalidate-sizes!)))))))
-
-(add-watch repl-size :size-change
-  (fn [_key _atom _old-state size]
-    (update-repl-size @repl-direction-horizontal? size)))
-
-(defn toggle-direction! []
-  (swap! repl-direction-horizontal? not))
-
-(defn resize-repl! [new-height]
-  (swap! repl-size assoc :size new-height :unit :vh))
-
-(defn step-repl-size! [increment]
-  (swap! repl-size (fn [{:keys [size unit] :as s}]
-                     (if (or (= unit :vh) (= unit :vw))
-                       {:size (+ size increment) :unit unit}
-                       (do (js/console.warn "Not in em mode while resizing!") s)))))
-
-(defn full-repl! []
-  (let [{:keys [size unit]} @repl-size]
-    (if (not= size 100)
-      (swap! repl-size assoc :size 100 :unit (repl-size-unit))
-      (swap! repl-size assoc :size (default-repl-size) :unit (repl-size-unit)))))
-
 (defn paste! []
   (->
     ($ "#pasteboard")
@@ -219,7 +128,7 @@
   (.setItem
     js/window.localStorage
     (str "session-" name)
-    (-> (.getValue @cm-inst)
+    (-> (cm/get-value)
         (.replace help-text "")
         (.replace save-session-proto "")
         (js/JSON.stringify))))
@@ -238,11 +147,11 @@
     (->> (get sessions (keyword name))
          (lab.parsing/normalize-session)
          (str help-text)
-         (.setValue @cm-inst))
+         cm/set-value)
     (some->> (or (.getItem js/window.localStorage (str "session-" name)) "\"\"")
              js/JSON.parse
              (str help-text)
-             (.setValue @cm-inst))))
+             cm/set-value)))
 
 (defn find-start-of-word [line ch]
   (->> (.substring line 0 ch)
@@ -268,12 +177,12 @@
 (defn- handle-key [e]
   (when (.-metaKey e)
     (case (.-keyCode e)
-      70 (do (full-repl!) (.preventDefault e))
+      70 (do (layout/full-repl!) (.preventDefault e))
+      72 (do (layout/toggle-repl!) (.preventDefault e))
       71 (do (toggle-help!) (.preventDefault e))
-      72 (do (toggle-repl!) (.preventDefault e))
       74 (do (paste!) (.preventDefault e))
       89 (when-not (.-altKey e)
-           (step-repl-size!  (if (.-shiftKey e) -1 1))
+           (layout/step-repl-size!  (if (.-shiftKey e) -1 1))
            (.preventDefault e))
       true)))
 
@@ -355,18 +264,18 @@
                      #js {:mode "clojure"
                           :lineNumbers false
                           :theme "solarized dark"})]
-        (reset! cm-inst cm)
+        (cm/set-inst! cm)
         (pcm/init cm)
         (set-shortcuts! cm)
         (.setOption cm "hintOptions" #js {"hint" get-completions})
         (let [stored (.getItem js/localStorage "repl_visibility")
               visible? (if-not (nil? stored) (= stored "true") true)]
           (when visible?
-            (toggle-repl! true)
+            (layout/toggle-repl! true)
             (.setCursor cm #js {:line 3 :ch 0})))
         (add-view! :view)
         (map! :view)
-        (update-repl-size)
+        (layout/update-repl-size)
         (load-session! "default")))))
 
 (defn on-js-reload []

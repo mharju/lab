@@ -33,13 +33,15 @@
                          :padding {:top 30 :left 60 :right 60}}
                         opts)))))
 
+
 (defn invalidate-size! []
   (doall
     (for [[k v] @components
           :let [{g :graph} v
-                p (.-parentNode (js/document.getElementById (name k)))
-                width (.-clientWidth p)
-                height (.-clientHeight p)]
+                o (js/document.getElementById (name k))
+                p (.-parentElement (js/document.getElementById (name k)))
+                width (min (.-clientWidth p) (.-clientWidth o))
+                height (min (.-clientHeight p) (.-clientWidth o))]
           :when (not (nil? g))]
       (do
         (.resize g #js {:width width :height height})

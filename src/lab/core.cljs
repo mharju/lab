@@ -12,6 +12,7 @@
             [lab.layout :as layout]
             [lab.map :refer [map!]]
             [lab.codemirror :as cm]
+            [lab.autodetect :as autodetect]
             [lab.graph]
             [lab.vis]
             [lab.console]
@@ -238,10 +239,12 @@
                                                       (let [input ($ "#pasteboard input[name=var]")
                                                             textarea ($ "#pasteboard textarea")
                                                             wrap ($ "#pasteboard input[name=wrap]")
+                                                            detect ($ "#pasteboard input[name=detect]")
                                                             var-name (.val input)
                                                             value (.val textarea)
-                                                            wrap-to-string? (.prop wrap "checked")]
-                                                        (js/console.log "store var" var-name "as" value)
+                                                            wrap-to-string? (.prop wrap "checked")
+                                                            auto-detect? (.prop detect "checked")]
+                                                        (js/console.log "store var" var-name "as" value "wrap?" wrap-to-string? "detect?" auto-detect?)
                                                         (.val input "")
                                                         (.val textarea "")
                                                         (.prop wrap "checked" false)
@@ -249,7 +252,19 @@
                                                         (js/setTimeout
                                                           (fn []
                                                             (.hide ($ "#pasteboard"))
-                                                            (evl/eval! (str "(def " var-name " " (if wrap-to-string? (str "\"" (string/replace value #"\"" "\\\"") "\"") value) ")")))
+                                                            (evl/eval!
+                                                              (str "(def "
+                                                                 var-name " "
+                                                                 (cond
+                                                                   wrap-to-string?
+                                                                   (str "\"" (string/replace value #"\"" "\\\"") "\"")
+
+                                                                   auto-detect?
+                                                                   (str "(lab.autodetect/detect" (str "\"" (string/replace value #"\"" "\\\"") "\"") ")")
+
+                                                                   :else
+                                                                   value)
+                                                               ")")))
                                                           800)
                                                         (.preventDefault e))))
       (.delegate ($ js/document) "#cancel" "click" (fn [_]

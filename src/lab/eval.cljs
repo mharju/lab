@@ -67,4 +67,5 @@
                                  [lab.vis :as v]
                                  [lab.views :as views]
                                  [lab.helpers :as h]
-                                 [lab.dashboard :as d]))")))
+                                 [lab.dashboard :as d]
+                                 [lab.autodetect]))")))

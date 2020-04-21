@@ -53,23 +53,6 @@ body {
   display: grid;
   width: 100vw;
   height: 60vh;
-  grid-template-columns: auto;
-  grid-template-rows: 100%;
-}
-#dashboard.n-2, #dashboard.n-3 {
-  grid-template-columns: 50vw 50vw;
-}
-#dashboard.n-3 {
-  grid-template-rows: 42% 58%;
-}
-#dashboard.n-3 > :nth-child(3) {
-  grid-column-start: 1;
-  grid-column-end: 3;
-  border-top: 1px solid #C8CBD6;
-}
-#dashboard.n-4 {
-    grid-template-columns: 50vw 50vw;
-    grid-template-rows: 50vh 50vh;
 }
 
 .view {

@@ -8,14 +8,15 @@
   (v/set-mode! view :dashboard))
 
 (defn metric! [view id value & {:keys [title unit]}]
-  (.insertAdjacentHTML
-    (.querySelector (get @v/views view) ".dashboard")
-    "beforeend"
-    (hiccups/html
-      (cond-> [:div {:class (str "metric " (name id))}]
-        title   (conj [:div.title title])
-        :always (conj [:div.value value])
-        unit    (conj [:div.unit unit])))))
+  (when-not (.querySelector js/document (str ".metric." (name id)))
+    (.insertAdjacentHTML
+      (.querySelector (get @v/views view) ".dashboard")
+      "beforeend"
+      (hiccups/html
+        (cond-> [:div {:class (str "metric " (name id))}]
+          title   (conj [:div.title title])
+          :always (conj [:div.value value])
+          unit    (conj [:div.unit unit]))))))
 
 (defn update! [view id value]
   (gobj/set

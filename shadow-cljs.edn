@@ -1,6 +1,6 @@
 {
   :source-paths ["src"]
-  :dependencies [[org.clojure/core.async  "1.0.567"
+  :dependencies [[org.clojure/core.async  "1.1.587"
                   :exclusions [org.clojure/tools.reader]]
                  [hiccup "1.0.5"]
                  [hiccups "0.3.0"]
@@ -16,4 +16,4 @@
                   :bootstrap {:target        :bootstrap
                               :output-dir    "resources/public/js/bootstrap"
                               :exclude       #{cljs.repl cljs.js cljs.core.async.macros lab.core hiccups.core}
-                              :entries       [cljs.js goog lab.layout lab.codemirror lab.map lab.graph lab.console lab.vis lab.views lab.dashboard lab.helpers lab.core lab.eval hiccups.runtime jquery]}}}
+                              :entries       [cljs.js goog lab.layout lab.codemirror lab.map lab.graph lab.console lab.vis lab.views lab.dashboard lab.helpers lab.core lab.eval lab.autodetect hiccups.runtime jquery]}}}

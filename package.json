@@ -6,14 +6,19 @@
   "dependencies": {
     "@mapbox/leaflet-omnivore": "^0.3.4",
     "c3": "^0.7.15",
-    "codemirror": "^5.52.0",
-    "jquery": "^3.4.1",
+    "codemirror": "^5.53.2",
+    "jquery": "^3.5.0",
     "leaflet": "^1.6.0",
     "leaflet-draw": "^1.0.4",
     "leaflet-omnivore": "^0.3.4",
+    "moment": "^2.24.0",
     "parinfer-codemirror": "^1.4.2",
     "process": "^0.11.10",
-    "vis-network": "^7.3.6",
+    "vis-data": "^6.5.1",
+    "vis-network": "^7.6.1",
     "vis-timeline": "^7.2.1"
+  },
+  "devDependencies": {
+    "shadow-cljs": "^2.8.99"
   }
 }

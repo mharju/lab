@@ -13,4 +13,4 @@
 (defn get-cursor []
   (.getCursor @cm-inst))
 (defn replace-range [content cursor]
-  (.replaceRanve @cm-inst content cursor))
+  (.replaceRange @cm-inst content cursor))

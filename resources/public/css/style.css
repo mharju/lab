@@ -272,11 +272,11 @@ text {
   width: 70vw;
   height: 75vh;
   background-color: white;
-  border-radius: 16px;
+  border-radius: 8px;
 
   display: flex;
   flex-direction: column;
-  padding: 2em;
+  padding: 1.5em 1.5em;
 
   opacity: 0;
   transform: translate3d(0,5vh,0);
@@ -303,7 +303,7 @@ text {
     border: 1px solid #ccc;
     font-size: 14pt;
     font-family: Menlo,'Droid Sans Mono',monospace;
-    margin-bottom: 1em;
+    padding: 1em;
 }
 #pasteboard .buttons {
   display: flex;
@@ -322,9 +322,20 @@ text {
     background-color: rgba(0,0,0,0.4);
     cursor: pointer;
 }
-#save { margin-right: 1em; }
-#pasteboard input[type=checkbox] {
-  margin-bottom: 1em;
+#save {
+  margin-right: 1em;
+  color: #fff;
+  background-color: #2873DC;
+}
+
+#pasteboard .options {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 1em;
+}
+#pasteboard .options div {
+  margin-left: 1em;
 }
 
 .vis {

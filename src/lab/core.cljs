@@ -1,5 +1,5 @@
 (ns lab.core
-  (:require [clojure.string :as string]
+  (:require [clojure.string :as str]
             [cljs.pprint]
             [goog.object :as gobj]
             ["jquery" :as $]
@@ -14,6 +14,7 @@
             [lab.map :refer [map!]]
             [lab.codemirror :as cm]
             [lab.autodetect :as autodetect]
+            [lab.hud :as hud]
             [lab.graph]
             [lab.vis]
             [lab.console]
@@ -122,7 +123,7 @@
     (js/Object.keys js/window.localStorage)
     (js->clj)
     (filterv (fn [item]
-               (string/starts-with? item "session-")))
+               (str/starts-with? item "session-")))
     (mapv (fn [item] (subs item (count "session-"))))
     (into session-names)))
 
@@ -208,9 +209,8 @@
           (eval-top-form [cm] (-> (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result @hud-result :hud-duration @hud-duration) (maybe-save-default!)))
           (eval-alt-form [cm] (-> (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result (not @hud-result)) (maybe-save-default!)))
           (eval-alt-top-form [cm] (-> (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result (not @hud-result)) (maybe-save-default!)))
-          (eval-editor [cm] (-> (.getValue cm)
-                                   (string/split #"\n")
-                                   evl/eval-forms!))
+          (eval-editor [_] (-> (cm/lines)
+                               evl/eval-forms!))
           (eval-toggle-help [_] (toggle-help!))]
       (.setOption cm "extraKeys"
         (-> (alternate-keys {"Cmd-E"        eval-form
@@ -236,11 +236,13 @@
   (let [input ($ "#pasteboard input[name=var]")
         textarea ($ "#pasteboard textarea")
         wrap ($ "#pasteboard input[name=wrap]")
-        detect ($ "#pasteboard input[name=detect]")]
+        detect ($ "#pasteboard input[name=detect]")
+        re-eval ($ "#pasteboard input[name=eval]")]
     (.val input "")
     (.val textarea "")
     (.prop wrap "checked" false)
     (.prop detect "checked" false)
+    (.prop re-eval "checked" false)
     (.removeClass ($ "#pasteboard") "visible")))
 
 (defonce init
@@ -258,11 +260,13 @@
                                                             textarea ($ "#pasteboard textarea")
                                                             wrap ($ "#pasteboard input[name=wrap]")
                                                             detect ($ "#pasteboard input[name=detect]")
+                                                            re-eval ($ "#pasteboard input[name=eval]")
                                                             var-name (.val input)
                                                             value (.val textarea)
                                                             wrap-to-string? (.prop wrap "checked")
-                                                            auto-detect? (.prop detect "checked")]
-                                                        (js/console.log "store var" var-name "as" value "wrap?" wrap-to-string? "detect?" auto-detect?)
+                                                            auto-detect? (.prop detect "checked")
+                                                            re-eval? (.prop re-eval "checked")]
+                                                        (js/console.log "store var" var-name "as" value "wrap?" wrap-to-string? "detect?" auto-detect? "re-eval?" re-eval?)
                                                         (reset-pasteboard!)
                                                         (js/setTimeout
                                                           (fn []
@@ -272,14 +276,18 @@
                                                                  var-name " "
                                                                  (cond
                                                                    wrap-to-string?
-                                                                   (str "\"" (string/replace value #"\"" "\\\"") "\"")
+                                                                   (str "\"" (str/replace value #"\"" "\\\"") "\"")
 
                                                                    auto-detect?
-                                                                   (str "(lab.autodetect/detect" (str "\"" (string/replace value #"\"" "\\\"") "\"") ")")
+                                                                   (str "(lab.autodetect/detect" (str "\"" (str/replace value #"\"" "\\\"") "\"") ")")
 
                                                                    :else
                                                                    value)
-                                                               ")")))
+                                                               ")")
+                                                               (fn [_]
+                                                                 (if re-eval?
+                                                                   (-> (cm/lines) evl/eval-forms!)
+                                                                   (hud/show! var-name)))))
                                                           800)
                                                         (.preventDefault e))))
       (.delegate ($ js/document) "#cancel" "click" (fn [_] (reset-pasteboard!)))

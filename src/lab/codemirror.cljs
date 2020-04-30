@@ -1,4 +1,5 @@
-(ns lab.codemirror)
+(ns lab.codemirror
+  (:require [clojure.string :as str]))
 
 (defonce cm-inst (atom nil))
 
@@ -14,3 +15,6 @@
   (.getCursor @cm-inst))
 (defn replace-range [content cursor]
   (.replaceRange @cm-inst content cursor))
+(defn lines []
+  (-> (.getValue @cm-inst)
+      (str/split #"\n")))

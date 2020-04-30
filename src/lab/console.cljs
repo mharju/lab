@@ -1,4 +1,5 @@
 (ns lab.console
+  (:require-macros [hiccups.core :as hiccups :refer [html]])
   (:require [clojure.string :as str]
             [lab.views :refer [components views set-mode!]]))
 
@@ -6,46 +7,71 @@
   (set-mode! view :console))
 
 (defn make-row [text]
-  (str "<span class=\"row\"><span class=\"date\">" (.replace (.slice (.toISOString (js/Date.)) 0 -1) "T" " ") "</span>" (str/join " " text) "</span>"))
+  [:span.row
+   [:span.date (.replace (.slice (.toISOString (js/Date.)) 0 -1) "T" " ")]
+   text])
 
 (defn find-element [view]
   (.find (js/$ (get-in @views [view])) ".console"))
 
 (defn- map-to-table [m]
-  (str "<table><tbody>"
-       (str/join
-         " "
-         (mapv
-           (fn [[k v]]
-             (str "<tr><td>" k "</td><td>" (if (map? v)
-                                             (map-to-table v)
-                                             v) "</td></tr>"))
-           m))
-       "</table>"))
+  [:table.map
+   (->> m
+        (mapv
+          (fn [[k v]]
+            [:tr
+             [:td k]
+             (if (map? v)
+               (into [:td] (map-to-table v))
+               [:td (str v)])]))
+        (into [:tbody]))])
 
 (defn make-table-row [m]
-  (str "<span class=\"row\">
-       <span class=\"date\">" (.replace (.slice (.toISOString (js/Date.)) 0 -1) "T" " ") "</span>"
-       (map-to-table m)
-       "</span>"))
+  (conj
+    [:span.row
+     [:span.date (.replace (.slice (.toISOString (js/Date.)) 0 -1) "T" " ")]]
+    (map-to-table m)))
 
 (defn scroll-to-bottom! [view]
   (let [v (.get (find-element view) 0)]
     (set! (.-scrollTop v) (.-scrollHeight v))))
 
 (defn append! [view & text]
-  (.append (find-element view) (make-row text))
+  (.append (find-element view) (html (make-row text)))
   (scroll-to-bottom! view))
 
 (defn append-map! [view m]
-  (.append (find-element view) (make-table-row m))
+  (.append (find-element view) (html (make-table-row m)))
   (scroll-to-bottom! view))
 
+(defn append-vec! [view v & {:keys [titles]}]
+  (let [titles (if titles
+                 titles
+                 (mapv str (range (count (first v)))))]
+    (.append
+      (find-element view)
+      (html
+        [:span.row
+         [:span.date (.replace (.slice (.toISOString (js/Date.)) 0 -1) "T" " ")]
+         [:table.vec
+          (->> titles
+               (mapv (fn [h] [:th h]) )
+               (into [:thead]))
+          (->> v
+               (mapv (fn [row]
+                       (into [:tr]
+                             (mapv
+                               (fn [c] [:td c])
+                               (if (map? row)
+                                 (vals row)
+                                 row)))))
+               (into [:tbody]))]]))))
+
 (defn prepend! [view & text]
-  (.prepend (find-element view) (make-row text)))
+  (.prepend (find-element view) (html (make-row text))))
 
 (defn prepend-map! [view m]
-  (.prepend (find-element view) (make-table-row m)))
+  (.prepend (find-element view) (html (make-table-row m))))
 
 (defn clear! [view]
   (let [element (.find (js/$ (get-in @views [view])) ".console")]

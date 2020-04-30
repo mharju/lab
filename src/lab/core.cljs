@@ -6,6 +6,7 @@
             ["codemirror" :as CodeMirror]
             ["codemirror/addon/hint/show-hint"]
             ["codemirror/mode/clojure/clojure"]
+            ["/js/keymap/vim"]
             ["parinfer-codemirror" :as pcm]
             [lab.eval :as evl]
             [lab.views :refer [add-view!]]
@@ -103,7 +104,7 @@
     ($ "#pasteboard")
     (.show)
     (.addClass "visible")
-    (.find "input")
+    (.find "input[type=\"text\"]")
     (.focus)))
 
 (def help-text
@@ -175,7 +176,13 @@
                           :from from
                           :to cursor}))))))
 
+(declare reset-pasteboard!)
 (defn- handle-key [e]
+  (when (and (.is ($ "#pasteboard") ":visible") (= (.-keyCode e) 27))
+    (println "reset pasteboard.")
+    (reset-pasteboard!)
+    (.hide ($ "#pasteboard")))
+
   (when (.-metaKey e)
     (case (.-keyCode e)
       70 (do (layout/full-repl!) (.preventDefault e))
@@ -225,6 +232,17 @@
 (defn handle-dragover [e]
   (.preventDefault e))
 
+(defn reset-pasteboard! []
+  (let [input ($ "#pasteboard input[name=var]")
+        textarea ($ "#pasteboard textarea")
+        wrap ($ "#pasteboard input[name=wrap]")
+        detect ($ "#pasteboard input[name=detect]")]
+    (.val input "")
+    (.val textarea "")
+    (.prop wrap "checked" false)
+    (.prop detect "checked" false)
+    (.removeClass ($ "#pasteboard") "visible")))
+
 (defonce init
   (.ready ($ js/document)
     (fn [_]
@@ -245,10 +263,7 @@
                                                             wrap-to-string? (.prop wrap "checked")
                                                             auto-detect? (.prop detect "checked")]
                                                         (js/console.log "store var" var-name "as" value "wrap?" wrap-to-string? "detect?" auto-detect?)
-                                                        (.val input "")
-                                                        (.val textarea "")
-                                                        (.prop wrap "checked" false)
-                                                        (.removeClass ($ "#pasteboard") "visible")
+                                                        (reset-pasteboard!)
                                                         (js/setTimeout
                                                           (fn []
                                                             (.hide ($ "#pasteboard"))
@@ -267,19 +282,15 @@
                                                                ")")))
                                                           800)
                                                         (.preventDefault e))))
-      (.delegate ($ js/document) "#cancel" "click" (fn [_]
-                                                        (let [input ($ "#pasteboard input[name=var]")
-                                                              textarea ($ "#pasteboard textarea")
-                                                              wrap ($ "#pasteboard input[name=wrap]")]
-                                                          (.val input "")
-                                                          (.val textarea "")
-                                                          (.prop wrap "checked" false)
-                                                          (.hide ($ "#pasteboard")))))
+      (.delegate ($ js/document) "#cancel" "click" (fn [_] (reset-pasteboard!)))
       (toggle-help!)
       (let [cm (CodeMirror. (js/document.querySelector "#repl")
                      #js {:mode "clojure"
                           :lineNumbers false
                           :theme "solarized dark"})]
+
+        (when (js/window.localStorage.getItem "vim-mode")
+          (.setOption cm "keyMap" "vim"))
         (cm/set-inst! cm)
         (pcm/init cm)
         (set-shortcuts! cm)

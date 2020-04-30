@@ -20,7 +20,21 @@
       (when (and (string? data) (re-find #"^(\w+,)(\w+,*)+" data))
         (let [[header & rows] (->> (str/split data "\n")
                                    (mapv #(str/split % ",")))
-              header (map keyword header)]
+              header (if (= (count header) (count (first rows)))
+                       (map keyword header)
+                       (map str (range (count (first rows)))))]
+          (map #(zipmap header
+                        (map
+                          (fn [v] (or (detect v) v)) %)) rows))))))
+(def tsv
+  (reify IDetector
+    (-transform [this data]
+      (when (and (string? data) (re-find #"\t" data))
+        (let [[header & rows] (->> (str/split data "\n")
+                                   (mapv #(str/split % "\t")))
+              header (if (= (count header) (count (first rows)))
+                       (map keyword header)
+                       (map str (range (count (first rows)))))]
           (map #(zipmap header
                         (map
                           (fn [v] (or (detect v) v)) %)) rows))))))
@@ -62,6 +76,7 @@
 
 (do
   (register! csv)
+  (register! tsv)
   (register! postgres)
   (register! numeric)
   (register! number-list)

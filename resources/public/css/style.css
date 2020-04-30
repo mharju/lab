@@ -104,19 +104,29 @@ body {
   margin: 0 auto;
   color: #2D4357;
 }
-.console table td:first-child {
+
+.console span.row > table.vec {
+  border-collapse: collapse;
+}
+.console span.row > table.vec td {
+  text-align: center;
+}
+.console span.row > table.vec tr:nth-child(2n) {
+  background-color: #93bade;
+}
+.console table.map td:first-child {
   color: #93BADE;
   padding-right: 0.5em;
   vertical-align: top;
 }
-.console table td:nth-child(2) {
+.console table.map td:nth-child(2) {
   font-weight: bold;
 }
-.console span.row > table > tbody > tr > td:first-child {
+.console span.row > table.map > tbody > tr > td:first-child {
   width: 50%;
   text-align: right;
 }
-.console span.row > table > tbody > tr > td > table {
+.console span.row > table.map > tbody > tr > td > table {
   margin: 0;
   padding: 0;
 }

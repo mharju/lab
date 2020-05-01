@@ -5,7 +5,8 @@ make ad-hoc dashboards, data visualizations or such when in need. You can use it
 built in REPL window or use the CLJS REPL through nREPL with your editor.
 
 It also supports retrieving and passing live data to views using websocket. This is handy
-if you want to have live updates from a production system.
+if you want to have live updates from a production system or push data from a system under 
+development for simple, visual introspection.
 
 ## Sessions
 
@@ -26,10 +27,11 @@ The application hosts default sessions that are stored in `src/lab/experiments` 
 | Cmd-(Shift)-R     | Evaluate (topmost) expression in current cursor position. Append result to the next row in editor.|
 | Control-Space     | Get autosuggestions of built in functions and currently available view name keywords.             |
 | Cmd-Shift-F       | Toggle Full REPL view.                                                                            |
-| Cmd-(Shift)-Y     | Make REPL bigger / smaller                                                                        |
+| Cmd-(Shift)-Y     | Make REPL bigger / smaller.                                                                       |
 | Cmd-G             | Toggle help.                                                                                      |
 | Cmd-H             | Toggle REPL visibility.                                                                           |
-| Cmd-J             | Paste var content                                                                                 |
+| Cmd-J             | Paste var content.                                                                                |
+| Esc               | Cancel paste window                                                                               |
 
 ## Screenshot
 

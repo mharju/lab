@@ -102,7 +102,7 @@
    :horizontal :row-defs})
 
 (defn add-view!
-  ([id] (add-view! id (some-> @view-info :views last) :vertical))
+  ([id] (add-view! id (some-> @view-info :views last :id) :vertical))
   ([id after direction]
     (when-not (contains? @components id)
       (let [$parent ($ "#dashboard")]

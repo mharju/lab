@@ -1,18 +1,29 @@
 (ns lab.autodetect
   (:require [clojure.string :as str]))
 
-(defonce detectors (atom #{}))
+(defonce detectors (atom []))
 (defprotocol IDetector
   (-transform [this data]))
 (defn register! [^IDectector detector]
   (swap! detectors conj detector))
 
 (defn detect [data]
-  (->> (for [detector @detectors]
-         (when-let [result (-transform detector data)]
-           result))
-       (remove nil?)
-       first))
+  (reduce
+    (fn [_ detector]
+      (when-let [result (-transform detector data)]
+        (reduced result)))
+    nil
+    @detectors))
+
+(def json
+  (reify
+    IDetector
+    (-transform [this data]
+      (try
+        (-> data
+            js/JSON.parse
+            (js->clj :keywordize-keys true))
+        (catch js/Error _ nil)))))
 
 (def csv
   (reify IDetector
@@ -23,7 +34,7 @@
               header (if (= (count header) (count (first rows)))
                        (map keyword header)
                        (map str (range (count (first rows)))))]
-          (map #(zipmap header
+          (mapv #(zipmap header
                         (map
                           (fn [v] (or (detect v) v)) %)) rows))))))
 (def tsv
@@ -35,7 +46,7 @@
               header (if (= (count header) (count (first rows)))
                        (map keyword header)
                        (map str (range (count (first rows)))))]
-          (map #(zipmap header
+          (mapv #(zipmap header
                         (map
                           (fn [v] (or (detect v) v)) %)) rows))))))
 
@@ -46,20 +57,11 @@
       (when (and (re-find #"\s+\w\s+" data) (re-find #"\-+" data))
         (let [[header _ & rows] (->> (str/split data "\n")
                                      (mapv #(str/split % #"\s+\||$")))]
-          (map #(zipmap (map (partial str/trim) header)
+          (mapv #(zipmap (map (partial str/trim) header)
                         (map
                           (fn [v] (let [v (str/trim v)]
                                     (or (detect v) v))) %))
              rows))))))
-
-(def json
-  (reify
-    IDetector
-    (-transform [this data]
-      (try
-        (-> (js/JSON.parse data)
-            (js->clj :keywordize-keys true))
-        (catch js/Error _ nil)))))
 
 (def numeric
   (reify
@@ -84,16 +86,17 @@
         (mapv (partial js/parseFloat) (re-seq #"\d+\.*\d*" data))))))
 
 (do
+  (reset! detectors [])
+  (register! json)
   (register! csv)
   (register! tsv)
   (register! postgres)
-  (register! json)
   (register! numeric)
   (register! number-list)
   (register! datetime))
 
 (comment
-  (reset! detectors #{})
+  (reset! detectors [])
   (detect "5")
 
   (let [data "    id     |            created            | status_type |        details        |            message_key             | order_id | status_code

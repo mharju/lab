@@ -52,6 +52,15 @@
                                     (or (detect v) v))) %))
              rows))))))
 
+(def json
+  (reify
+    IDetector
+    (-transform [this data]
+      (try
+        (-> (js/JSON.parse data)
+            (js->clj :keywordize-keys true))
+        (catch js/Error _ nil)))))
+
 (def numeric
   (reify
     IDetector
@@ -78,6 +87,7 @@
   (register! csv)
   (register! tsv)
   (register! postgres)
+  (register! json)
   (register! numeric)
   (register! number-list)
   (register! datetime))

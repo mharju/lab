@@ -92,6 +92,10 @@
           {:id (name id)}
           [:div.info [:span.id id] [:span.connection-status]]
           [:div.map] [:div.graph] [:div.vis] [:div.console] [:div.dashboard]]))
+(defn ->element [html]
+  (let [container (js/document.createElement "div")]
+    (set! (.-innerHTML container) html)
+    (.-firstChild container)))
 
 (defn update-styles! [styles]
   (let [stylesheet (js/document.getElementById "dashboard-styles")]
@@ -100,6 +104,17 @@
 (def direction-map
   {:vertical :col-defs
    :horizontal :row-defs})
+
+(defn set-views! [& {:keys [col-defs row-defs] declared-views :views}]
+  (let [parent (js/document.getElementById "dashboard")]
+    (set! (.-innerHTML parent) "")
+    (doseq [{:keys [id]} declared-views]
+      (.appendChild parent (-> (new-view id) ->element))
+      (swap! views assoc id (js/document.getElementById (name id)))
+      (swap! components assoc id {}))
+    (->> (reset! view-info {:views declared-views :row-defs row-defs :col-defs col-defs})
+         ->css
+         update-styles!)))
 
 (defn add-view!
   ([id] (add-view! id (some-> @view-info :views last :id) :vertical))

@@ -114,17 +114,19 @@
                                     (not= :require (first %)))))
                  first
                  (drop 1))]
-    (str "(require "
-          (-> (string/join " " dcl)
-              (string/replace #"\[" "'[")) ")")))
+    (when (seq dcl)
+      (str "(require "
+            (-> (string/join " " dcl)
+                (string/replace #"\[" "'[")) ")"))))
 
 (defn normalize-session [session]
   session
   (let [forms (-> session
                   (string/split #"\n")
-                  lines->forms)]
+                  lines->forms)
+        ns-form (normalize-ns (first forms))]
     (->> (rest forms)
-         (into [(normalize-ns (first forms))])
+         (into (or ns-form []))
          string/join)))
 
 (comment

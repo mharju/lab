@@ -126,7 +126,7 @@
                   lines->forms)
         ns-form (normalize-ns (first forms))]
     (->> (rest forms)
-         (into (or ns-form []))
+         (into (or [ns-form] []))
          string/join)))
 
 (comment

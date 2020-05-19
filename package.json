@@ -6,6 +6,7 @@
   "dependencies": {
     "@mapbox/leaflet-omnivore": "^0.3.4",
     "c3": "^0.7.15",
+    "d3": "^5.8.0",
     "codemirror": "^5.53.2",
     "jquery": "^3.5.0",
     "leaflet": "^1.6.0",

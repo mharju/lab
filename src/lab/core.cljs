@@ -271,23 +271,31 @@
                                                         (js/setTimeout
                                                           (fn []
                                                             (.hide ($ "#pasteboard"))
-                                                            (evl/eval!
-                                                              (str "(def "
-                                                                 var-name " "
-                                                                 (cond
-                                                                   wrap-to-string?
-                                                                   (str "\"" (str/replace value #"\"" "\\\"") "\"")
+                                                            (let [value
+                                                                   (str "(def "
+                                                                        var-name " "
+                                                                        (cond
+                                                                          wrap-to-string?
+                                                                          (str "\"" (-> value
+                                                                                        (str/replace #"\"" "\\\""))
+                                                                               "\"")
 
-                                                                   auto-detect?
-                                                                   (str "(lab.autodetect/detect" (str "\"" (str/replace value #"\"" "\\\"") "\"") ")")
+                                                                          auto-detect?
+                                                                          (str "(lab.autodetect/detect \"" (-> value
+                                                                                                               (str/replace #"\\" "\\\\")
+                                                                                                               (str/replace #"\"" "\\\""))
+                                                                               "\")")
 
-                                                                   :else
-                                                                   value)
-                                                               ")")
-                                                               (fn [_]
-                                                                 (if re-eval?
-                                                                   (-> (cm/lines) evl/eval-forms!)
-                                                                   (hud/show! var-name)))))
+                                                                          :else
+                                                                          value)
+                                                                        ")")]
+                                                              (js/console.log value)
+                                                              (evl/eval!
+                                                                value
+                                                                (fn [_]
+                                                                  (if re-eval?
+                                                                    (-> (cm/lines) evl/eval-forms!)
+                                                                    (hud/show! var-name))))))
                                                           800)
                                                         (.preventDefault e))))
       (.delegate ($ js/document) "#cancel" "click" (fn [_] (reset-pasteboard!)))

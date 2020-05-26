@@ -54,7 +54,7 @@
   (reify
     IDetector
     (-transform [this data]
-      (when (and (re-find #"\s+\w\s+" data) (re-find #"\-+" data))
+      (when (and (re-find #"\s+\w+\s+" data) (re-find #"\-+" data))
         (let [[header _ & rows] (->> (str/split data "\n")
                                      (mapv #(str/split % #"\s+\||$")))]
           (mapv #(zipmap (map (partial str/trim) header)

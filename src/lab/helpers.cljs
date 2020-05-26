@@ -1,4 +1,5 @@
-(ns lab.helpers)
+(ns lab.helpers
+  (:require [clojure.string :as str]))
 
 (defn load-json [& args]
   (-> (.apply js/fetch nil (clj->js args))
@@ -11,3 +12,12 @@
   (-> (load-json args)
       (.then (fn [r]
                (reset! destination r)))))
+
+(defn to-csv [data]
+  (let [ks (keys (first data))]
+    (str
+      (str/join "," ks)
+      "\n"
+      (->>
+        (mapv (fn [v] (str/join "," (vals v)) ) data)
+        (str/join "\n")))))

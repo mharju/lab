@@ -222,12 +222,16 @@
                              "Ctrl-Space"   "autocomplete"})
             clj->js))))
 
+(defonce file-contents (atom nil))
 (defn handle-drop [e]
   (.preventDefault e)
   (let [f  (aget (gobj/getValueByKeys e "dataTransfer" "files") 0)]
     (-> (.text f)
         (.then (fn [content]
-                 (gobj/set (js/document.getElementById "drop-target") "value" content))))))
+                 (if (>= (count content) 1024)
+                   (do (reset! file-contents content)
+                       (gobj/set (js/document.getElementById "drop-target") "value" (str "Loaded " (gobj/get f "name") ", size " (count content) " bytes.")))
+                   (gobj/set (js/document.getElementById "drop-target") "value" content)))))))
 
 (defn handle-dragover [e]
   (.preventDefault e))
@@ -238,6 +242,7 @@
         wrap ($ "#pasteboard input[name=wrap]")
         detect ($ "#pasteboard input[name=detect]")
         re-eval ($ "#pasteboard input[name=eval]")]
+    (reset! file-contents nil)
     (.val input "")
     (.val textarea "")
     (.prop wrap "checked" false)
@@ -262,7 +267,7 @@
                                                             detect ($ "#pasteboard input[name=detect]")
                                                             re-eval ($ "#pasteboard input[name=eval]")
                                                             var-name (.val input)
-                                                            value (.val textarea)
+                                                            value (or @file-contents (.val textarea))
                                                             wrap-to-string? (.prop wrap "checked")
                                                             auto-detect? (.prop detect "checked")
                                                             re-eval? (.prop re-eval "checked")]

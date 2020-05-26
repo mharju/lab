@@ -1,6 +1,8 @@
 (ns lab.map
+  (:require-macros [hiccups.core :as hiccups :refer [html]])
   (:require [lab.views :refer [components views set-mode!]]
             [lab.layout :as layout]
+            [lab.console :refer [map-to-table]]
             ["leaflet" :refer [tileLayer Icon LatLng marker polyline] :as L]
             ["leaflet-omnivore"]
             ["leaflet-draw"]))
@@ -80,7 +82,7 @@
 
 (defn add-marker!
   "Add a new marker to view with latitude and longitude."
-  [view lat lon & {:keys [rev center? zoom center-opts icon] :or {rev false center? true zoom 13 center-opts {:padding [10 10]}}}]
+  [view lat lon & {:keys [rev center? zoom center-opts icon data on-click] :or {rev false center? true zoom 13 center-opts {:padding [10 10]}}}]
   (set-mode! view :map)
   (let [l (get-in @components [view :map])
         coords (if-not rev [lat lon] [lon lat])
@@ -90,6 +92,10 @@
             (marker (clj->js coords)))]
     (.addTo m l)
     (when center? (map-center! view coords zoom center-opts))
+    (when on-click
+      (.on m "click" on-click))
+    (when data
+      (.bindPopup m (html (map-to-table data))))
     m))
 
 (defn add-custom-layer! [view layer]

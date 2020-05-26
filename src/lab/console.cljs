@@ -14,15 +14,46 @@
 (defn find-element [view]
   (.find (js/$ (get-in @views [view])) ".console"))
 
-(defn- map-to-table [m]
+(declare map-to-table)
+(defn vec-to-table [v & {:keys [titles]}]
+  (let [titles (if titles
+                 titles
+                 (mapv str (range (count (first v)))))]
+    [:table.vec
+      (->> titles
+           (mapv (fn [h] [:th h]) )
+           (into [:thead]))
+      (->> v
+           (mapv (fn [row]
+                   (into [:tr]
+                         (mapv
+                           (fn [c] [:td
+                                     (cond
+                                       (map? c)
+                                       (map-to-table c)
+
+                                       :else
+                                       (str c))])
+                           (if (map? row)
+                             (vals row)
+                             row)))))
+           (into [:tbody]))]))
+
+(defn map-to-table [m]
   [:table.map
    (->> m
         (mapv
           (fn [[k v]]
             [:tr
              [:td k]
-             (if (map? v)
-               (into [:td] (map-to-table v))
+             (cond
+               (map? v)
+               [:td (map-to-table v)]
+
+               (and (vector? v) (or (map? (first v)) (vector? (first v))))
+               [:td (vec-to-table v :titles (if (map? (first v)) (keys (first v)) nil))]
+
+               :else
                [:td (str v)])]))
         (into [:tbody]))])
 
@@ -45,27 +76,12 @@
   (scroll-to-bottom! view))
 
 (defn append-vec! [view v & {:keys [titles]}]
-  (let [titles (if titles
-                 titles
-                 (mapv str (range (count (first v)))))]
-    (.append
-      (find-element view)
-      (html
-        [:span.row
-         [:span.date (.replace (.slice (.toISOString (js/Date.)) 0 -1) "T" " ")]
-         [:table.vec
-          (->> titles
-               (mapv (fn [h] [:th h]) )
-               (into [:thead]))
-          (->> v
-               (mapv (fn [row]
-                       (into [:tr]
-                             (mapv
-                               (fn [c] [:td c])
-                               (if (map? row)
-                                 (vals row)
-                                 row)))))
-               (into [:tbody]))]]))))
+  (.append
+    (find-element view)
+    (html
+      [:span.row
+        [:span.date (.replace (.slice (.toISOString (js/Date.)) 0 -1) "T" " ")]
+        (vec-to-table v :titles titles)])))
 
 (defn prepend! [view & text]
   (.prepend (find-element view) (html (make-row text))))

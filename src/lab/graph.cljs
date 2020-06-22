@@ -34,7 +34,6 @@
                          :padding {:top 30 :left 60 :right 60}}
                         opts)))))
 
-
 (defn invalidate-size! []
   (doall
     (for [[k v] @components
@@ -65,3 +64,6 @@
   [view opts]
   (let [graph (get-in @components [view :graph])]
     (.flow graph (clj->js opts))))
+
+(comment
+  (graph! :view {:data {:columns [["data" 1 2 3 4 3 2 1]]}}))

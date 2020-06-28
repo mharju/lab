@@ -80,6 +80,9 @@
                     (when-not (>= (.indexOf (.-className (.getPane layer)) "tile") 0)
                       (.remove layer))))))
 
+(defn update-data! [marker data]
+  (.bindPopup marker (html (map-to-table data))))
+
 (defn add-marker!
   "Add a new marker to view with latitude and longitude."
   [view lat lon & {:keys [rev center? zoom center-opts icon data on-click] :or {rev false center? true zoom 13 center-opts {:padding [10 10]}}}]
@@ -92,10 +95,8 @@
             (marker (clj->js coords)))]
     (.addTo m l)
     (when center? (map-center! view coords zoom center-opts))
-    (when on-click
-      (.on m "click" on-click))
-    (when data
-      (.bindPopup m (html (map-to-table data))))
+    (when on-click (.on m "click" on-click))
+    (when data (update-data! m data))
     m))
 
 (defn add-custom-layer! [view layer]
@@ -103,10 +104,10 @@
   (let [m (get-in @components [view :map])]
     (.addTo layer m)))
 
-(defn add-markers! [view points & {:keys [rev] :or {rev false}}]
+(defn add-markers! [view points & args]
   "Add markers from the provided seq of lat-lon -pairs to the view."
   (doseq [point points]
-    (apply add-marker! view point rev)))
+    (apply add-marker! view (conj point args))))
 
 (defn add-geojson! [view data]
   "Add a GeoJSON object to the view."

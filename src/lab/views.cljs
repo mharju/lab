@@ -92,6 +92,7 @@
           {:id (name id)}
           [:div.info [:span.id id] [:span.connection-status]]
           [:div.map] [:div.graph] [:div.vis] [:div.console] [:div.dashboard]]))
+
 (defn ->element [html]
   (let [container (js/document.createElement "div")]
     (set! (.-innerHTML container) html)

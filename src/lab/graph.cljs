@@ -1,7 +1,8 @@
 (ns lab.graph
   (:require [lab.views :refer [components set-mode!]]
             [lab.layout :as layout]
-            ["c3" :as c3]))
+            ["c3" :as c3]
+            [goog.object :as gobj]))
 
 (def color-pattern {:pattern ["#0cc2aa" "#fcc100" "#a88add"]})
 
@@ -39,8 +40,8 @@
     (for [[k v] @components
           :let [{g :graph} v
                 p (js/document.getElementById (name k))
-                width (.-clientWidth p)
-                height (.-clientHeight p)]
+                width (gobj/get p "clientWidth")
+                height (gobj/get p "clientHeight")]
           :when (not (nil? g))]
       (do
         (.resize g #js {:width width :height height})

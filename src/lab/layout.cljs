@@ -2,7 +2,6 @@
   (:require ["jquery" :as $]
             [lab.codemirror :as cm]))
 
-
 (defonce handlers (atom #{}))
 (defn register-handler! [handler]
   (swap! handlers conj handler))

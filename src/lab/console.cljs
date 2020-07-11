@@ -32,6 +32,9 @@
                                        (map? c)
                                        (map-to-table c)
 
+                                       (and (vector? c) (map? (first c)))
+                                       (vec-to-table c :titles (if (map? (first c)) (keys (first c)) nil))
+
                                        :else
                                        (str c))])
                            (if (map? row)

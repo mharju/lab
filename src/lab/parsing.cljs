@@ -40,9 +40,9 @@
   (loop [{:keys [line ch]} cursor]
     (let [current-line (-> (get-line cm line) string/reverse)
           length (count current-line)
-          search-col (- length ch)
+          search-col (- length ch 1)
           index (.indexOf current-line "(" search-col)]
-      (if (> index 0)
+      (if (>= index 0)
         {:line line :ch (- length index 1)}
         (when (pos? line) (recur {:line (dec line)
                                   :ch (count (get-line cm (dec line)))}))))))
@@ -63,8 +63,9 @@
     line))
 
 (defn find-end-paren
-  ([cm cursor]
-   (find-end-paren cm cursor 1))
+  ([cm {:keys [line ch] :as cursor}]
+   (let [start-ch (.charAt (get-line cm line) ch)]
+     (find-end-paren cm cursor (if (=  start-ch "(") 0 1))))
   ([cm cursor counter-init]
     (loop [{:keys [line ch]} cursor counter counter-init]
       (let [current-line (.substring (get-line cm line) ch)
@@ -76,6 +77,7 @@
              {:line (inc line) :ch 0}
              counter)))))))
 
+;; TODO does not work if in closing paren of larger form
 (defn get-current-form [cm cursor]
   (let [start (find-start-paren cm cursor)
         end (find-end-paren cm cursor)]
@@ -133,19 +135,25 @@
   (require 'lab.core)
   (require '[goog.object :as gobj])
 
-  (let [cursor (.getCursor @lab.core/cm-inst)
-        cursor {:line (gobj/get cursor "line") :ch (gobj/get cursor "ch")}
-        top-form (find-top-form @lab.core/cm-inst cursor)
-        start (find-start-paren @lab.core/cm-inst top-form)
-        end (find-end-paren @lab.core/cm-inst top-form)]
+  (let [cmi @lab.codemirror/cm-inst
+        cursor (.getCursor @lab.codemirror/cm-inst)
+        cursor {:line (.-line cursor) :ch (.-ch cursor)}
+        top-form (find-top-form cmi cursor)
+        start (find-start-paren cmi top-form)
+        end (find-end-paren cmi top-form)]
     (js/console.log "top form at line" top-form start end)
     (when (and start end)
-      (.getRange @lab.core/cm-inst (clj->js start) (clj->js end))))
+      (.getRange cmi (clj->js start) (clj->js end))))
 
   (let [code ["(ns foo (:import [test]) (:require [foo] [bar] [baz]) (:require-macros [seppo :as s]))"]
         res (lines->forms code)]
     (normalize-ns (first res)))
 
-  (-> (.getValue @lab.core/cm-inst)
+  (let [cm @lab.codemirror/cm-inst
+        cursor-pos (.getCursor cm)
+        cursor {:line (.-line cursor-pos) :ch (.-ch cursor-pos)}]
+    (get-current-form cm cursor))
+
+  (-> (.getValue @lab.codemirror/cm-inst)
       (string/split  #"\n")
       lines->forms))

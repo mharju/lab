@@ -11,10 +11,11 @@
 
   Example:
   (g/columnize [{:type :foo :value 1} {:type :bar :value 2}] :type :value)"
-  [data x y]
+  [data column value & {:keys [x-axis]}]
   (->> data
        (reduce (fn [columns row]
-                 (update columns (get row x) conj (get row y)))
+                 (cond-> (update columns (name (or (get row column) column)) (fnil conj []) (get row value))
+                         x-axis (update (name x-axis) (fnil conj []) (get row x-axis))))
                {})
        (mapv (fn [[k v]]
                (into [k] v)))))
@@ -66,5 +67,36 @@
   (let [graph (get-in @components [view :graph])]
     (.flow graph (clj->js opts))))
 
+(defn simple!
+  "Simple plot generated from `data` using the `y` and `x` as key
+  to retrieve the y axis with an optional x-axis parameter."
+  ([view data y]
+   (simple! view data nil y))
+  ([view data x y]
+    (graph! :view {:data {:xs      (when x {"data" "x"})
+                          :columns (columnize data :data y :x-axis x)}})))
+
+(defn ->freqs-columns [data k]
+  (->> data
+       (map k)
+       (frequencies)
+       (sort-by (comp - val))
+       (reduce conj [])))
+
+(defn frequencies! [view data k]
+  (graph! view {:data {:columns (->freqs-columns data k)
+                       :type :bar}}))
+
 (comment
-  (graph! :view {:data {:columns [["data" 1 2 3 4 3 2 1]]}}))
+  (simple! :view [{:x 0 :y 1} {:x 1 :y 2} {:x 5 :y 3}] :y)
+
+  (graph! :view {:data {:xs      {"data" "x"}
+                        :columns (columnize [{:x 0 :y 1} {:x 1 :y 2} {:x 10 :y 3}]
+                                            :data
+                                            :y
+                                            :x-axis :x)}})
+
+  (frequencies! :view [{:foo "bar"} {:foo "baz"} {:foo "baz"} {:foo "qux"}] :foo)
+
+  (graph! :view {:data {:columns [["data" 1 2 3 4 3 2 1]]}})
+  (graph! :view {:data {:columns (columnize [{:type :foo :value 1} {:type :bar :value 2}] :type :value) :type :pie}}))

@@ -5,9 +5,18 @@
             [cljs.js :as cljs]
             [cljs.env :as env]
             [lab.parsing :as parsing]
-            [lab.hud :as hud]))
+            [lab.hud :as hud]
+            [lab.session :as session]))
 
 (defonce compile-state-ref (env/default-compiler-env))
+
+(defonce comment-evaled
+  (let [stored (js/JSON.parse (.getItem js/localStorage "comment_evaled"))]
+    (atom (if-not (nil? stored) stored false))))
+
+(defn toggle-comment-evaled! []
+  (swap! comment-evaled not)
+  (.setItem js/localStorage "comment_evaled" @comment-evaled))
 
 (defn eval!
   ([value]
@@ -29,6 +38,21 @@
   (doseq [form (parsing/lines->forms lines)]
     (js/console.log "Eval" form)
     (eval! form)))
+
+;; keep this here to avoid circular dependencies
+(defn save-session! [name value]
+  (.setItem
+    js/window.localStorage
+    (str "session-" name)
+    (-> value
+        (.replace session/help-text "")
+        (.replace session/save-session-proto "")
+        (js/JSON.stringify))))
+
+(defn maybe-save-default! [form]
+  (when (and (= @session/loaded-session "default")
+             (not (re-find #"session\!" form)))
+    (save-session! "default" form)))
 
 (defn try-eval! [cm & {:keys [comment-evaled top-form hud-result hud-duration] :or {comment-evaled true top-form false hud-result false hud-duration 3000}}]
   (let [cursor-pos (.getCursor cm)
@@ -54,6 +78,7 @@
               (do
                 (hud/show! (str value) :duration hud-duration)
                 (.setCursor cm cursor-pos)))))))
+    (maybe-save-default! part)
     part))
 
 (boot/init compile-state-ref

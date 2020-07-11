@@ -3,17 +3,13 @@
             [cljs.pprint]
             [goog.object :as gobj]
             ["jquery" :as $]
-            ["codemirror" :as CodeMirror]
-            ["codemirror/addon/hint/show-hint"]
-            ["codemirror/mode/clojure/clojure"]
-            ["/js/keymap/vim"]
-            ["parinfer-codemirror" :as pcm]
             [lab.eval :as evl]
             [lab.views :refer [add-view!]]
             [lab.layout :as layout]
             [lab.map :refer [map!]]
             [lab.codemirror :as cm]
             [lab.autodetect :as autodetect]
+            [lab.session :as session]
             [lab.hud :as hud]
             [lab.graph]
             [lab.vis]
@@ -21,11 +17,14 @@
             [lab.dashboard]
             [lab.parsing]
             [lab.helpers])
-  (:require-macros  [lab.core :refer [render-help resolve-symbol default-sessions]]))
+  (:require-macros  [lab.core :refer [render-help]]))
 
 (enable-console-print!)
 
 (defonce data-connection (atom {:ws nil :listeners {}}))
+
+(def load-session! (comp cm/set-value session/get-session))
+(def save-session! (comp evl/save-session! cm/get-value))
 
 (defn listen! [id target-view listener]
   (let [selector (str "#" (name target-view) " .connection-status")]
@@ -72,34 +71,6 @@
 (defn toggle-help! []
   (.toggle ($ ".help")))
 
-(defonce comment-evaled
-  (let [stored (js/JSON.parse (.getItem js/localStorage "comment_evaled"))]
-    (atom (if-not (nil? stored) stored false))))
-
-(defn toggle-comment-evaled! []
-  (swap! comment-evaled not)
-  (.setItem js/localStorage "comment_evaled" @comment-evaled))
-
-(defonce hud-result
-  (let [stored (js/JSON.parse (.getItem js/localStorage "hud_result"))]
-    (atom (if-not (nil? stored) stored true))))
-
-(defonce hud-duration
-  (let [stored (js/JSON.parse (.getItem js/localStorage "hud_duration"))]
-    (atom (if-not (nil? stored) stored 3000))))
-
-(defn toggle-hud-result!
-  "Eval to show the evaluation results in HUD instead of writing it to the console."
-  []
-  (->> (swap! hud-result not)
-       (.setItem js/localStorage "hud_result")))
-
-(defn set-hud-duration!
-  "Set the duration in milliseconds the HUD will be shown (needs hud-result to be true)"
-  [duration]
-  (->> (reset! hud-duration duration)
-       (.setItem js/localStorage "hud_duration")))
-
 (defn paste! []
   (->
     ($ "#pasteboard")
@@ -107,75 +78,6 @@
     (.addClass "visible")
     (.find "input[type=\"text\"]")
     (.focus)))
-
-(def help-text
-";; Eval (lab.core/toggle-help!) for help. Cmd-(Shift)-(E|R) Eval current (topmost) expression.
-;; Cmd-J for pasting content as vars. Ctrl-Space for autocomplete.\n" )
-(def save-session-proto
-  #"\(lab.core/save-session\!.*\)")
-
-(def sessions (default-sessions))
-(def session-names (mapv name (keys sessions)))
-(defonce loaded-session (atom "default"))
-
-(defn list-sessions! []
-  (->>
-    (js/Object.keys js/window.localStorage)
-    (js->clj)
-    (filterv (fn [item]
-               (str/starts-with? item "session-")))
-    (mapv (fn [item] (subs item (count "session-"))))
-    (into session-names)))
-
-(defn save-session! [name]
-  (.setItem
-    js/window.localStorage
-    (str "session-" name)
-    (-> (cm/get-value)
-        (.replace help-text "")
-        (.replace save-session-proto "")
-        (js/JSON.stringify))))
-
-(defn maybe-save-default! [form]
-  (when (and (= @loaded-session "default")
-             (not (re-find #"session\!" form)))
-    (save-session! "default")))
-
-(defn delete-session! [name]
-  (.removeItem js/window.localStorage (str "session-" name)))
-
-(defn load-session! [name]
-  (reset! loaded-session name)
-  (if ((set session-names) name)
-    (->> (get sessions (keyword name))
-         (lab.parsing/normalize-session)
-         (str help-text)
-         cm/set-value)
-    (some->> (or (.getItem js/window.localStorage (str "session-" name)) "\"\"")
-             js/JSON.parse
-             (str help-text)
-             cm/set-value)))
-
-(defn find-start-of-word [line ch]
-  (->> (.substring line 0 ch)
-       (reverse)
-       (drop-while #(re-matches #"[\w\.\-\/:!]" %))
-       count))
-
-(defn get-completions [cm option]
-  (js/Promise.
-    (fn [accept]
-      (let [cursor (.getCursor cm)
-            line (.getLine cm (gobj/get cursor "line"))
-            current-line (gobj/get cursor "line")
-            end-ch (gobj/get cursor "ch")
-            start-ch (find-start-of-word line end-ch)
-            from {:line current-line :ch start-ch}
-            word (.substring line start-ch end-ch)
-            symbols (resolve-symbol word)]
-        (accept (clj->js {:list symbols
-                          :from from
-                          :to cursor}))))))
 
 (declare reset-pasteboard!)
 (defn- handle-key [e]
@@ -195,32 +97,6 @@
            (layout/step-repl-size!  (if (.-shiftKey e) -1 1))
            (.preventDefault e))
       true)))
-
-(defn alternate-keys [form]
-  (merge form
-    (reduce-kv
-      (fn [m k v]
-        (assoc m (.replace k "Cmd" "Ctrl") v))
-      {}
-      form)))
-
-(defn set-shortcuts! [cm]
-  (letfn [(eval-form [cm] (-> (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result @hud-result :hud-duration @hud-duration) (maybe-save-default!)))
-          (eval-top-form [cm] (-> (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result @hud-result :hud-duration @hud-duration) (maybe-save-default!)))
-          (eval-alt-form [cm] (-> (evl/try-eval! cm :comment-evaled @comment-evaled :hud-result (not @hud-result)) (maybe-save-default!)))
-          (eval-alt-top-form [cm] (-> (evl/try-eval! cm :comment-evaled @comment-evaled :top-form true :hud-result (not @hud-result)) (maybe-save-default!)))
-          (eval-editor [_] (-> (cm/lines)
-                               evl/eval-forms!))
-          (eval-toggle-help [_] (toggle-help!))]
-      (.setOption cm "extraKeys"
-        (-> (alternate-keys {"Cmd-E"        eval-form
-                             "Shift-Cmd-E"  eval-top-form
-                             "Cmd-R"        eval-alt-form
-                             "Shift-Cmd-R"  eval-alt-top-form
-                             "Shift-Cmd-L"  eval-editor
-                             "Shift-Cmd-T"  eval-toggle-help
-                             "Ctrl-Space"   "autocomplete"})
-            clj->js))))
 
 (defonce file-contents (atom nil))
 (defn handle-drop [e]
@@ -304,27 +180,20 @@
                                                           800)
                                                         (.preventDefault e))))
       (.delegate ($ js/document) "#cancel" "click" (fn [_] (reset-pasteboard!)))
-      (toggle-help!)
-      (let [cm (CodeMirror. (js/document.querySelector "#repl")
-                     #js {:mode "clojure"
-                          :lineNumbers false
-                          :theme "solarized dark"})]
 
-        (when (js/window.localStorage.getItem "vim-mode")
-          (.setOption cm "keyMap" "vim"))
-        (cm/set-inst! cm)
-        (pcm/init cm)
-        (set-shortcuts! cm)
-        (.setOption cm "hintOptions" #js {"hint" get-completions})
-        (let [stored (.getItem js/localStorage "repl_visibility")
-              visible? (if-not (nil? stored) (= stored "true") true)]
-          (when visible?
-            (layout/toggle-repl! true)
-            (.setCursor cm #js {:line 3 :ch 0})))
-        (add-view! :view)
-        (map! :view)
-        (layout/update-repl-size)
-        (load-session! "default")))))
+      (toggle-help!)
+
+      (let [cm (cm/init!)
+            stored (.getItem js/localStorage "repl_visibility")
+            visible? (if-not (nil? stored) (= stored "true") true)]
+        (when visible?
+          (layout/toggle-repl! true)
+          (.setCursor cm #js {:line 3 :ch 0})))
+
+      (add-view! :view)
+      (map! :view)
+      (layout/update-repl-size)
+      (load-session! "default"))))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on

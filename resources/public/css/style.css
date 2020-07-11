@@ -114,7 +114,7 @@ table.map table.map {
   text-align: center;
 }
 .console span.row > table.vec tr:nth-child(2n) {
-  background-color: #93bade;
+  background-color: #ebebeb;
 }
 .console span.row > table.map > tbody > tr > td:first-child {
   width: 50%;

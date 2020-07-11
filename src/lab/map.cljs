@@ -104,10 +104,13 @@
   (let [m (get-in @components [view :map])]
     (.addTo layer m)))
 
-(defn add-markers! [view points & args]
+(defn add-markers! [view points & {:keys [key-fn data-fn] :as args :or {key-fn identity data-fn nil}}]
   "Add markers from the provided seq of lat-lon -pairs to the view."
   (doseq [point points]
-    (apply add-marker! view (conj point args))))
+    (apply add-marker! view (->> (into (key-fn point) (cond-> args
+                                                          data-fn (assoc :data (data-fn point))
+                                                          true    (dissoc :data-fn)))
+                                 flatten))))
 
 (defn add-geojson! [view data]
   "Add a GeoJSON object to the view."

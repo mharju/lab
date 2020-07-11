@@ -21,13 +21,17 @@
                                            (second (get fn-info :arglists)))]
             (str current-namespace "/" fn-name)))))
     flatten
-    (into [])))
+    ;; Add these two manually to save extra hassle
+    (into ["lab.core/save-session!" "lab.core/load-session!"])))
 
 (defmacro resolve-symbol [part]
   `(if-not (str/blank? ~part)
      (let [source# (cond
                      (str/starts-with? ~part ":")
                      (lab.views/list-views)
+
+                     (str/starts-with? ~part "\"")
+                     (mapv #(str "\"" % "\"") (lab.session/list-sessions!))
 
                      :else
                      ~(internal-symbols))]

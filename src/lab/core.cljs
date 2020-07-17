@@ -26,10 +26,8 @@
 (def load-session! (comp cm/set-value session/get-session))
 (def save-session! (comp evl/save-session! cm/get-value))
 
-(defn listen! [id target-view listener]
-  (let [selector (str "#" (name target-view) " .connection-status")]
-    (.addClass ($ selector) "connected")
-    (swap! data-connection assoc-in [:listeners id] listener)))
+(defn listen! [id listener]
+  (swap! data-connection assoc-in [:listeners id] listener))
 
 (defn connect! [{:keys [host port] :or {host "localhost" port 7889}}]
   (when-let [{:keys [ws]} @data-connection]
@@ -39,11 +37,19 @@
         (let [s (js/WebSocket. (str "ws://" host ":" port))]
           (set!  (.-onopen s) #(.log js/console "Data socket opened at ws://" host ":" port))
           (set!  (.-onmessage s) (fn [e]
-                                   (let [{:strs [id data] :or {id "unknown" data nil}} (js->clj (.parseJSON $(.-data e)))
+                                   (let [{:strs [id data] :as message} (try
+                                                                         (js->clj
+                                                                              (js/JSON.parse (.-data e)))
+                                                                        (catch js/Error _
+                                                                          (.-data e)))
                                          listener (get-in @data-connection [:listeners id])]
-                                     (when listener
-                                       (apply listener [data])))))
+                                     (if (and data id listener)
+                                       (listener data)
+                                       (doseq [listener (vals (get @data-connection :listeners))]
+                                         (listener message))))))
           s)))))
+
+(deref data-connection)
 
 ;; editor functions
 
@@ -147,7 +153,6 @@
                                                             wrap-to-string? (.prop wrap "checked")
                                                             auto-detect? (.prop detect "checked")
                                                             re-eval? (.prop re-eval "checked")]
-                                                        (js/console.log "store var" var-name "as" value "wrap?" wrap-to-string? "detect?" auto-detect? "re-eval?" re-eval?)
                                                         (reset-pasteboard!)
                                                         (js/setTimeout
                                                           (fn []

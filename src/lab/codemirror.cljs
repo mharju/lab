@@ -56,10 +56,10 @@
                           :to cursor}))))))
 
 (defn set-shortcuts! [cm]
-  (letfn [(eval-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :hud-result @hud/hud-result :hud-duration @hud/hud-duration))
-          (eval-top-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :top-form true :hud-result @hud/hud-result :hud-duration @hud/hud-duration))
-          (eval-alt-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :hud-result (not @hud/hud-result)))
-          (eval-alt-top-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :top-form true :hud-result (not @hud/hud-result)))
+  (letfn [(eval-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :hud-result true :hud-duration @hud/hud-duration))
+          (eval-top-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :top-form true :hud-result true :hud-duration @hud/hud-duration))
+          (eval-alt-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :hud-result false))
+          (eval-alt-top-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :top-form true :hud-result false))
           (eval-editor [_] (-> (lines)
                                evl/eval-forms!))]
       (.setOption cm "extraKeys"

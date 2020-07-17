@@ -1,18 +1,8 @@
 (ns lab.hud)
 
-(defonce hud-result
-  (let [stored (js/JSON.parse (.getItem js/localStorage "hud_result"))]
-    (atom (if-not (nil? stored) stored true))))
-
 (defonce hud-duration
   (let [stored (js/JSON.parse (.getItem js/localStorage "hud_duration"))]
     (atom (if-not (nil? stored) stored 3000))))
-
-(defn toggle-hud-result!
-  "Eval to show the evaluation results in HUD instead of writing it to the console."
-  []
-  (->> (swap! hud-result not)
-       (.setItem js/localStorage "hud_result")))
 
 (defn set-hud-duration!
   "Set the duration in milliseconds the HUD will be shown (needs hud-result to be true)"

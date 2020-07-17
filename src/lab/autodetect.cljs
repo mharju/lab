@@ -75,7 +75,7 @@
     IDetector
     (-transform [this data]
       (when-let [match (js/Date. data)]
-        (when-not (js/isNaN (.getTime match))
+        (when-not (or (re-find #"[^0-9\-\.:]" data) (js/isNaN (.getTime match)))
           match)))))
 
 (def number-list

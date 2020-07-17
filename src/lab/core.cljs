@@ -128,7 +128,7 @@
     (.val input "")
     (.val textarea "")
     (.prop wrap "checked" false)
-    (.prop detect "checked" false)
+    (.prop detect "checked" true)
     (.prop re-eval "checked" false)
     (.removeClass ($ "#pasteboard") "visible")))
 

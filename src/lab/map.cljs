@@ -4,7 +4,7 @@
             [lab.layout :as layout]
             [lab.console :refer [map-to-table]]
             ["leaflet" :refer [tileLayer Icon LatLng marker polyline] :as L]
-            ["leaflet-omnivore"]
+            ["leaflet-omnivore" :as om]
             ["leaflet-draw"]))
 
 (defn cartodb-positron []
@@ -162,7 +162,16 @@
   [view wkt-string]
   (set-mode! view :map)
   (let [m (get-in @components [view :map])
-        layer (js/omnivore.wkt.parse wkt-string)]
+        layer (om/wkt.parse wkt-string)]
+    (.addTo layer m)
+    (.fitBounds m (.getBounds layer))))
+
+(defn add-kml!
+  "Add a KML object to the view"
+  [view kml-string]
+  (set-mode! view :map)
+  (let [m (get-in @components [view :map])
+        layer (om/kml.parse kml-string)]
     (.addTo layer m)
     (.fitBounds m (.getBounds layer))))
 

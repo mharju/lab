@@ -1,6 +1,5 @@
 (ns lab.layout
-  (:require ["jquery" :as $]
-            [lab.codemirror :as cm]))
+  (:require ["jquery" :as $]))
 
 (defonce handlers (atom #{}))
 (defn register-handler! [handler]
@@ -33,8 +32,7 @@
           (set! (.. dashboard -style -height) (str (- 100 size) (if (keyword? unit) (name unit) unit))))
         (do
           (.hide $repl)
-          (set! (.. dashboard -style -height) "100vh")
-          (cm/focus)))
+          (set! (.. dashboard -style -height) "100vh")))
       (invalidate-sizes!))))
 
 (declare repl-direction-horizontal?)

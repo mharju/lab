@@ -5,21 +5,21 @@
   },
   "dependencies": {
     "@mapbox/leaflet-omnivore": "^0.3.4",
-    "c3": "^0.7.15",
+    "c3": "^0.7.18",
+    "codemirror": "^5.55.0",
     "d3": "^5.8.0",
-    "codemirror": "^5.53.2",
     "jquery": "^3.5.0",
     "leaflet": "^1.6.0",
     "leaflet-draw": "^1.0.4",
     "leaflet-omnivore": "^0.3.4",
-    "moment": "^2.24.0",
+    "moment": "^2.27.0",
     "parinfer-codemirror": "^1.4.2",
     "process": "^0.11.10",
-    "vis-data": "^6.5.1",
-    "vis-network": "^7.6.1",
-    "vis-timeline": "^7.2.1"
+    "vis-data": "^6.6.1",
+    "vis-network": "^7.10.0",
+    "vis-timeline": "^7.3.7"
   },
   "devDependencies": {
-    "shadow-cljs": "^2.8.99"
+    "shadow-cljs": "^2.10.15"
   }
 }

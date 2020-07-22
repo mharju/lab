@@ -226,13 +226,10 @@
 
       (toggle-help!)
 
-      (let [cm (cm/init!)
-            stored (.getItem js/localStorage "repl_visibility")
-            visible? (if-not (nil? stored) (= stored "true") true)]
-        (when visible?
-          (set-shortcuts! cm)
-          (layout/toggle-repl! true)
-          (.setCursor cm #js {:line 3 :ch 0})))
+      (let [cm (cm/init!)]
+        (set-shortcuts! cm)
+        (layout/toggle-repl! true)
+        (.setCursor cm #js {:line 3 :ch 0}))
 
       (add-view! :view)
       (map! :view)

@@ -25,7 +25,6 @@
     (let [$repl ($ "#repl")
           dashboard (js/document.getElementById "dashboard")
           {:keys [size unit]} @repl-size]
-      (.setItem js/localStorage "repl_visibility" visible?)
       (if visible?
         (do
           (.show $repl)

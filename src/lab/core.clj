@@ -15,14 +15,10 @@
       (for [current-namespace ns-list
             :let [fns (ns-publics current-namespace)]]
         (doall
-          (for [[fn-name fn-info] (sort-by first fns)
-                 :let [fn-info (if (nil? fn-info) (get-in fn-info [:fn-var]) fn-info)]
-                 args (or (get-in fn-info [:top-fn :arglists])
-                          (second (get fn-info :arglists)))]
+          (for [[fn-name] (sort-by first fns)]
             (str current-namespace "/" fn-name)))))
     flatten
-    ;; Add these two manually to save extra hassle
-    (into ["lab.core/save-session!" "lab.core/load-session!"])))
+    (into [])))
 
 (defmacro resolve-symbol [part]
   `(if-not (str/blank? ~part)

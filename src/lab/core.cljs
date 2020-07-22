@@ -8,9 +8,9 @@
             [lab.layout :as layout]
             [lab.map :refer [map!]]
             [lab.codemirror :as cm]
-            [lab.autodetect :as autodetect]
             [lab.session :as session]
             [lab.hud :as hud]
+            [lab.autodetect]
             [lab.graph]
             [lab.vis]
             [lab.console]
@@ -24,12 +24,20 @@
 (defonce data-connection (atom {:ws nil :listeners {}}))
 
 (def load-session! (comp cm/set-value session/get-session))
-(def save-session! (comp evl/save-session! cm/get-value))
+(defn save-session! [name]
+  (.setItem
+    js/window.localStorage
+    (str "session-" name)
+    (-> (cm/get-value)
+        (.replace session/help-text "")
+        (.replace session/save-session-proto "")
+        (js/JSON.stringify))))
+
 
 (defn listen! [id listener]
   (swap! data-connection assoc-in [:listeners id] listener))
 
-(defn connect! [{:keys [host port] :or {host "localhost" port 7889}}]
+(defn connect! [{:keys [host port] :or {host "localhost" port 9898}}]
   (when-let [{:keys [ws]} @data-connection]
     (if-not (nil? ws)
       ws
@@ -132,6 +140,37 @@
     (.prop re-eval "checked" false)
     (.removeClass ($ "#pasteboard") "visible")))
 
+(defn alternate-keys [form]
+  (merge form
+    (reduce-kv
+      (fn [m k v]
+        (assoc m (.replace k "Cmd" "Ctrl") v))
+      {}
+      form)))
+
+(defn maybe-save-default! [form {:keys [error]}]
+  (println "I maybe save here" form "and" error)
+  (when (and (= @session/loaded-session "default")
+             (not (re-find #"session\!" form))
+             (not error))
+    (save-session! "default")))
+
+(defn set-shortcuts! [cm]
+  (letfn [(eval-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :hud-result true :hud-duration @hud/hud-duration :after maybe-save-default!))
+          (eval-top-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :top-form true :hud-result true :hud-duration @hud/hud-duration :after maybe-save-default!))
+          (eval-alt-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :hud-result false :after maybe-save-default!))
+          (eval-alt-top-form [cm] (evl/try-eval! cm :comment-evaled @evl/comment-evaled :top-form true :hud-result false :after maybe-save-default!))
+          (eval-editor [_] (-> (cm/lines)
+                               evl/eval-forms!))]
+      (.setOption cm "extraKeys"
+        (-> (alternate-keys {"Cmd-E"        eval-form
+                             "Shift-Cmd-E"  eval-top-form
+                             "Cmd-R"        eval-alt-form
+                             "Shift-Cmd-R"  eval-alt-top-form
+                             "Shift-Cmd-L"  eval-editor
+                             "Ctrl-Space"   "autocomplete"})
+            clj->js))))
+
 (defonce init
   (.ready ($ js/document)
     (fn [_]
@@ -192,6 +231,7 @@
             stored (.getItem js/localStorage "repl_visibility")
             visible? (if-not (nil? stored) (= stored "true") true)]
         (when visible?
+          (set-shortcuts! cm)
           (layout/toggle-repl! true)
           (.setCursor cm #js {:line 3 :ch 0})))
 

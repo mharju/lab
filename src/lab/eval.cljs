@@ -39,22 +39,7 @@
     (js/console.log "Eval" form)
     (eval! form)))
 
-;; keep this here to avoid circular dependencies
-(defn save-session! [name value]
-  (.setItem
-    js/window.localStorage
-    (str "session-" name)
-    (-> value
-        (.replace session/help-text "")
-        (.replace session/save-session-proto "")
-        (js/JSON.stringify))))
-
-(defn maybe-save-default! [form]
-  (when (and (= @session/loaded-session "default")
-             (not (re-find #"session\!" form)))
-    (save-session! "default" form)))
-
-(defn try-eval! [cm & {:keys [comment-evaled top-form hud-result hud-duration] :or {comment-evaled true top-form false hud-result false hud-duration 3000}}]
+(defn try-eval! [cm & {:keys [comment-evaled top-form hud-result hud-duration after] :or {comment-evaled true top-form false hud-result false hud-duration 3000 after identity}}]
   (let [cursor-pos (.getCursor cm)
         cursor {:line (gobj/get cursor-pos "line") :ch (gobj/get cursor-pos "ch")}
         part (cond
@@ -73,12 +58,12 @@
             (js/alert error)
             (if-not hud-result
               (do
-                (.setValue cm (str new-editor-content (if (> 80 (count editor-content)) "\r\n" " ") "\n;; => " value "\n"))
+                (.setValue cm (str new-editor-content "\n;; => " value "\n"))
                 (.setCursor cm (.lineCount cm) 1))
               (do
                 (hud/show! (str value) :duration hud-duration)
-                (.setCursor cm cursor-pos)))))))
-    (maybe-save-default! part)
+                (.setCursor cm cursor-pos))))
+          (after part result))))
     part))
 
 (boot/init compile-state-ref

@@ -7,7 +7,7 @@
             [cljs.analyzer.api :refer [ns-publics ns-resolve]])
   (:import (java.io File)))
 
-(def ns-list '[lab.map lab.graph lab.console lab.vis lab.core lab.views lab.dashboard lab.helpers])
+(def ns-list '[lab.core lab.map lab.graph lab.console lab.vis lab.views lab.dashboard lab.helpers])
 
 (defn internal-symbols []
   (->>

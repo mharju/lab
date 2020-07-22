@@ -33,7 +33,6 @@
         (.replace session/save-session-proto "")
         (js/JSON.stringify))))
 
-
 (defn listen! [id listener]
   (swap! data-connection assoc-in [:listeners id] listener))
 

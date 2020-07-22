@@ -1,8 +1,8 @@
 (ns lab.graph
   (:require [lab.views :refer [components set-mode!]]
             [lab.layout :as layout]
-            ["c3" :as c3]
-            [goog.object :as gobj]))
+            [goog.object :as gobj]
+            ["c3" :as c3]))
 
 (def color-pattern {:pattern ["#0cc2aa" "#fcc100" "#a88add"]})
 

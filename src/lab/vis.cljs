@@ -1,7 +1,10 @@
 (ns lab.vis
   (:require [lab.views :refer [views components set-mode!]]
-            ["vis-network" :refer [Network DataSet]]
-            ["vis-timeline" :refer [Timeline]]))
+            [lab.layout :as layout]
+            [goog.object :as gobj]
+            ["vis-data/esnext" :refer [DataSet]]
+            ["vis-network/esnext" :refer [Network]]
+            ["vis-timeline/esnext" :refer [Timeline]]))
 
 (defn- data-set [data] (DataSet. (clj->js data)))
 
@@ -28,9 +31,16 @@
   (let [items (get-in @components [view :vis-ds])]
     (.add items (clj->js item))))
 
+(def ^:dynamic *default-opts* {:nodes {:color {:border "gray" :background "white"
+                                               :highlight {:border "black" :background "white"}}
+                                       :shape :box
+                                       :shapeProperties {:borderRadius 0}
+                                       :margin {:top 10 :right 15 :bottom 7 :left 15}
+                                       :font {:face "Menlo, Courier, Monospace" :size 11}}
+                               :edges {:arrows {:from true}}})
 (defn vis!
   ([view nodes edges]
-   (vis! view nodes edges {}))
+   (vis! view nodes edges *default-opts*))
   ([view nodes edges options]
     (set-mode! view :vis)
     (swap! components assoc-in [view :vis]
@@ -69,20 +79,23 @@
             :vis-ds items
             :vis-groups groups))))
 
+(defn invalidate-size! []
+  (doall
+    (for [[k v] @components
+          :let [{g :vis} v
+                p (js/document.getElementById (name k))
+                width (gobj/get p "clientWidth")
+                height (gobj/get p "clientHeight")]
+          :when (not (nil? g))]
+      (do
+        (.setSize g width height)
+        (.redraw g)))))
+(layout/register-handler! invalidate-size!)
+
 (comment
   (vis! :view
         [{:id 1 :label "c/normalize"} {:id 2 :label "m/add-marker!"} {:id 3 :label "c/vis!"}]
-        [{:from 1 :to 2} {:from 2 :to 3}]
-        {:physics {:enabled true}
-         :nodes {:color {:border "gray" :background "white"
-                :highlight {:border "black" :background "white"}}
-                :shape :box
-                :shapeProperties {:borderRadius 0}
-                :margin {:top 10 :right 15 :bottom 7 :left 15}
-                :font {:face "Menlo, Courier, Monospace" :size 11}}
-         :edges   {:arrows {:to {:enabled true}}}
-         :layout  {:hierarchical {:enabled true :direction "LR"}
-                   :randomSeed 0}})
+        [{:from 1 :to 2} {:from 2 :to 3}])
 
   (grouped-timeline! :view
              [{:id 1 :content "Mikko" :start "2019-07-20" :group 1}

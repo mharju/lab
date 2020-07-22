@@ -89,7 +89,7 @@ div.map {
   display: none;
 }
 
-.graph, div..map, .vis, .console {
+.graph, div..map, .console {
   height: 100%;
   width: 100%;
 }
@@ -342,6 +342,8 @@ table.map td:nth-child(2) {
 
 .vis {
   font-size: 10pt;
+  width: 100vw;
+  height: 100%;
 }
 .vis-labelset .vis-label {
   color: #2D4357;

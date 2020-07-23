@@ -23,7 +23,7 @@
 
 (defonce data-connection (atom {:ws nil :listeners {}}))
 
-(def load-session! (comp cm/set-value session/get-session))
+(def ^:export load-session! (comp cm/set-value session/get-session))
 (defn save-session! [name]
   (.setItem
     js/window.localStorage
@@ -95,9 +95,11 @@
 (declare reset-pasteboard!)
 (defn- handle-key [e]
   (when (and (.is ($ "#pasteboard") ":visible") (= (.-keyCode e) 27))
-    (println "reset pasteboard.")
     (reset-pasteboard!)
     (.hide ($ "#pasteboard")))
+
+  (when (and (= (.getAttribute (js/document.getElementById "sessions") "class") "visible") (= (.-keyCode e) 27))
+    (session/close-session-load-display!))
 
   (when (.-metaKey e)
     (case (.-keyCode e)
@@ -167,6 +169,7 @@
                              "Cmd-R"        eval-alt-form
                              "Shift-Cmd-R"  eval-alt-top-form
                              "Shift-Cmd-L"  eval-editor
+                             "Shift-Cmd-O"  session/open-session-load-display!
                              "Ctrl-Space"   "autocomplete"})
             clj->js))))
 

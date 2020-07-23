@@ -266,15 +266,17 @@ table.map td:nth-child(2) {
   opacity: 1;
 }
 
-#pasteboard {
+#sessions, #pasteboard {
   position: absolute;
   z-index: 1800;
   top: 5vw;
   left: 15vw;
   width: 70vw;
-  height: 75vh;
+  max-height: 75vh;
   background-color: white;
   border-radius: 8px;
+
+  overflow-y: scroll;
 
   display: flex;
   flex-direction: column;
@@ -284,7 +286,7 @@ table.map td:nth-child(2) {
   transform: translate3d(0,5vh,0);
   transition: all 0.3s ease-in;
 }
-#pasteboard.visible {
+#sessions.visible, #pasteboard.visible {
   opacity: 1;
   transform: translate3d(0,0,0);
   transition: all 0.3s ease-out;
@@ -307,11 +309,11 @@ table.map td:nth-child(2) {
     font-family: Menlo,'Droid Sans Mono',monospace;
     padding: 1em;
 }
-#pasteboard .buttons {
+#sessions .buttons, #pasteboard .buttons {
   display: flex;
   justify-content: space-between;
 }
-#pasteboard button {
+#sessions button, #pasteboard button {
     flex: 1;
     padding: 1em;
     border: 1px solid #ccc;
@@ -320,9 +322,23 @@ table.map td:nth-child(2) {
     font-weight: bold;
     outline: none;
 }
-#pasteboard button:hover {
+#sessions button:hover, #pasteboard button:hover {
     background-color: rgba(0,0,0,0.4);
     cursor: pointer;
+}
+#sessions .options {
+    font-size: 14pt;
+    font-family: Menlo,'Droid Sans Mono',monospace;
+}
+#sessions .options .option {
+    padding: 0.5em 0.25em;
+    cursor: pointer;
+}
+#sessions .option:hover {
+    background-color: #ccc;
+}
+#sessions .option.selected {
+    background-color: #ccc;
 }
 #save {
   margin-right: 1em;

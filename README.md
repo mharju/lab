@@ -5,7 +5,7 @@ make ad-hoc dashboards, data visualizations or such when in need. You can use it
 built in REPL window or use the CLJS REPL through nREPL with your editor.
 
 It also supports retrieving and passing live data to views using websocket. This is handy
-if you want to have live updates from a production system or push data from a system under 
+if you want to have live updates from a production system or push data from a system under
 development for simple, visual introspection.
 
 ## Sessions
@@ -31,6 +31,7 @@ The application hosts default sessions that are stored in `src/lab/experiments` 
 | Cmd-G             | Toggle help.                                                                                      |
 | Cmd-H             | Toggle REPL visibility.                                                                           |
 | Cmd-J             | Paste var content.                                                                                |
+| Cmd-Shift-O       | Show session loader, exit with ESC if you don't want to select.                                   |
 | Esc               | Cancel paste window                                                                               |
 
 ## Screenshot
@@ -39,6 +40,25 @@ Sample using the open live data from Foli to show locations of busses in the map
 load the sample by evaluating `(lab.core/load-session! "foli")`, and then evaluating the editor content with `Cmd-Shift-L` to experiment with it yourself.
 
 ![Screenshot](screenshot.png)
+
+
+## Lab-Wrapper
+
+You can also use [Lab Wrapper](https://github.com/mharju/Lab-Wrapper/) to get TCP/WS
+connectivity straight out of the box for OS X. Just copy out the contents of the
+`resources/public` directory after release compilation to the project, compile and
+install. I use a git hook for that:
+
+```bash
+#!/bin/bash
+
+WRAPPER_PATH=/set/wrapper/project/path
+
+set -e
+npm run release &&\
+    rsync -avh --delete resources/public/* $WRAPPER_PATH/public &&
+    (cd $WRAPPER_PATH && xcodebuild && cp -r build/Release/Lab.app /Applications)
+```
 
 
 ## Development setup

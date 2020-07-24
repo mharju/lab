@@ -18,7 +18,8 @@
           (for [[fn-name] (sort-by first fns)]
             (str current-namespace "/" fn-name)))))
     flatten
-    (into [])))
+    ;; load-session is a def, incorporate it here for minimal fuss
+    (into ["lab.core/load-session!"])))
 
 (defmacro resolve-symbol [part]
   `(if-not (str/blank? ~part)

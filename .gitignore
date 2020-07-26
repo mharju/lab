@@ -1,4 +1,3 @@
-/resources/public/js/compiled/**
 figwheel_server.log
 pom.xml
 *jar
@@ -20,6 +19,7 @@ pom.xml
 nashorn_code_cache/
 node_modules/
 resources/public/js
+!resources/public/js/regenerator.js
 .shadow-cljs
 *.log
 src/lab/experiments/private

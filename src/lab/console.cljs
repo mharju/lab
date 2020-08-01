@@ -71,14 +71,17 @@
     (set! (.-scrollTop v) (.-scrollHeight v))))
 
 (defn append! [view & text]
+  (console! view)
   (.append (find-element view) (html (make-row text)))
   (scroll-to-bottom! view))
 
 (defn append-map! [view m]
+  (console! view)
   (.append (find-element view) (html (make-table-row m)))
   (scroll-to-bottom! view))
 
 (defn append-vec! [view v & {:keys [titles]}]
+  (console! view)
   (.append
     (find-element view)
     (html
@@ -87,9 +90,11 @@
         (vec-to-table v :titles titles)])))
 
 (defn prepend! [view & text]
+  (console! view)
   (.prepend (find-element view) (html (make-row text))))
 
 (defn prepend-map! [view m]
+  (console! view)
   (.prepend (find-element view) (html (make-table-row m))))
 
 (defn clear! [view]

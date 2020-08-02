@@ -72,11 +72,17 @@
       (assoc data def-key col-defs
              :views views))))
 
+(defn find-view-info
+  ([id]
+   (find-view-info id (:views @view-info)))
+  ([id views]
+   (->> views
+        (filter (comp (partial = id) :id))
+        first)))
+
 (defn- siblings [pred {:keys [views row-defs col-defs]} id]
   (let [{[start-col-target start-row-target] :start [size-col-target size-row-target] :size id :id}
-        (->> views
-             (filter (comp (partial = id) :id))
-             first)
+        (find-view-info id views)
         end-col-target (find-end start-col-target size-col-target col-defs)
         end-row-target (find-end start-row-target size-row-target row-defs)]
     (->>
@@ -120,9 +126,7 @@
           [is-left? grow] (if (seq grow)
                             [true grow]
                             [false (right-siblings {:views views :col-defs col-defs :row-defs row-defs} id)])
-          [grow-size _] (->> views
-                             (filter (comp (partial = id) :id))
-                             first
+          [grow-size _] (->> (find-view-info id views)
                              :size)
           views     (->> views
                          (map (fn [{:keys [id] [w h] :size [sx sy] :start :as v}]
@@ -250,12 +254,37 @@
       (.setAttribute view "id" (name new-id))
       (set! (.-innerHTML (.querySelector view ".id")) new-id)
       (swap! views clojure.set/rename-keys {id new-id})
-      (swap! components clojure.set/rename-keys {id new-id}))))
+      (swap! components clojure.set/rename-keys {id new-id})
+      (swap! view-info (fn [old-info]
+                         (assoc old-info :views
+                            (map (fn [{id' :id :as data}]
+                                   (if (= id id')
+                                     (assoc data :id new-id)
+                                     data))
+                                 (:views old-info))))))))
 
-(defn swap-view! [index another-index]
-  (let [subject (-> ($ "#dashboard") (.children) (.get index) $)
-        object (-> ($ "#dashboard") (.children) (.get another-index))]
-    (.insertAfter subject object)))
+(defn swap-view! [id another-id]
+  (let [view-data (find-view-info id)
+        another-data (find-view-info another-id)]
+    (->> (swap! view-info (fn [{:keys [views] :as old-info}]
+                            (assoc old-info :views
+                                   (->>
+                                     (map
+                                       (fn [{id' :id :as data}]
+                                         (cond (= id' another-id)
+                                               (assoc data :size (:size view-data) :start (:start view-data))
+
+                                               (= id' id)
+                                               (assoc data :size (:size another-data) :start (:start another-data))
+
+                                               :else
+                                               data))
+                                       views)
+                                     (sort-by :start)))))
+         ->css
+         update-styles!)))
+
+(deref view-info)
 
 (defn set-mode! [view mode]
   (let [p ($ (get @views view))]

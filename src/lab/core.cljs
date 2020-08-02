@@ -17,7 +17,8 @@
             [lab.dashboard]
             [lab.parsing]
             [lab.helpers])
-  (:require-macros  [lab.core :refer [render-help]]))
+  (:require-macros  [lab.core :refer [render-help]])
+  (:refer-clojure :exclude [reset!]))
 
 (enable-console-print!)
 
@@ -120,7 +121,7 @@
     (-> (.text f)
         (.then (fn [content]
                  (if (>= (count content) 1024)
-                   (do (reset! file-contents content)
+                   (do (clojure.core/reset! file-contents content)
                        (gobj/set (js/document.getElementById "drop-target") "value" (str "Loaded " (gobj/get f "name") ", size " (count content) " bytes.")))
                    (gobj/set (js/document.getElementById "drop-target") "value" content)))))))
 
@@ -133,7 +134,7 @@
         wrap ($ "#pasteboard input[name=wrap]")
         detect ($ "#pasteboard input[name=detect]")
         re-eval ($ "#pasteboard input[name=eval]")]
-    (reset! file-contents nil)
+    (clojure.core/reset! file-contents nil)
     (.val input "")
     (.val textarea "")
     (.prop wrap "checked" false)
@@ -153,6 +154,7 @@
   (println "I maybe save here" form "and" error)
   (when (and (= @session/loaded-session "default")
              (not (re-find #"session\!" form))
+             (not (re-find #"lab\.core/reset\!" form))
              (not error))
     (save-session! "default")))
 
@@ -238,6 +240,9 @@
       (map! :view)
       (layout/update-repl-size)
       (load-session! "default"))))
+
+(defn reset! []
+  (js/window.location.reload))
 
 (defn on-js-reload []
   ;; optionally touch your app-state to force rerendering depending on

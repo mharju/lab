@@ -2,7 +2,7 @@
   :source-paths ["src"]
   :dependencies [[hiccup "1.0.5"]
                  [hiccups "0.3.0"]
-                 [com.cognitect/transit-cljs "0.8.256"]]
+                 [com.cognitect/transit-cljs "0.8.264"]]
   :dev-http      {9500 "resources/public"}
   :builds        {:lab       {:target         :browser
                               :output-dir     "resources/public/js"

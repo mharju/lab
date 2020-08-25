@@ -51,8 +51,12 @@
 (defn open-session-load-display! []
   (let [elem (js/document.getElementById "sessions")]
     (set! (.-innerHTML elem) (session-load-display))
-    (.setAttribute elem "class" "visible")))
+    (.add (.-classList elem) "visible")))
 
 (defn ^:export close-session-load-display! []
   (let [elem (js/document.getElementById "sessions")]
-    (.setAttribute elem "class" "")))
+    (.remove (.-classList elem) "visible")
+    (js/setTimeout
+      (fn []
+        (set! (.-innerHTML elem) ""))
+      1000)))

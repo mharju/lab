@@ -1,5 +1,9 @@
 # Lab
 
+**This project IS actively maintained and in the author's almost daily use. The current features seem to be
+quite a nice fit to my current needs so don't be afraid that the updates are not that
+common.**
+
 Web application that exposes bootstrapped Clojurescript REPL and provides simple tools to
 make ad-hoc dashboards, data visualizations or such when in need. You can use it via the
 built in REPL window or use the CLJS REPL through nREPL with your editor.

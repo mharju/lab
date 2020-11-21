@@ -25,7 +25,8 @@
     "vis-data": "^6.6.1",
     "vis-network": "^7.10.2",
     "vis-timeline": "^7.3.7",
-    "vis-util": "^4.3.4"
+    "vis-util": "^4.3.4",
+    "static-eval": ">=2.0.2"
   },
   "devDependencies": {
     "shadow-cljs": "^2.11.0"

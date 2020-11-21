@@ -20,6 +20,7 @@
     "parinfer-codemirror": "^1.4.2",
     "process": "^0.11.10",
     "propagating-hammerjs": "^1.4.7",
+    "static-eval": ">=2.0.2",
     "timsort": "^0.3.0",
     "uuid": "^8.3.0",
     "vis-data": "^6.6.1",

@@ -51,7 +51,14 @@
       (fn [{:keys [value error] :as result}]
         (let [editor-content (.getValue cm)
               success (boolean (not error))
-              value (if (string/blank? value) "OK" value)
+              value (cond (and success (string/blank? value)) 
+                          "OK" 
+
+                          (and (not success) (string/blank? value))
+                          "See console"
+
+                          :else
+                          value)
               new-editor-content (if (and success comment-evaled) (.replace editor-content (js/RegExp "^([^;])" "gm") ";; $1") editor-content)]
           (js/console.log result)
           (if (not success)

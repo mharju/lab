@@ -257,11 +257,11 @@
       (swap! components clojure.set/rename-keys {id new-id})
       (swap! view-info (fn [old-info]
                          (assoc old-info :views
-                            (map (fn [{id' :id :as data}]
-                                   (if (= id id')
-                                     (assoc data :id new-id)
-                                     data))
-                                 (:views old-info))))))))
+                                (mapv (fn [{id' :id :as data}]
+                                        (if (= id id')
+                                          (assoc data :id new-id)
+                                          data))
+                                      (:views old-info))))))))
 
 (defn swap-view! [id another-id]
   (let [view-data (find-view-info id)
@@ -283,8 +283,6 @@
                                      (sort-by :start)))))
          ->css
          update-styles!)))
-
-(deref view-info)
 
 (defn set-mode! [view mode]
   (let [p ($ (get @views view))]

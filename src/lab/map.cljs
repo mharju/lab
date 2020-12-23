@@ -159,12 +159,16 @@
 
 (defn add-wkt!
   "Add a WKT object to the view"
-  [view wkt-string]
+  [view wkt-string & {:keys [fit-bounds? options] :or {fit-bounds? false options nil}}]
   (set-mode! view :map)
   (let [m (get-in @components [view :map])
-        layer (om/wkt.parse wkt-string)]
+        custom-layer (when options
+                       (L/geoJson nil options))
+        layer (om/wkt.parse wkt-string nil custom-layer)]
     (.addTo layer m)
-    (.fitBounds m (.getBounds layer))))
+    (when fit-bounds?
+      (.fitBounds m (.getBounds layer)))
+    layer))
 
 (defn add-kml!
   "Add a KML object to the view"

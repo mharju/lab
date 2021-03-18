@@ -22,13 +22,20 @@
     "propagating-hammerjs": "^1.4.7",
     "static-eval": ">=2.0.2",
     "timsort": "^0.3.0",
-    "uuid": "^8.3.0",
-    "vis-data": "^6.6.1",
-    "vis-network": "^7.10.2",
-    "vis-timeline": "^7.3.7",
-    "vis-util": "^4.3.4"
+    "uuid": "^8.3.2",
+    "vis-data": "^7.1.2",
+    "vis-network": "^9.0.4",
+    "vis-timeline": "^7.4.6",
+    "vis-util": "^5.0.1",
+    "xss": "^1.0.0"
   },
   "devDependencies": {
-    "shadow-cljs": "^2.11.7"
+    "@babel/core": "^7.13.10",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.13.8",
+    "@babel/plugin-proposal-optional-chaining": "^7.13.8",
+    "elliptic": ">=6.5.4",
+    "minimist": ">=0.2.1",
+    "shadow-cljs": "^2.11.23",
+    "xmldom": ">=0.5.0"
   }
 }

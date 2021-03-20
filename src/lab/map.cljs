@@ -113,10 +113,17 @@
                                  flatten))))
 
 (defn add-geojson! [view data]
-  "Add a GeoJSON object to the view."
+  "Add a GeoJSON object to the view. Adds the properties as a popup."
   (set-mode! view :map)
   (let [l (get-in @components [view :map])
-        m (.geoJSON L (clj->js data))]
+        m (.geoJSON L
+              (clj->js data)
+              #js {:onEachFeature (fn [feature layer]
+                                    (update-data!
+                                      layer
+                                      (js->clj
+                                        (.-properties feature)
+                                        :keywordize-keys true)))})]
     (.addTo m l)
     m))
 

@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" href="//clojurescript.org/images/cljs-logo-icon-32.png">
+
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.0/codemirror.min.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/codemirror/5.24.0/codemirror.min.css" />
+    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/8.9.1/styles/default.min.css" />
+    <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,700">
+    <link rel="stylesheet" href="//visjs.github.io/vis-timeline/dist/vis-timeline-graph2d.min.css">
+    <link rel="stylesheet" href="css/c3.min.css" />
+    <link rel="stylesheet" href="css/solarized.css" />
+    <link rel="stylesheet" href="css/leaflet.inc.css" />
+    <link rel="stylesheet" href="css/leaflet-draw.inc.css" />
+
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <style id="dashboard-styles"></style>
+    <script src="js/regenerator.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div id="repl"></div>
+    <div id="dashboard" class="container"></div>
+    <div id="hud"></div>
+    <div id="pasteboard">
+        <input type="text" name="var" placeholder="Var name" />
+        <textarea id="drop-target" name="value"></textarea>
+        <div class="options">
+          <div>
+            <input id="wrap" name="wrap" type="checkbox">
+            <label for="wrap">Wrap with quotes</label>
+          </div>
+
+          <div>
+            <input id="detect" name="detect" type="checkbox" checked>
+            <label for="detect">Smart detect type</label>
+          </div>
+
+          <div>
+            <input id="eval" name="eval" type="checkbox">
+            <label for="eval">Re-evaluate current content after declaration</label>
+          </div>
+        </div>
+        <div class="buttons">
+          <button id="save">Store</button>
+          <button id="cancel">Cancel</button>
+        </div>
+    </div>
+    <div id="sessions">
+    </div>
+    <script src="js/main.js?v=1" type="text/javascript"></script>
+  </body>
+</html>

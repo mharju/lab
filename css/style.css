@@ -1,0 +1,444 @@
+/* some style */
+@font-face {
+  font-family: 'Open Sans Light';
+  font-style: normal;
+  font-weight: 300;
+  src: url('../fonts/OpenSans-Light.eot');
+  src: local('Open Sans Light'), local('OpenSans-Light'),
+    url('../fonts/OpenSans-Light.eot') format('embedded-opentype'),
+    url('../fonts/OpenSans-Light.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../fonts/OpenSans.eot');
+  src: local('Open Sans'), local('OpenSans'),
+    url('../fonts/OpenSans.eot') format('embedded-opentype'),
+    url('../fonts/OpenSans.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: normal;
+  font-weight: 600;
+  src: url('../fonts/OpenSans-Semibold.eot');
+  src: local('Open Sans Semibold'), local('OpenSans-Semibold'),
+    url('../fonts/OpenSans-Semibold.eot') format('embedded-opentype'),
+    url('../fonts/OpenSans-Semibold.woff') format('woff');
+}
+
+@font-face {
+  font-family: 'Open Sans';
+  font-style: italic;
+  font-weight: 300;
+  src: local('Open Sans Light Italic'), local('OpenSansLight-Italic'),
+    url('../fonts/OpenSansLight-Italic.eot') format('embedded-opentype'),
+    url('../fonts/OpenSansLight-Italic.woff') format('woff');
+}
+
+html {
+    height: 100%;
+    width: 100%;
+    font-family: 'Roboto',sans-serif;
+}
+body {
+    margin: 0; padding: 0;
+    min-height: 100vw;
+    max-width: 100vh;
+    overflow: hidden;
+}
+#dashboard {
+  display: grid;
+  width: 100vw;
+  height: 60vh;
+}
+
+.view {
+  justify-self: stretch;
+}
+
+div.map {
+  width: 100%;
+  height: 100%;
+}
+
+.view .info .connection-status {
+  display: inline-block;
+  background-color: red;
+  border-radius: 8px;
+  width: 8px;
+  height: 8px;
+  margin-left: 8px;
+}
+.view .info .connection-status.connected {
+  background-color: green;
+}
+
+.view .info {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background-color: rgba(0,0,0,0.4);
+  color: white;
+  font-family: Menlo;
+  z-index: 10000;
+  text-align: right;
+  padding: 5px 10px;
+  display: none;
+}
+
+.graph, div..map, .console {
+  height: 100%;
+  width: 100%;
+}
+
+.console {
+  background-color: #F1F3F6;
+  overflow-x: hidden;
+}
+
+.console span.row > table {
+  width: 100%;
+  margin: 0 auto;
+  color: #2D4357;
+}
+.console span.row > table.vec,
+table.map table.vec,
+table.vec table.map,
+table.map table.map {
+  border-collapse: collapse;
+}
+.console span.row > table.vec td {
+  text-align: center;
+}
+.console span.row > table.vec tr:nth-child(2n) {
+  background-color: #ebebeb;
+}
+.console span.row > table.map > tbody > tr > td:first-child {
+  width: 50%;
+  text-align: right;
+}
+.console span.row > table.map > tbody > tr > td > table {
+  margin: 0;
+  padding: 0;
+}
+.console {
+    overflow: auto;
+    padding-top: 30px;
+    padding-left: 20px;
+    height: calc(100% - 30px);
+}
+.console span.row {
+    display: block;
+    font-family: "Menlo";
+    font-size: 8pt;
+    margin-bottom: 0.25em;
+}
+.console span.date {
+    font-weight: bold;
+    color: #2D4357;
+}
+.console span.date:after {
+    content: " - ";
+}
+.console > :last-child {
+  padding-bottom: 3em;
+}
+
+.c3-axis {
+    fill: #aaa;
+}
+.c3-axis path.domain, .c3-axis .tick line {
+    stroke: #aaa;
+}
+.c3-line {
+    stroke-width: 2;
+}
+text {
+    font-family: 'Roboto';
+    font-size: 10pt;
+}
+
+table.map td:first-child {
+  color: #93BADE;
+  padding-right: 0.5em;
+  vertical-align: top;
+}
+table.map td:nth-child(2) {
+  font-weight: bold;
+}
+
+#repl {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  top: inherit !important;
+  width: 100%;
+  height: 40vh;
+  border: 0;
+  z-index: 500;
+  font-size: 12pt;
+  overflow: auto;
+
+  box-shadow: 0px 3px 7px 4px rgba(2, 43, 53, 0.99) !important;
+  background-color: rgba(2, 43, 53, 0.99);
+  display: none;
+}
+
+.horizontal #repl {
+  height: 100vh;
+  top: 0;
+  width: 40vw;
+}
+
+.help {
+    box-shadow: 0px 0px 8px 2px rgba(64, 64, 64, 0.99) !important;
+
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+    z-index: 800;
+    background-color: white;
+    padding: 0.5em 1em;
+
+    display: flex;
+    flex-wrap: wrap;
+    max-height: 35%;
+    overflow: scroll;
+}
+.help a {
+    position: fixed;
+    top: 16px;
+    right: 50px;
+    cursor: pointer;
+}
+.help .section {
+    min-width: 250px;
+}
+.help .section td {
+    font-family: 'Droid Sans Mono',monospace;
+    font-size: 9pt;
+}
+.help .section td.has-doc {
+    text-decoration: underline;
+    cursor: pointer;
+    position: relative;
+}
+.help .section td .doc {
+  display: none;
+}
+.help .section td.has-doc:hover .doc {
+  display: block;
+  position: absolute;
+  background: white;
+  z-index: 900;
+  border: 1px solid black;
+  top: 1.4em;
+  left: 0px;
+  width: 300px;
+  padding: 1em;
+}
+
+#hud {
+  z-index: 1800;
+  position: absolute;
+  top: calc(50vh - 4em);
+  left: 15vw;
+  width: 70vw;
+  font-size: 3em;
+  background-color: rgba(0,0,0,0.4);
+  border-radius: 16px;
+  color: white;
+  padding: 0.5em;
+  text-align: center;
+  opacity: 0;
+  transition: opacity 0.2s ease-in;
+  font-family: Menlo,'Droid Sans Mono',monospace;
+  max-height: 30vh;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+#hud.visible {
+  transition: opacity 0.2s ease-out ;
+  opacity: 1;
+}
+
+#sessions, #pasteboard {
+  position: absolute;
+  z-index: 1800;
+  top: 5vw;
+  left: 15vw;
+  width: 70vw;
+  max-height: 75vh;
+  background-color: white;
+  border-radius: 8px;
+
+  overflow-y: scroll;
+
+  display: flex;
+  flex-direction: column;
+  padding: 1.5em 1.5em;
+
+  opacity: 0;
+  transform: translate3d(0,5vh,0);
+  transition: all 0.3s ease-in;
+}
+#sessions.visible, #pasteboard.visible {
+  opacity: 1;
+  transform: translate3d(0,0,0);
+  transition: all 0.3s ease-out;
+}
+#pasteboard input[type=text] {
+    background-color: transparent;
+    border: 1px solid #ccc;
+    padding: 1em;
+    outline: none;
+    margin-bottom: 1em;
+    font-family: Menlo,'Droid Sans Mono',monospace;
+    font-size: 14pt;
+}
+#pasteboard textarea {
+    flex: 1;
+    background-color: transparent;
+    outline: none;
+    border: 1px solid #ccc;
+    font-size: 14pt;
+    font-family: Menlo,'Droid Sans Mono',monospace;
+    padding: 1em;
+}
+#sessions .buttons, #pasteboard .buttons {
+  display: flex;
+  justify-content: space-between;
+}
+#sessions button, #pasteboard button {
+    flex: 1;
+    padding: 1em;
+    border: 1px solid #ccc;
+    font-family: Menlo,'Droid Sans Mono',monospace;
+    font-size: 14pt;
+    font-weight: bold;
+    outline: none;
+}
+#sessions button:hover, #pasteboard button:hover {
+    background-color: rgba(0,0,0,0.4);
+    cursor: pointer;
+}
+#sessions .options {
+    font-size: 14pt;
+    font-family: Menlo,'Droid Sans Mono',monospace;
+}
+#sessions .options .option {
+    padding: 0.5em 0.25em;
+    cursor: pointer;
+}
+#sessions .option:hover {
+    background-color: #ccc;
+}
+#sessions .option.selected {
+    background-color: #ccc;
+}
+#save {
+  margin-right: 1em;
+  color: #fff;
+  background-color: #2873DC;
+}
+
+#pasteboard .options {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  margin: 1em;
+}
+#pasteboard .options div {
+  margin-left: 1em;
+}
+
+.vis {
+  font-size: 10pt;
+  width: 100vw;
+  height: 100%;
+}
+.vis-labelset .vis-label {
+  color: #2D4357;
+  font-weight: 700;
+}
+.vis-item {
+  border-color: #2D4357;
+  background-color: #93BADE;
+  color: #2D4357;
+}
+
+
+.CodeMirror-hints {
+  position: absolute;
+  z-index: 800 !important;
+  overflow: hidden;
+  list-style: none;
+
+  margin: 0;
+  padding: 0;
+
+  -webkit-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+  -moz-box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+  box-shadow: 2px 3px 5px rgba(0,0,0,.2);
+  border-radius: 3px;
+  border: 1px solid rgba(2, 43, 53, 0.99);
+
+  font-size: 90%;
+  font-family: monospace;
+
+  max-height: 20em;
+  overflow-y: auto;
+}
+
+.CodeMirror-hint {
+  margin: 0;
+  padding: 4px;
+  white-space: pre;
+  color: #586e75;
+  cursor: pointer;
+  background-color: rgba(2, 43, 53, 0.99);
+}
+
+li.CodeMirror-hint-active {
+  background: #d33682;
+  color: white;
+}
+
+.help table {
+  width: 100%;
+}
+.help table thead th {
+  text-align: left;
+}
+.help table tbody td {
+  font-family: 'Droid Sans Mono',monospace;
+  font-size: 9pt;
+}
+
+.dashboard {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  flex-direction: row;
+}
+.dashboard .metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: 'Droid Sans Mono',monospace;
+}
+.dashboard .metric .unit,
+.dashboard .metric .title {
+  font-size: 14pt;
+}
+
+.dashboard .metric .value {
+  font-size: 28pt;
+  font-weight: bold;
+}

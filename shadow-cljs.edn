@@ -14,4 +14,4 @@
                   :bootstrap {:target        :bootstrap
                               :output-dir    "resources/public/js/bootstrap"
                               :exclude       #{cljs.repl cljs.js cljs.core.async.macros lab.core hiccups.core}
-                              :entries       [cljs.js goog lab.layout lab.session lab.parsing lab.map lab.graph lab.console lab.vis lab.views lab.dashboard lab.helpers lab.core lab.eval lab.autodetect hiccups.runtime jquery lab.codemirror]}}}
+                              :entries       [cljs.js goog lab.layout lab.session lab.parsing lab.map lab.graph lab.console lab.vis lab.views lab.dashboard lab.helpers lab.core lab.eval lab.autodetect hiccups.runtime jquery lab.codemirror lab.postgres]}}}

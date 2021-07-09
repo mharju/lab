@@ -92,3 +92,26 @@
     (if (not= size 100)
       (swap! repl-size assoc :size 100 :unit (repl-size-unit))
       (swap! repl-size assoc :size (default-repl-size) :unit (repl-size-unit)))))
+
+(defonce resize-mode (atom nil))
+(defn init! []
+  (js/console.log "ready")
+  (-> (js/$ js/document)
+      (.delegate "#repl" "mousedown" 
+                 (fn [e] 
+                   (when (< (- (.-pageY e) (.-top (.position (js/$ (.-currentTarget e))))) 16)
+                     (reset! resize-mode {:page-y (.-pageY e) :start-size @repl-size}))))
+      (.delegate js/document "mousemove"
+                 (fn [e]
+                   (when (map? @resize-mode)
+                     (let [top-delta (js/Math.floor (/ (- (:page-y @resize-mode) (.-pageY e)) 8))
+                           {:keys [size unit]} (:start-size @resize-mode)]
+                       (reset! repl-size {:size (+ top-delta size) :unit unit})
+                       (invalidate-sizes!)
+                       (.stopPropagation e)
+                       (.preventDefault e)
+                       false))))
+      (.delegate js/document "mouseup" 
+                 (fn [] 
+                   (when (map? @resize-mode)
+                     (reset! resize-mode false))))))

@@ -10,13 +10,14 @@
             [lab.codemirror :as cm]
             [lab.session :as session]
             [lab.hud :as hud]
+            [lab.bencode :as b]
             [lab.autodetect]
             [lab.graph]
             [lab.vis]
             [lab.console]
             [lab.dashboard]
             [lab.parsing]
-            [lab.helpers])
+	    [lab.helpers])
   (:require-macros  [lab.core :refer [render-help]])
   (:refer-clojure :exclude [reset!]))
 
@@ -56,6 +57,10 @@
                                        (doseq [listener (vals (get @data-connection :listeners))]
                                          (listener message))))))
           s)))))
+
+(defn send! [id message]
+  (when-let [ws (get @data-connection :ws)] 
+    (.send ws (b/encode message))))
 
 (deref data-connection)
 
@@ -181,6 +186,7 @@
       (.append ($ js/document.body) (render-help))
       (.hide ($ "#hud, #pasteboard"))
       (.on ($ js/document) "keydown" handle-key)
+      (layout/init!)
       (let [drop-target (js/document.getElementById "drop-target")]
         (.addEventListener drop-target "drop" handle-drop)
         (.addEventListener  drop-target "dragover" handle-dragover))

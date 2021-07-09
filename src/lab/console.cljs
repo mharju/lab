@@ -1,7 +1,8 @@
 (ns lab.console
   (:require-macros [hiccups.core :as hiccups :refer [html]])
   (:require [clojure.string :as str]
-            [lab.views :refer [components views set-mode!]]))
+            [lab.views :refer [components views set-mode!]]
+            ["tablesorter" :as ts]))
 
 (defn console! [view]
   (set-mode! view :console))
@@ -16,9 +17,10 @@
 
 (declare map-to-table)
 (defn vec-to-table [v & {:keys [titles]}]
-  (let [titles (if titles
-                 titles
-                 (mapv str (range (count (first v)))))]
+  (let [titles (cond 
+                 titles titles
+                 (map? (first v)) (mapv name (keys (first v)))
+                 true (mapv str (range (count (first v)))))]
     [:table.vec
       (->> titles
            (mapv (fn [h] [:th h]) )
@@ -84,10 +86,13 @@
   (console! view)
   (.append
     (find-element view)
-    (html
-      [:span.row
-        [:span.date (.replace (.slice (.toISOString (js/Date.)) 0 -1) "T" " ")]
-        (vec-to-table v :titles titles)])))
+    (-> (js/$ (html
+            [:span.row
+             [:span.date (.replace (.slice (.toISOString (js/Date.)) 0 -1) "T" " ")]
+             (vec-to-table v :titles titles)]))
+        (.find "> table")
+        (.tablesorter)
+        (.end))))
 
 (defn prepend! [view & text]
   (console! view)

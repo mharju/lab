@@ -3,7 +3,6 @@
             [lab.map]
             [lab.graph]
             [lab.console]
-            [lab.vis]
             [lab.views]
             [lab.dashboard]
             [lab.helpers])

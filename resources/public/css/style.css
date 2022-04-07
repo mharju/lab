@@ -260,6 +260,7 @@ table.map td:nth-child(2) {
   max-height: 30vh;
   text-overflow: ellipsis;
   overflow: hidden;
+  pointer-events: none;
 }
 #hud.visible {
   transition: opacity 0.2s ease-out ;
@@ -283,10 +284,12 @@ table.map td:nth-child(2) {
   padding: 1.5em 1.5em;
 
   opacity: 0;
+  pointer-events: none;
   transform: translate3d(0,5vh,0);
   transition: all 0.3s ease-in;
 }
 #sessions.visible, #pasteboard.visible {
+  pointer-events: auto;
   opacity: 1;
   transform: translate3d(0,0,0);
   transition: all 0.3s ease-out;

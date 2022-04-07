@@ -81,8 +81,8 @@
                        (:require [lab.map :as m]
                                  [lab.graph :as g]
                                  [lab.console :as c]
-                                 [lab.vis :as v]
                                  [lab.views :as views]
                                  [lab.helpers :as h]
                                  [lab.dashboard :as d]
+                                 [clojure.string :as str]
                                  [lab.autodetect]))")))

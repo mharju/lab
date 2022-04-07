@@ -12,7 +12,6 @@
             [lab.hud :as hud]
             [lab.autodetect]
             [lab.graph]
-            [lab.vis]
             [lab.console]
             [lab.dashboard]
             [lab.parsing]
@@ -109,6 +108,7 @@
       71 (do (toggle-help!) (.preventDefault e))
       ;; window mode HJKL
       74 (do (paste!) (.preventDefault e))
+      75 (do (session/open-session-load-display!) (.preventDefault e))
       89 (when-not (.-altKey e)
            (layout/step-repl-size!  (if (.-shiftKey e) -1 1))
            (.preventDefault e))
@@ -151,7 +151,6 @@
       form)))
 
 (defn maybe-save-default! [form {:keys [error]}]
-  (println "I maybe save here" form "and" error)
   (when (and (= @session/loaded-session "default")
              (not (re-find #"session\!" form))
              (not (re-find #"lab\.core/reset\!" form))
@@ -171,7 +170,6 @@
                              "Cmd-R"        eval-alt-form
                              "Shift-Cmd-R"  eval-alt-top-form
                              "Shift-Cmd-L"  eval-editor
-                             "Shift-Cmd-O"  session/open-session-load-display!
                              "Ctrl-Space"   "autocomplete"})
             clj->js))))
 

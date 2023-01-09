@@ -15,7 +15,7 @@
     "leaflet": "^1.6.0",
     "leaflet-draw": "^1.0.4",
     "leaflet-omnivore": "^0.3.4",
-    "moment": "^2.29.2",
+    "moment": "^2.29.4",
     "opencollective-postinstall": "^2.0.3",
     "parinfer-codemirror": "^1.4.2",
     "process": "^0.11.10",

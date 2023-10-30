@@ -1,0 +1,7 @@
+goog.provide("goog.promise.Resolver");
+goog.requireType("goog.Promise");
+goog.promise.Resolver = function() {
+};
+goog.promise.Resolver.prototype.promise;
+goog.promise.Resolver.prototype.resolve;
+goog.promise.Resolver.prototype.reject;
